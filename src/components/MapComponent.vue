@@ -54,21 +54,21 @@ const currentZoom = ref(13)
 
 // 转换船只数据为地图标记
 const mapMarkers = computed(() => {
-  return props.ships.map(ship => ({
-    id: ship.id,
+  return props.ships.map((ship, index) => ({
+    id: parseInt(ship.id) || index,
     latitude: ship.lat,
     longitude: ship.lng,
     title: ship.name,
     iconPath: getShipIcon(ship.status),
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
     callout: {
       content: `${ship.name}\n速度: ${ship.speed}节\n电量: ${ship.battery}%`,
       color: '#ffffff',
-      fontSize: 12,
-      borderRadius: 8,
+      fontSize: 10,
+      borderRadius: 6,
       bgColor: 'rgba(0,0,0,0.8)',
-      padding: 8,
+      padding: 6,
       display: 'BYCLICK'
     }
   }))
@@ -83,17 +83,23 @@ const getShipIcon = (status: string) => {
   }
   const color = colors[status as keyof typeof colors] || colors.default
   
-  // 现代化船只图标 - 流线型设计 (增大尺寸)
+  // 小船样式图标 - 更像真实的小船
   const svg = `
-    <svg width="48" height="48" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-      <!-- 船体 -->
-      <path d="M16 6C12 6 8 12 8 22L16 26L24 22C24 12 20 6 16 6Z" fill="${color}" stroke="white" stroke-width="2"/>
+    <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <!-- 船体底部 -->
+      <ellipse cx="20" cy="28" rx="16" ry="4" fill="${color}" stroke="white" stroke-width="1.5"/>
+      <!-- 船体主体 -->
+      <path d="M8 28C8 24 12 20 20 20C28 20 32 24 32 28" fill="${color}" stroke="white" stroke-width="1.5"/>
       <!-- 船舱 -->
-      <rect x="12" y="12" width="8" height="4" fill="white" fill-opacity="0.8" rx="1"/>
+      <rect x="16" y="22" width="8" height="4" fill="white" fill-opacity="0.9" rx="1"/>
       <!-- 桅杆 -->
-      <rect x="15" y="8" width="2" height="6" fill="white"/>
-      <!-- 方向指示 -->
-      <polygon points="16,8 14,10 18,10" fill="white"/>
+      <line x1="20" y1="22" x2="20" y2="12" stroke="white" stroke-width="2"/>
+      <!-- 帆 -->
+      <path d="M20 12L26 14L26 20L20 18Z" fill="white" fill-opacity="0.8" stroke="white" stroke-width="1"/>
+      <!-- 船头装饰 -->
+      <circle cx="20" cy="20" r="2" fill="white" fill-opacity="0.9"/>
+      <!-- 方向指示箭头 -->
+      <polygon points="20,10 18,14 22,14" fill="${color}" stroke="white" stroke-width="1"/>
     </svg>
   `
   return `data:image/svg+xml;base64,${btoa(svg)}`

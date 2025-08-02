@@ -23,14 +23,6 @@
     />
     <!-- #endif -->
     
-    <!-- 添加航点模式提示 -->
-    <view class="add-waypoint-overlay" v-if="isAddingWaypoint">
-      <view class="add-waypoint-tip">
-        <text class="tip-icon">📍</text>
-        <text class="tip-text">点击地图添加航点</text>
-      </view>
-    </view>
-    
     <!-- 航点信息面板 -->
     <view class="waypoint-info" v-if="selectedWaypointInfo">
       <view class="info-header">

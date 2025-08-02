@@ -71,8 +71,8 @@ const mapCenter = ref({ lat: 26.0614, lng: 119.3061 })
 const currentShip = ref({
   id: '001',
   name: '当前船只',
-  lat: 26.0614,
-  lng: 119.3061,
+  lat: 26.0654, // 更靠近海岸的位置
+  lng: 119.3081, // 更靠近海岸的位置
   status: 'online' as const,
   speed: 8.0,
   battery: 85,
