@@ -83,7 +83,6 @@ const leftControls: ControlItem[] = [
   { key: 'emergency', icon: '🛑', label: '急停', color: 'red' },
   { key: 'anchor', icon: '⚓', label: '锚泊', color: 'yellow' },
   { key: 'warning', icon: '⚠️', label: '警报', color: 'orange' },
-  { key: 'return', icon: '🏠', label: '回收', color: 'blue' },
 ]
 
 let dataUpdateInterval: NodeJS.Timeout
@@ -102,9 +101,6 @@ function handleControlClick(key: string) {
       break
     case 'warning':
       handleWarning()
-      break
-    case 'return':
-      handleReturn()
       break
   }
 }
@@ -142,20 +138,6 @@ function handleWarning() {
   })
 }
 
-function handleReturn() {
-  uni.showModal({
-    title: '自动回收',
-    content: '确定要启动自动回收模式吗？',
-    success: (res) => {
-      if (res.confirm) {
-        uni.showToast({
-          title: '自动回收已启动',
-          icon: 'success',
-        })
-      }
-    },
-  })
-}
 
 function handleJoystickControl(data: { x: number, y: number }) {
   joystickX.value = data.x
