@@ -258,7 +258,7 @@ onUnmounted(() => {
         </view>
         <view class="title-section">
           <text class="brain-icon">🧠</text>
-          <text class="title">AI智能电量管理</text>
+          <text class="title">AI管理</text>
         </view>
         <view class="ai-status">
           <view class="status-dot" />
@@ -284,24 +284,24 @@ onUnmounted(() => {
             <text class="title-icon">🔋</text>
             <text class="title-text">电池状态监控</text>
           </view>
-          <view class="battery-grid">
+          <view class="battery-grid-horizontal">
             <view
               v-for="battery in batteries"
               :key="battery.id"
-              class="battery-card"
+              class="battery-card-compact"
               :class="battery.status"
               @click="handleBatteryClick(battery)"
             >
               <view class="battery-indicator">
-                <view class="battery-level" :class="battery.status" :style="{ width: `${battery.level}%` }" />
+                <view class="battery-level" :class="battery.status" :style="{ width: `${battery.level.toFixed(1)}%` }" />
               </view>
               <text class="battery-name">{{ battery.name }}</text>
-              <text class="battery-percentage">{{ battery.level }}%</text>
+              <text class="battery-percentage">{{ battery.level.toFixed(1) }}%</text>
               <view class="battery-status">
                 <view class="status-dot" :class="battery.status" />
                 <text class="status-text">{{ getStatusText(battery.status) }}</text>
               </view>
-              <text class="battery-voltage">{{ battery.voltage }}V</text>
+              <text class="battery-voltage">{{ battery.voltage.toFixed(1) }}V</text>
             </view>
           </view>
         </view>
@@ -458,15 +458,15 @@ onUnmounted(() => {
         <view class="modal-content">
           <view class="detail-item">
             <text class="detail-label">电量</text>
-            <text class="detail-value">{{ selectedBattery.level }}%</text>
+            <text class="detail-value">{{ selectedBattery.level.toFixed(1) }}%</text>
           </view>
           <view class="detail-item">
             <text class="detail-label">电压</text>
-            <text class="detail-value">{{ selectedBattery.voltage }}V</text>
+            <text class="detail-value">{{ selectedBattery.voltage.toFixed(1) }}V</text>
           </view>
           <view class="detail-item">
             <text class="detail-label">温度</text>
-            <text class="detail-value">{{ selectedBattery.temperature }}°C</text>
+            <text class="detail-value">{{ selectedBattery.temperature.toFixed(1) }}°C</text>
           </view>
           <view class="detail-item">
             <text class="detail-label">充电周期</text>
@@ -625,6 +625,54 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300rpx, 1fr));
   gap: 24rpx;
+}
+
+.battery-grid-horizontal {
+  display: flex;
+  gap: 24rpx;
+  justify-content: space-between;
+}
+
+.battery-card-compact {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(15rpx);
+  border: 2rpx solid rgba(255, 255, 255, 0.2);
+  border-radius: 24rpx;
+  padding: 24rpx;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.7);
+    border-color: rgba(79, 209, 199, 0.5);
+    transform: translateY(-4rpx);
+  }
+
+  .battery-indicator {
+    width: 100rpx;
+    height: 50rpx;
+    margin: 0 auto 16rpx;
+  }
+
+  .battery-name {
+    font-size: 22rpx;
+    margin-bottom: 6rpx;
+  }
+
+  .battery-percentage {
+    font-size: 32rpx;
+    margin-bottom: 12rpx;
+  }
+
+  .battery-status {
+    margin-bottom: 6rpx;
+  }
+
+  .battery-voltage {
+    font-size: 18rpx;
+  }
 }
 
 .analysis-section {
@@ -1148,8 +1196,28 @@ onUnmounted(() => {
 
   .content-area {
     top: 120rpx;
-    bottom: 100rpx;
-    // padding: 24rpx;
+    bottom: 96rpx;
+  }
+
+  .battery-grid-horizontal {
+    gap: 16rpx;
+  }
+
+  .battery-card-compact {
+    padding: 20rpx;
+
+    .battery-indicator {
+      width: 80rpx;
+      height: 40rpx;
+    }
+
+    .battery-name {
+      font-size: 20rpx;
+    }
+
+    .battery-percentage {
+      font-size: 28rpx;
+    }
   }
 
   .battery-grid {
@@ -1186,7 +1254,6 @@ onUnmounted(() => {
   .content-area {
     top: 160rpx;
     bottom: 120rpx;
-    // padding: 40rpx 32rpx;
   }
 
   .battery-grid {
