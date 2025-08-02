@@ -456,14 +456,7 @@ const handleTabChange = (tab: string) => {
 
 .control-panel {
   position: absolute;
-  top: 160rpx;
-  left: 32rpx;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(20rpx);
-  border-radius: 24rpx;
-  border: 2rpx solid rgba(255, 255, 255, 0.2);
-  padding: 24rpx;
 }
 
 .panel-buttons {
@@ -619,9 +612,8 @@ const handleTabChange = (tab: string) => {
   }
   
   .control-panel {
-    top: 180rpx;
-    left: 24rpx;
-    padding: 20rpx;
+    top: 300rpx;
+    left: 20rpx;
   }
   
   .advanced-panel {
