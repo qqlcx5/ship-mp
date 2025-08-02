@@ -3,9 +3,6 @@
     <!-- 顶部状态栏 -->
     <view class="cruise-header">
       <view class="header-left">
-        <view class="back-btn" @click="goBack">
-          <text class="back-icon">←</text>
-        </view>
         <view class="title-section">
           <text class="route-icon">🗺️</text>
           <text class="title">自动巡航</text>
@@ -196,9 +193,6 @@ const advancedSettings: AdvancedSetting[] = [
   { key: 'accel-toggle', icon: '⚖️', label: '加速度计开关', color: 'green' }
 ]
 
-const goBack = () => {
-  uni.navigateBack()
-}
 
 const handleControlClick = (key: string) => {
   switch (key) {

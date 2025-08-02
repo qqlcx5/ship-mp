@@ -207,9 +207,6 @@ const tasks = ref<Task[]>([
   },
 ])
 
-function goBack() {
-  uni.navigateBack()
-}
 
 function getShipStatusText(status: string) {
   switch (status) {
@@ -378,9 +375,6 @@ function handleTabChange(tab: string) {
     <!-- 顶部状态栏 -->
     <view class="management-header">
       <view class="header-left">
-        <view class="back-btn" @click="goBack">
-          <text class="back-icon">←</text>
-        </view>
         <view class="title-section">
           <text class="management-icon">⚙️</text>
           <text class="title">综合管理中心</text>

@@ -87,9 +87,6 @@ const leftControls: ControlItem[] = [
 
 let dataUpdateInterval: NodeJS.Timeout
 
-function goBack() {
-  uni.navigateBack()
-}
 
 function handleControlClick(key: string) {
   switch (key) {
@@ -228,9 +225,6 @@ onUnmounted(() => {
     <!-- 顶部状态栏 -->
     <view class="manual-header">
       <view class="header-left">
-        <view class="back-btn" @click="goBack">
-          <text class="back-icon">←</text>
-        </view>
         <view class="title-section">
           <text class="control-icon">🎮</text>
           <text class="title">手动导航控制</text>
@@ -581,7 +575,7 @@ onUnmounted(() => {
 .left-controls {
   position: absolute;
   left: 32rpx;
-  top: 50%;
+  top: 40%;
   transform: translateY(-50%);
   z-index: 1000;
   display: flex;

@@ -176,9 +176,6 @@ const trendData = ref({
 
 let dataUpdateInterval: NodeJS.Timeout
 
-function goBack() {
-  uni.navigateBack()
-}
 
 function getStatusText(status: string) {
   switch (status) {
@@ -338,9 +335,6 @@ onUnmounted(() => {
     <!-- 顶部状态栏 -->
     <view class="ai-header">
       <view class="header-left">
-        <view class="back-btn" @click="goBack">
-          <text class="back-icon">←</text>
-        </view>
         <view class="title-section">
           <text class="brain-icon">🧠</text>
           <text class="title">AI管理</text>
