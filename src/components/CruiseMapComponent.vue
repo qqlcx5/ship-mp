@@ -23,22 +23,6 @@
     />
     <!-- #endif -->
     
-    <!-- 地图控制按钮 -->
-    <view class="map-controls">
-      <button class="control-btn" @click="zoomIn">
-        <text class="control-icon">+</text>
-      </button>
-      <button class="control-btn" @click="zoomOut">
-        <text class="control-icon">-</text>
-      </button>
-      <button class="control-btn" @click="centerMap">
-        <text class="control-icon">📍</text>
-      </button>
-      <button class="control-btn" @click="toggleRouteMode">
-        <text class="control-icon">{{ routeMode ? '✏️' : '👁️' }}</text>
-      </button>
-    </view>
-    
     <!-- 航点信息面板 -->
     <view class="waypoint-info" v-if="selectedWaypointInfo">
       <view class="info-header">
