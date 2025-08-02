@@ -21,18 +21,7 @@
     />
     <!-- #endif -->
     
-    <!-- 地图控制按钮 -->
-    <view class="map-controls">
-      <button class="control-btn" @click="zoomIn">
-        <text class="control-icon">+</text>
-      </button>
-      <button class="control-btn" @click="zoomOut">
-        <text class="control-icon">-</text>
-      </button>
-      <button class="control-btn" @click="centerMap">
-        <text class="control-icon">📍</text>
-      </button>
-    </view>
+
   </view>
 </template>
 
