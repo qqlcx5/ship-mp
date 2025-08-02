@@ -27,10 +27,25 @@ interface EnergyConsumption {
 
 interface RuntimeData {
   totalDistance: number
-  totalFuelConsumption: number
+  totalPowerConsumption: number
   totalRuntime: string
   averageSpeed: number
   efficiency: number
+  singleTripDistance: number
+  singleTripPowerConsumption: number
+  optimizedSpeed: number
+  optimizedRange: number
+}
+
+interface TrajectoryRecord {
+  id: string
+  date: string
+  startTime: string
+  endTime: string
+  distance: number
+  powerConsumption: number
+  averageSpeed: number
+  route: string
 }
 
 interface AISuggestion {
@@ -77,11 +92,52 @@ const energyConsumption = ref<EnergyConsumption>({
 
 const runtimeData = ref<RuntimeData>({
   totalDistance: 1847.6,
-  totalFuelConsumption: 356.8,
+  totalPowerConsumption: 2456.8,
   totalRuntime: '127小时32分',
   averageSpeed: 14.5,
-  efficiency: 5.18,
+  efficiency: 0.75,
+  singleTripDistance: 23.5,
+  singleTripPowerConsumption: 18.2,
+  optimizedSpeed: 12.8,
+  optimizedRange: 156.3,
 })
+
+const trajectoryRecords = ref<TrajectoryRecord[]>([
+  {
+    id: '1',
+    date: '2024-01-15',
+    startTime: '08:30',
+    endTime: '12:45',
+    distance: 23.5,
+    powerConsumption: 18.2,
+    averageSpeed: 5.5,
+    route: '港口A → 港口B'
+  },
+  {
+    id: '2',
+    date: '2024-01-14',
+    startTime: '14:20',
+    endTime: '18:10',
+    distance: 31.2,
+    powerConsumption: 24.8,
+    averageSpeed: 8.0,
+    route: '港口B → 港口C'
+  },
+  {
+    id: '3',
+    date: '2024-01-13',
+    startTime: '09:15',
+    endTime: '16:30',
+    distance: 45.8,
+    powerConsumption: 35.6,
+    averageSpeed: 6.3,
+    route: '港口C → 港口D'
+  }
+])
+
+const showTrajectoryModal = ref(false)
+const showBatteryWarning = ref(false)
+const batteryWarningShown = ref(false)
 
 const aiSuggestions = ref<AISuggestion[]>([
   {
@@ -99,15 +155,7 @@ const aiSuggestions = ref<AISuggestion[]>([
     description: '检测到前方有逆流，建议调整航向避开，可减少20分钟航行时间',
     impact: 'medium',
     savings: '节省20分钟',
-  },
-  {
-    id: '3',
-    type: 'maintenance',
-    title: '主电池需要维护',
-    description: '主电池电量过低且温度偏高，建议尽快进行检查和维护',
-    impact: 'high',
-    savings: '延长电池寿命',
-  },
+  }
 ])
 
 const trendData = ref({
@@ -197,6 +245,32 @@ function handleApplySuggestion(suggestion: AISuggestion) {
   })
 }
 
+function handleTrajectoryQuery() {
+  showTrajectoryModal.value = true
+}
+
+function checkBatteryWarning() {
+  const mainBattery = batteries.value.find(b => b.id === 'main')
+  if (mainBattery && mainBattery.level < 20 && !batteryWarningShown.value) {
+    showBatteryWarning.value = true
+    uni.showModal({
+      title: '电量低提醒',
+      content: `主电池电量已低于20%（当前${mainBattery.level.toFixed(1)}%），请尽快充电或返回港口！`,
+      showCancel: false,
+      confirmText: '知道了',
+      success: () => {
+        showBatteryWarning.value = false
+        batteryWarningShown.value = true
+      }
+    })
+  }
+  
+  // 当电池电量恢复到20%以上时，重置预警状态
+  if (mainBattery && mainBattery.level >= 20) {
+    batteryWarningShown.value = false
+  }
+}
+
 function handleTabChange(tab: string) {
   switch (tab) {
     case 'dashboard':
@@ -221,19 +295,27 @@ function updateData() {
       battery.level = Math.max(0, battery.level - 0.1)
       battery.temperature = 35 + Math.random() * 5
     }
-    if (battery.id === 'solar') {
-      battery.level = Math.min(100, battery.level + Math.random() * 2)
+    if (battery.id === 'backup') {
+      battery.level = Math.max(0, battery.level - 0.05)
+      battery.temperature = 28 + Math.random() * 3
     }
   })
 
   // 更新电池状态
   const mainBattery = batteries.value.find(b => b.id === 'main')
   if (mainBattery) {
-    batteryStatus.value = `${Math.round(mainBattery.level)}%${mainBattery.level < 20 ? '警告' : '正常'}`
+    batteryStatus.value = `${mainBattery.level.toFixed(1)}%${mainBattery.level < 20 ? '警告' : '正常'}`
     const hours = Math.floor(mainBattery.level / 7.2) // 假设每小时消耗7.2%
     const minutes = Math.floor((mainBattery.level % 7.2) * 60 / 7.2)
     estimatedRuntime.value = `${hours}小时${minutes}分钟`
+    
+    // 检查电池预警
+    checkBatteryWarning()
   }
+  
+  // 更新运行数据
+  runtimeData.value.singleTripDistance += 0.1
+  runtimeData.value.singleTripPowerConsumption += 0.08
 }
 
 onMounted(() => {
@@ -363,8 +445,8 @@ onUnmounted(() => {
                   <text class="runtime-value">{{ runtimeData.totalDistance }} 海里</text>
                 </view>
                 <view class="runtime-item">
-                  <text class="runtime-label">总油耗</text>
-                  <text class="runtime-value">{{ runtimeData.totalFuelConsumption }} 升</text>
+                  <text class="runtime-label">总电耗</text>
+                  <text class="runtime-value">{{ runtimeData.totalPowerConsumption }} kWh</text>
                 </view>
                 <view class="runtime-item">
                   <text class="runtime-label">运行时间</text>
@@ -375,8 +457,61 @@ onUnmounted(() => {
                   <text class="runtime-value">{{ runtimeData.averageSpeed }} 节</text>
                 </view>
                 <view class="runtime-item">
-                  <text class="runtime-label">燃油效率</text>
-                  <text class="runtime-value">{{ runtimeData.efficiency }} 海里/升</text>
+                  <text class="runtime-label">电能效率</text>
+                  <text class="runtime-value">{{ runtimeData.efficiency }} 海里/kWh</text>
+                </view>
+              </view>
+            </view>
+
+            <!-- 优化航速和航程 -->
+            <view class="analysis-card">
+              <view class="card-header">
+                <text class="card-icon">🎯</text>
+                <text class="card-title">优化航速和航程</text>
+              </view>
+              <view class="optimization-grid">
+                <view class="optimization-item">
+                  <text class="optimization-label">推荐航速</text>
+                  <text class="optimization-value">{{ runtimeData.optimizedSpeed.toFixed(1) }}节</text>
+                  <text class="optimization-desc">最佳能效航速</text>
+                </view>
+                <view class="optimization-item">
+                  <text class="optimization-label">预计航程</text>
+                  <text class="optimization-value">{{ runtimeData.optimizedRange.toFixed(1) }}海里</text>
+                  <text class="optimization-desc">当前电量可达</text>
+                </view>
+                <view class="optimization-item">
+                  <text class="optimization-label">节能模式</text>
+                  <text class="optimization-value">启用</text>
+                  <text class="optimization-desc">可延长15%航程</text>
+                </view>
+                <view class="optimization-item">
+                  <text class="optimization-label">到港时间</text>
+                  <text class="optimization-value">预计2.5小时</text>
+                  <text class="optimization-desc">按推荐航速</text>
+                </view>
+              </view>
+            </view>
+
+            <!-- 历史轨迹查询 -->
+            <view class="analysis-card">
+              <view class="card-header">
+                <text class="card-icon">🗺️</text>
+                <text class="card-title">历史轨迹查询</text>
+                <button class="query-btn" @click="handleTrajectoryQuery">查看详情</button>
+              </view>
+              <view class="trajectory-summary">
+                <view class="summary-item">
+                  <text class="summary-label">最近航行</text>
+                  <text class="summary-value">{{ trajectoryRecords[0].date }}</text>
+                </view>
+                <view class="summary-item">
+                  <text class="summary-label">航行距离</text>
+                  <text class="summary-value">{{ trajectoryRecords[0].distance.toFixed(1) }}海里</text>
+                </view>
+                <view class="summary-item">
+                  <text class="summary-label">电量消耗</text>
+                  <text class="summary-value">{{ trajectoryRecords[0].powerConsumption.toFixed(1) }}kWh</text>
                 </view>
               </view>
             </view>
@@ -414,29 +549,7 @@ onUnmounted(() => {
           </view>
         </view>
 
-        <!-- 历史趋势 -->
-        <view class="trends-section">
-          <view class="section-title">
-            <text class="title-icon">📈</text>
-            <text class="title-text">历史趋势分析</text>
-          </view>
-          <view class="trend-chart">
-            <view class="chart-legend">
-              <view class="legend-item">
-                <view class="legend-color red" />
-                <text class="legend-text">电池电量</text>
-              </view>
-              <view class="legend-item">
-                <view class="legend-color blue" />
-                <text class="legend-text">能耗功率</text>
-              </view>
-            </view>
-            <view class="chart-placeholder">
-              <text class="chart-text">📊 趋势图表区域</text>
-              <text class="chart-subtitle">电池电量持续下降，建议尽快充电</text>
-            </view>
-          </view>
-        </view>
+
       </view>
     </scroll-view>
 
@@ -471,6 +584,50 @@ onUnmounted(() => {
           <view class="detail-item">
             <text class="detail-label">充电周期</text>
             <text class="detail-value">{{ selectedBattery.cycles }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 历史轨迹查询弹窗 -->
+    <view v-if="showTrajectoryModal" class="modal-overlay" @click="showTrajectoryModal = false">
+      <view class="trajectory-modal" @click.stop>
+        <view class="modal-header">
+          <text class="modal-title">历史轨迹查询</text>
+          <button class="close-btn" @click="showTrajectoryModal = false">
+            <text class="close-icon">✕</text>
+          </button>
+        </view>
+        <view class="modal-content">
+          <view class="trajectory-list">
+            <view
+              v-for="record in trajectoryRecords"
+              :key="record.id"
+              class="trajectory-item"
+            >
+              <view class="trajectory-header">
+                <text class="trajectory-date">{{ record.date }}</text>
+                <text class="trajectory-time">{{ record.startTime }} - {{ record.endTime }}</text>
+              </view>
+              <view class="trajectory-details">
+                <view class="detail-row">
+                  <text class="detail-label">航线</text>
+                  <text class="detail-value">{{ record.route }}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">距离</text>
+                  <text class="detail-value">{{ record.distance.toFixed(1) }} 海里</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">电耗</text>
+                  <text class="detail-value">{{ record.powerConsumption.toFixed(1) }} kWh</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">平均速度</text>
+                  <text class="detail-value">{{ record.averageSpeed.toFixed(1) }} 节</text>
+                </view>
+              </view>
+            </view>
           </view>
         </view>
       </view>
@@ -618,7 +775,7 @@ onUnmounted(() => {
 }
 
 .battery-section {
-  margin-bottom: 48rpx;
+  margin-bottom: 24rpx;
 }
 
 .battery-grid {
@@ -676,7 +833,7 @@ onUnmounted(() => {
 }
 
 .analysis-section {
-  margin-bottom: 48rpx;
+  margin-bottom: 24rpx;
 }
 
 .analysis-grid {
@@ -686,7 +843,7 @@ onUnmounted(() => {
 }
 
 .suggestions-section {
-  margin-bottom: 48rpx;
+  margin-bottom: 24px;
 }
 
 .suggestions-list {
@@ -921,6 +1078,88 @@ onUnmounted(() => {
     font-size: 24rpx;
     font-weight: 600;
     font-family: monospace;
+  }
+}
+
+/* 优化航速和航程样式 */
+.optimization-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24rpx;
+}
+
+.optimization-item {
+  text-align: center;
+  padding: 24rpx;
+  background: rgba(79, 209, 199, 0.1);
+  border: 2rpx solid rgba(79, 209, 199, 0.3);
+  border-radius: 16rpx;
+
+  .optimization-label {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 20rpx;
+    margin-bottom: 8rpx;
+  }
+
+  .optimization-value {
+    display: block;
+    color: #4fd1c7;
+    font-size: 28rpx;
+    font-weight: bold;
+    margin-bottom: 8rpx;
+  }
+
+  .optimization-desc {
+    display: block;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 18rpx;
+  }
+}
+
+/* 历史轨迹查询样式 */
+.query-btn {
+  background: linear-gradient(to right, #4fd1c7, #60a5fa);
+  color: white;
+  font-size: 20rpx;
+  font-weight: 600;
+  padding: 12rpx 24rpx;
+  border-radius: 8rpx;
+  border: none;
+  margin-left: auto;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(to right, #2dd4bf, #3b82f6);
+    transform: translateY(-2rpx);
+  }
+}
+
+.trajectory-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.summary-item {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12rpx;
+
+  .summary-label {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 20rpx;
+    margin-bottom: 8rpx;
+  }
+
+  .summary-value {
+    display: block;
+    color: #4fd1c7;
+    font-size: 24rpx;
+    font-weight: 600;
   }
 }
 
@@ -1187,6 +1426,177 @@ onUnmounted(() => {
   }
 }
 
+/* 电池预警样式 */
+.warning-card {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1));
+  border: 2rpx solid rgba(239, 68, 68, 0.5);
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+  backdrop-filter: blur(20rpx);
+  animation: pulse 2s infinite;
+  
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+    margin-bottom: 16rpx;
+    
+    .card-icon {
+      font-size: 32rpx;
+    }
+    
+    .card-title {
+      color: #ef4444;
+      font-size: 28rpx;
+      font-weight: bold;
+    }
+  }
+  
+  .warning-content {
+    .warning-text {
+      color: #fca5a5;
+      font-size: 24rpx;
+      line-height: 1.5;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* 历史轨迹查询弹窗样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(10rpx);
+}
+
+/* 历史轨迹查询弹窗样式 */
+.trajectory-modal {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+  border: 2rpx solid rgba(79, 209, 199, 0.3);
+  border-radius: 24rpx;
+  width: 90%;
+  max-width: 800rpx;
+  max-height: 80vh;
+  overflow: hidden;
+  backdrop-filter: blur(20rpx);
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx;
+  border-bottom: 2rpx solid rgba(79, 209, 199, 0.2);
+  
+  .modal-title {
+    color: #4fd1c7;
+    font-size: 32rpx;
+    font-weight: bold;
+  }
+  
+  .close-btn {
+    background: rgba(239, 68, 68, 0.2);
+    border: 2rpx solid rgba(239, 68, 68, 0.3);
+    border-radius: 50%;
+    width: 60rpx;
+    height: 60rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .close-icon {
+      color: #ef4444;
+      font-size: 24rpx;
+      font-weight: bold;
+    }
+  }
+}
+
+.modal-content {
+  padding: 32rpx;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.trajectory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.trajectory-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2rpx solid rgba(79, 209, 199, 0.2);
+  border-radius: 16rpx;
+  padding: 24rpx;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(79, 209, 199, 0.4);
+    transform: translateY(-4rpx);
+  }
+}
+
+.trajectory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+  
+  .trajectory-date {
+    color: #4fd1c7;
+    font-size: 24rpx;
+    font-weight: bold;
+  }
+  
+  .trajectory-time {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 20rpx;
+  }
+}
+
+.trajectory-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  .detail-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 20rpx;
+  }
+  
+  .detail-value {
+    color: white;
+    font-size: 20rpx;
+    font-weight: 600;
+  }
+}
+
 /* 横屏适配 */
 @media (orientation: landscape) {
   .ai-header {
@@ -1229,6 +1639,15 @@ onUnmounted(() => {
     grid-template-columns: repeat(2, 1fr);
     gap: 16rpx;
   }
+  
+  .optimization-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16rpx;
+  }
+  
+  .trajectory-summary {
+    gap: 12rpx;
+  }
 }
 
 /* 竖屏适配 */
@@ -1264,6 +1683,15 @@ onUnmounted(() => {
   .analysis-grid {
     grid-template-columns: 1fr;
     gap: 20rpx;
+  }
+  
+  .optimization-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .trajectory-summary {
+    flex-direction: column;
+    gap: 16rpx;
   }
 }
 </style>
