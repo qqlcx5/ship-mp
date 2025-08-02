@@ -1,3 +1,108 @@
+<script setup lang="ts">
+import { computed, nextTick, ref } from 'vue'
+
+interface Props {
+  xValue: number
+  yValue: number
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<{
+  control: [data: { x: number, y: number }]
+}>()
+
+const joystickContainer = ref<HTMLElement>()
+const isDragging = ref(false)
+const handlePosition = ref({ x: 0, y: 0 })
+const containerSize = 280 // rpx
+const handleSize = 100 // rpx
+const maxDistance = (containerSize - handleSize) / 2
+
+const handleStyle = computed(() => {
+  return {
+    transform: `translate(${handlePosition.value.x}rpx, ${handlePosition.value.y}rpx)`,
+  }
+})
+
+function handleTouchStart(e: TouchEvent) {
+  isDragging.value = true
+  e.preventDefault()
+}
+
+function handleTouchMove(e: TouchEvent) {
+  if (!isDragging.value)
+    return
+
+  e.preventDefault()
+
+  const touch = e.touches[0]
+
+  // 获取摇杆容器的实际位置和尺寸
+  uni.createSelectorQuery().select('.joystick-container').boundingClientRect((rect: any) => {
+    if (!rect)
+      return
+
+    // 计算触摸点相对于容器中心的位置
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+
+    // 计算相对于中心的偏移量（像素单位）
+    const offsetX = touch.clientX - centerX
+    const offsetY = touch.clientY - centerY
+
+    // 转换为rpx单位
+    const rpxRatio = 750 / uni.getSystemInfoSync().windowWidth
+    const touchX = offsetX * rpxRatio
+    const touchY = offsetY * rpxRatio
+
+    // 计算距离中心的距离
+    const distance = Math.sqrt(touchX * touchX + touchY * touchY)
+
+    let newX = touchX
+    let newY = touchY
+
+    // 限制在圆形区域内
+    if (distance > maxDistance) {
+      const angle = Math.atan2(touchY, touchX)
+      newX = Math.cos(angle) * maxDistance
+      newY = Math.sin(angle) * maxDistance
+    }
+
+    handlePosition.value = { x: newX, y: newY }
+
+    // 计算标准化的控制值 (-1 到 1)
+    // 修正坐标系：右为正X，上为负Y（因为屏幕坐标系Y向下为正）
+    const normalizedX = newX / maxDistance
+    const normalizedY = -newY / maxDistance // Y轴反转，向上为正
+
+    emit('control', { x: normalizedX, y: normalizedY })
+  }).exec()
+}
+
+function handleTouchEnd() {
+  isDragging.value = false
+
+  // 回弹到中心
+  handlePosition.value = { x: 0, y: 0 }
+  emit('control', { x: 0, y: 0 })
+}
+
+// 监听外部控制值变化
+function updateHandlePosition() {
+  if (!isDragging.value) {
+    handlePosition.value = {
+      x: props.xValue * maxDistance,
+      y: -props.yValue * maxDistance,
+    }
+  }
+}
+
+// 当props变化时更新位置
+nextTick(() => {
+  updateHandlePosition()
+})
+</script>
+
 <template>
   <view class="joystick-wrapper">
     <!-- 控制值显示 -->
@@ -11,17 +116,17 @@
         <text class="value-number">{{ yValue.toFixed(2) }}</text>
       </view>
     </view>
-    
+
     <!-- 摇杆容器 -->
-    <view class="joystick-container" ref="joystickContainer">
+    <view ref="joystickContainer" class="joystick-container">
       <!-- 方向指示器 -->
       <text class="direction-indicator top">前</text>
       <text class="direction-indicator bottom">后</text>
       <text class="direction-indicator left">左</text>
       <text class="direction-indicator right">右</text>
-      
+
       <!-- 摇杆手柄 -->
-      <view 
+      <view
         class="joystick-handle"
         :style="handleStyle"
         @touchstart="handleTouchStart"
@@ -33,104 +138,6 @@
     </view>
   </view>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
-
-interface Props {
-  xValue: number
-  yValue: number
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<{
-  control: [data: { x: number; y: number }]
-}>()
-
-const joystickContainer = ref<HTMLElement>()
-const isDragging = ref(false)
-const handlePosition = ref({ x: 0, y: 0 })
-const containerSize = 280 // rpx
-const handleSize = 100 // rpx
-const maxDistance = (containerSize - handleSize) / 2
-
-const handleStyle = computed(() => {
-  return {
-    transform: `translate(${handlePosition.value.x}rpx, ${handlePosition.value.y}rpx)`
-  }
-})
-
-const handleTouchStart = (e: TouchEvent) => {
-  isDragging.value = true
-  e.preventDefault()
-}
-
-const handleTouchMove = (e: TouchEvent) => {
-  if (!isDragging.value) return
-  
-  e.preventDefault()
-  
-  const touch = e.touches[0]
-  const containerRect = {
-    left: 0,
-    top: 0,
-    width: containerSize,
-    height: containerSize
-  }
-  
-  // 计算触摸点相对于容器中心的位置
-  const centerX = containerRect.width / 2
-  const centerY = containerRect.height / 2
-  
-  // 将触摸坐标转换为rpx
-  const touchX = (touch.clientX - containerRect.left) * 2 - centerX
-  const touchY = (touch.clientY - containerRect.top) * 2 - centerY
-  
-  // 计算距离中心的距离
-  const distance = Math.sqrt(touchX * touchX + touchY * touchY)
-  
-  let newX = touchX
-  let newY = touchY
-  
-  // 限制在圆形区域内
-  if (distance > maxDistance) {
-    const angle = Math.atan2(touchY, touchX)
-    newX = Math.cos(angle) * maxDistance
-    newY = Math.sin(angle) * maxDistance
-  }
-  
-  handlePosition.value = { x: newX, y: newY }
-  
-  // 计算标准化的控制值 (-1 到 1)
-  const normalizedX = newX / maxDistance
-  const normalizedY = -newY / maxDistance // Y轴反转，向上为正
-  
-  emit('control', { x: normalizedX, y: normalizedY })
-}
-
-const handleTouchEnd = () => {
-  isDragging.value = false
-  
-  // 回弹到中心
-  handlePosition.value = { x: 0, y: 0 }
-  emit('control', { x: 0, y: 0 })
-}
-
-// 监听外部控制值变化
-const updateHandlePosition = () => {
-  if (!isDragging.value) {
-    handlePosition.value = {
-      x: props.xValue * maxDistance,
-      y: -props.yValue * maxDistance
-    }
-  }
-}
-
-// 当props变化时更新位置
-nextTick(() => {
-  updateHandlePosition()
-})
-</script>
 
 <style lang="scss" scoped>
 .joystick-wrapper {
@@ -159,13 +166,13 @@ nextTick(() => {
   display: flex;
   align-items: center;
   gap: 8rpx;
-  
+
   .value-label {
     color: rgba(255, 255, 255, 0.7);
   }
-  
+
   .value-number {
-    color: #4FD1C7;
+    color: #4fd1c7;
     font-family: monospace;
     font-weight: 600;
     min-width: 60rpx;
@@ -180,7 +187,9 @@ nextTick(() => {
   border-radius: 50%;
   border: 6rpx solid rgba(79, 209, 199, 0.5);
   backdrop-filter: blur(30rpx);
-  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.4), inset 0 0 40rpx rgba(79, 209, 199, 0.1);
+  box-shadow:
+    0 16rpx 48rpx rgba(0, 0, 0, 0.4),
+    inset 0 0 40rpx rgba(79, 209, 199, 0.1);
 }
 
 .direction-indicator {
@@ -189,25 +198,25 @@ nextTick(() => {
   font-size: 24rpx;
   font-weight: bold;
   text-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.5);
-  
+
   &.top {
     top: 16rpx;
     left: 50%;
     transform: translateX(-50%);
   }
-  
+
   &.bottom {
     bottom: 16rpx;
     left: 50%;
     transform: translateX(-50%);
   }
-  
+
   &.left {
     left: 16rpx;
     top: 50%;
     transform: translateY(-50%);
   }
-  
+
   &.right {
     right: 16rpx;
     top: 50%;
@@ -222,10 +231,12 @@ nextTick(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: linear-gradient(145deg, #4FD1C7, #2DD4BF);
+  background: linear-gradient(145deg, #4fd1c7, #2dd4bf);
   border-radius: 50%;
   border: 6rpx solid white;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.3), 0 0 30rpx rgba(79, 209, 199, 0.4);
+  box-shadow:
+    0 8rpx 24rpx rgba(0, 0, 0, 0.3),
+    0 0 30rpx rgba(79, 209, 199, 0.4);
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -235,17 +246,19 @@ nextTick(() => {
   color: white;
   touch-action: none;
   user-select: none;
-  
+
   .handle-icon {
     font-size: 32rpx;
     font-weight: bold;
   }
-  
+
   &:hover {
     transform: translate(-50%, -50%) scale(1.1);
-    box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.4), 0 0 50rpx rgba(79, 209, 199, 0.6);
+    box-shadow:
+      0 12rpx 32rpx rgba(0, 0, 0, 0.4),
+      0 0 50rpx rgba(79, 209, 199, 0.6);
   }
-  
+
   &:active {
     transform: translate(-50%, -50%) scale(0.95);
   }
@@ -258,41 +271,41 @@ nextTick(() => {
     height: 240rpx;
     border-width: 4rpx;
   }
-  
+
   .joystick-handle {
     width: 80rpx;
     height: 80rpx;
     border-width: 4rpx;
-    
+
     .handle-icon {
       font-size: 28rpx;
     }
   }
-  
+
   .direction-indicator {
     font-size: 20rpx;
-    
+
     &.top,
     &.bottom {
       top: 12rpx;
     }
-    
+
     &.bottom {
       bottom: 12rpx;
       top: auto;
     }
-    
+
     &.left,
     &.right {
       left: 12rpx;
     }
-    
+
     &.right {
       right: 12rpx;
       left: auto;
     }
   }
-  
+
   .control-display {
     font-size: 20rpx;
     padding: 12rpx 20rpx;
@@ -307,41 +320,41 @@ nextTick(() => {
     height: 320rpx;
     border-width: 8rpx;
   }
-  
+
   .joystick-handle {
     width: 120rpx;
     height: 120rpx;
     border-width: 8rpx;
-    
+
     .handle-icon {
       font-size: 36rpx;
     }
   }
-  
+
   .direction-indicator {
     font-size: 28rpx;
-    
+
     &.top,
     &.bottom {
       top: 20rpx;
     }
-    
+
     &.bottom {
       bottom: 20rpx;
       top: auto;
     }
-    
+
     &.left,
     &.right {
       left: 20rpx;
     }
-    
+
     &.right {
       right: 20rpx;
       left: auto;
     }
   }
-  
+
   .control-display {
     font-size: 28rpx;
     padding: 20rpx 28rpx;

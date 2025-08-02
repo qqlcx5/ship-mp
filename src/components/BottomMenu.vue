@@ -1,7 +1,7 @@
 <template>
   <view class="bottom-menu">
-    <view 
-      v-for="item in menuItems" 
+    <view
+      v-for="item in menuItems"
       :key="item.key"
       class="menu-item"
       :class="{ active: activeTab === item.key }"
@@ -30,7 +30,6 @@ const emit = defineEmits<{
 }>()
 
 const menuItems: MenuItem[] = [
-  { key: 'dashboard', icon: '🎮', label: '主控台' },
   { key: 'manual', icon: '🕹️', label: '手动导航' },
   { key: 'cruise', icon: '🗺️', label: '自动巡航' },
   { key: 'ai', icon: '🧠', label: 'AI管理' },
@@ -68,23 +67,23 @@ const handleTabClick = (tab: string) => {
   transition: all 0.3s ease;
   cursor: pointer;
   height: 100%;
-  
+
   .menu-icon {
     font-size: 32rpx;
     margin-bottom: 6rpx;
   }
-  
+
   .menu-label {
     font-size: 20rpx;
     font-weight: 500;
   }
-  
+
   &:hover,
   &.active {
     color: #4FD1C7;
     background: rgba(79, 209, 199, 0.1);
   }
-  
+
   &:active {
     transform: scale(0.95);
   }
@@ -95,13 +94,13 @@ const handleTabClick = (tab: string) => {
   .bottom-menu {
     height: 100rpx;
   }
-  
+
   .menu-item {
     .menu-icon {
       font-size: 28rpx;
       margin-bottom: 4rpx;
     }
-    
+
     .menu-label {
       font-size: 18rpx;
     }
@@ -113,13 +112,13 @@ const handleTabClick = (tab: string) => {
   .bottom-menu {
     height: 120rpx;
   }
-  
+
   .menu-item {
     .menu-icon {
       font-size: 36rpx;
       margin-bottom: 8rpx;
     }
-    
+
     .menu-label {
       font-size: 22rpx;
     }

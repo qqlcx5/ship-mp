@@ -2,13 +2,13 @@
   <view class="login-container">
     <!-- 海洋背景 -->
     <view class="ocean-background">
-      <image 
-        src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800&h=400&fit=crop" 
+      <image
+        src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800&h=400&fit=crop"
         class="background-image"
         mode="aspectFill"
       />
     </view>
-    
+
     <!-- 登录内容 -->
     <view class="login-content">
       <view class="login-card">
@@ -20,7 +20,7 @@
           <text class="app-title">海洋智控</text>
           <text class="app-subtitle">船舶智能管理系统</text>
         </view>
-        
+
         <!-- 蓝牙连接状态 -->
         <view class="bluetooth-section">
           <view class="bluetooth-status">
@@ -35,13 +35,13 @@
             <text class="signal-strength">信号强度: 85%</text>
           </view>
         </view>
-        
+
         <!-- 连接按钮 -->
         <button class="connect-button" @click="connectDevice">
           <text class="button-icon">🔗</text>
           连接设备
         </button>
-        
+
         <text class="help-text">请确保蓝牙已开启并靠近设备</text>
       </view>
     </view>
@@ -55,13 +55,13 @@ const isConnecting = ref(false)
 
 const connectDevice = () => {
   isConnecting.value = true
-  
+
   // 模拟连接过程
   setTimeout(() => {
     isConnecting.value = false
-    // 连接成功后跳转到主控台
-    uni.navigateTo({
-      url: '/pages/dashboard/dashboard'
+    // 连接成功后跳转到手动导航页面
+    uni.reLaunch({
+      url: '/pages/manual/manual'
     })
   }, 2000)
 }
@@ -79,7 +79,7 @@ const connectDevice = () => {
   position: absolute;
   inset: 0;
   background: linear-gradient(rgba(11, 20, 38, 0.85), rgba(26, 54, 93, 0.85));
-  
+
   .background-image {
     width: 100%;
     height: 100%;
@@ -109,7 +109,7 @@ const connectDevice = () => {
 
 .logo-section {
   margin-bottom: 48rpx;
-  
+
   .logo-icon {
     width: 128rpx;
     height: 128rpx;
@@ -120,13 +120,13 @@ const connectDevice = () => {
     align-items: center;
     justify-content: center;
     box-shadow: 0 16rpx 32rpx rgba(0, 0, 0, 0.3);
-    
+
     .iconfont {
       font-size: 48rpx;
       color: white;
     }
   }
-  
+
   .app-title {
     display: block;
     font-size: 48rpx;
@@ -134,7 +134,7 @@ const connectDevice = () => {
     color: white;
     margin-bottom: 8rpx;
   }
-  
+
   .app-subtitle {
     display: block;
     font-size: 28rpx;
@@ -144,13 +144,13 @@ const connectDevice = () => {
 
 .bluetooth-section {
   margin-bottom: 48rpx;
-  
+
   .bluetooth-status {
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 32rpx;
-    
+
     .status-indicator {
       width: 24rpx;
       height: 24rpx;
@@ -159,36 +159,36 @@ const connectDevice = () => {
       margin-right: 16rpx;
       animation: pulse 2s infinite;
     }
-    
+
     .status-text {
       color: white;
       font-size: 28rpx;
     }
   }
-  
+
   .device-card {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 16rpx;
     padding: 24rpx;
     border: 2rpx solid rgba(255, 255, 255, 0.3);
-    
+
     .device-info {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 8rpx;
-      
+
       .device-name {
         color: white;
         font-size: 28rpx;
       }
-      
+
       .bluetooth-icon {
         color: #4FD1C7;
         font-size: 32rpx;
       }
     }
-    
+
     .signal-strength {
       color: rgba(255, 255, 255, 0.6);
       font-size: 24rpx;
@@ -210,12 +210,12 @@ const connectDevice = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   .button-icon {
     margin-right: 16rpx;
     font-size: 28rpx;
   }
-  
+
   &:hover {
     background: linear-gradient(to right, #2DD4BF, #3B82F6);
     transform: translateY(-4rpx);
@@ -240,21 +240,21 @@ const connectDevice = () => {
     max-width: 800rpx;
     padding: 48rpx;
   }
-  
+
   .logo-section {
     margin-bottom: 32rpx;
-    
+
     .logo-icon {
       width: 96rpx;
       height: 96rpx;
       margin-bottom: 24rpx;
     }
-    
+
     .app-title {
       font-size: 40rpx;
     }
   }
-  
+
   .bluetooth-section {
     margin-bottom: 32rpx;
   }
@@ -265,7 +265,7 @@ const connectDevice = () => {
   .login-content {
     padding: 64rpx 32rpx;
   }
-  
+
   .login-card {
     padding: 80rpx 48rpx;
   }

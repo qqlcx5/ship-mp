@@ -25,14 +25,6 @@
       }
     },
     {
-      "path": "pages/dashboard/dashboard",
-      "type": "page",
-      "style": {
-        "navigationStyle": "custom",
-        "navigationBarTitleText": "主控台"
-      }
-    },
-    {
       "path": "pages/manual/manual",
       "type": "page",
       "style": {
