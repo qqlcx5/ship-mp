@@ -352,7 +352,7 @@ const goBackToLogin = () => {
       color: rgba(255, 255, 255, 0.9);
       font-size: 26rpx;
       font-weight: 500;
-      width: 120rpx;
+      width: 80rpx;
       flex-shrink: 0;
       text-align: right;
     }
@@ -402,7 +402,7 @@ const goBackToLogin = () => {
 
       .login-input {
         flex: 1;
-        padding: 28rpx 32rpx 28rpx 0;
+        padding: 20rpx 32rpx 20rpx 0;
         background: transparent;
         border: none;
         color: white;
@@ -427,7 +427,7 @@ const goBackToLogin = () => {
   background: linear-gradient(to right, #4FD1C7, #60A5FA);
   color: white;
   font-weight: 600;
-  padding: 24rpx 32rpx;
+  padding: 18rpx 32rpx;
   border-radius: 16rpx;
   border: none;
   font-size: 32rpx;
