@@ -286,162 +286,164 @@ onUnmounted(() => {
 
     <!-- 主要内容区域 -->
     <scroll-view class="content-area" scroll-y>
-      <!-- 电池状态监控 -->
-      <view class="battery-section">
-        <view class="section-title">
-          <text class="title-icon">🔋</text>
-          <text class="title-text">电池状态监控</text>
-        </view>
-        <view class="battery-grid">
-          <view
-            v-for="battery in batteries"
-            :key="battery.id"
-            class="battery-card"
-            :class="battery.status"
-            @click="handleBatteryClick(battery)"
-          >
-            <view class="battery-indicator">
-              <view class="battery-level" :class="battery.status" :style="{ width: `${battery.level}%` }" />
+      <view class="p-[24rpx]">
+        <!-- 电池状态监控 -->
+        <view class="battery-section">
+          <view class="section-title">
+            <text class="title-icon">🔋</text>
+            <text class="title-text">电池状态监控</text>
+          </view>
+          <view class="battery-grid">
+            <view
+              v-for="battery in batteries"
+              :key="battery.id"
+              class="battery-card"
+              :class="battery.status"
+              @click="handleBatteryClick(battery)"
+            >
+              <view class="battery-indicator">
+                <view class="battery-level" :class="battery.status" :style="{ width: `${battery.level}%` }" />
+              </view>
+              <text class="battery-name">{{ battery.name }}</text>
+              <text class="battery-percentage">{{ battery.level }}%</text>
+              <view class="battery-status">
+                <view class="status-dot" :class="battery.status" />
+                <text class="status-text">{{ getStatusText(battery.status) }}</text>
+              </view>
+              <text class="battery-voltage">{{ battery.voltage }}V</text>
             </view>
-            <text class="battery-name">{{ battery.name }}</text>
-            <text class="battery-percentage">{{ battery.level }}%</text>
-            <view class="battery-status">
-              <view class="status-dot" :class="battery.status" />
-              <text class="status-text">{{ getStatusText(battery.status) }}</text>
-            </view>
-            <text class="battery-voltage">{{ battery.voltage }}V</text>
           </view>
         </view>
-      </view>
 
-      <!-- AI智能分析 -->
-      <view class="analysis-section">
-        <view class="section-title">
-          <text class="title-icon">📊</text>
-          <text class="title-text">AI智能分析</text>
-        </view>
-        <view class="analysis-grid">
-          <!-- 能耗统计 -->
-          <view class="analysis-card">
-            <view class="card-header">
-              <text class="card-icon">📊</text>
-              <text class="card-title">能耗统计分析</text>
-            </view>
-            <view class="consumption-list">
-              <view class="consumption-item">
-                <text class="item-label">推进系统</text>
-                <view class="progress-bar">
-                  <view class="progress-fill" style="width: 64%" />
-                </view>
-                <text class="item-value">64%</text>
-              </view>
-              <view class="consumption-item">
-                <text class="item-label">导航设备</text>
-                <view class="progress-bar">
-                  <view class="progress-fill blue" style="width: 18%" />
-                </view>
-                <text class="item-value">18%</text>
-              </view>
-              <view class="consumption-item">
-                <text class="item-label">通讯系统</text>
-                <view class="progress-bar">
-                  <view class="progress-fill green" style="width: 12%" />
-                </view>
-                <text class="item-value">12%</text>
-              </view>
-              <view class="consumption-item">
-                <text class="item-label">其他设备</text>
-                <view class="progress-bar">
-                  <view class="progress-fill purple" style="width: 6%" />
-                </view>
-                <text class="item-value">6%</text>
-              </view>
-            </view>
+        <!-- AI智能分析 -->
+        <view class="analysis-section">
+          <view class="section-title">
+            <text class="title-icon">📊</text>
+            <text class="title-text">AI智能分析</text>
           </view>
+          <view class="analysis-grid">
+            <!-- 能耗统计 -->
+            <view class="analysis-card">
+              <view class="card-header">
+                <text class="card-icon">📊</text>
+                <text class="card-title">能耗统计分析</text>
+              </view>
+              <view class="consumption-list">
+                <view class="consumption-item">
+                  <text class="item-label">推进系统</text>
+                  <view class="progress-bar">
+                    <view class="progress-fill" style="width: 64%" />
+                  </view>
+                  <text class="item-value">64%</text>
+                </view>
+                <view class="consumption-item">
+                  <text class="item-label">导航设备</text>
+                  <view class="progress-bar">
+                    <view class="progress-fill blue" style="width: 18%" />
+                  </view>
+                  <text class="item-value">18%</text>
+                </view>
+                <view class="consumption-item">
+                  <text class="item-label">通讯系统</text>
+                  <view class="progress-bar">
+                    <view class="progress-fill green" style="width: 12%" />
+                  </view>
+                  <text class="item-value">12%</text>
+                </view>
+                <view class="consumption-item">
+                  <text class="item-label">其他设备</text>
+                  <view class="progress-bar">
+                    <view class="progress-fill purple" style="width: 6%" />
+                  </view>
+                  <text class="item-value">6%</text>
+                </view>
+              </view>
+            </view>
 
-          <!-- 运行数据 -->
-          <view class="analysis-card">
-            <view class="card-header">
-              <text class="card-icon">📈</text>
-              <text class="card-title">累计运行数据</text>
-            </view>
-            <view class="runtime-list">
-              <view class="runtime-item">
-                <text class="runtime-label">总航程</text>
-                <text class="runtime-value">{{ runtimeData.totalDistance }} 海里</text>
+            <!-- 运行数据 -->
+            <view class="analysis-card">
+              <view class="card-header">
+                <text class="card-icon">📈</text>
+                <text class="card-title">累计运行数据</text>
               </view>
-              <view class="runtime-item">
-                <text class="runtime-label">总油耗</text>
-                <text class="runtime-value">{{ runtimeData.totalFuelConsumption }} 升</text>
-              </view>
-              <view class="runtime-item">
-                <text class="runtime-label">运行时间</text>
-                <text class="runtime-value">{{ runtimeData.totalRuntime }}</text>
-              </view>
-              <view class="runtime-item">
-                <text class="runtime-label">平均速度</text>
-                <text class="runtime-value">{{ runtimeData.averageSpeed }} 节</text>
-              </view>
-              <view class="runtime-item">
-                <text class="runtime-label">燃油效率</text>
-                <text class="runtime-value">{{ runtimeData.efficiency }} 海里/升</text>
+              <view class="runtime-list">
+                <view class="runtime-item">
+                  <text class="runtime-label">总航程</text>
+                  <text class="runtime-value">{{ runtimeData.totalDistance }} 海里</text>
+                </view>
+                <view class="runtime-item">
+                  <text class="runtime-label">总油耗</text>
+                  <text class="runtime-value">{{ runtimeData.totalFuelConsumption }} 升</text>
+                </view>
+                <view class="runtime-item">
+                  <text class="runtime-label">运行时间</text>
+                  <text class="runtime-value">{{ runtimeData.totalRuntime }}</text>
+                </view>
+                <view class="runtime-item">
+                  <text class="runtime-label">平均速度</text>
+                  <text class="runtime-value">{{ runtimeData.averageSpeed }} 节</text>
+                </view>
+                <view class="runtime-item">
+                  <text class="runtime-label">燃油效率</text>
+                  <text class="runtime-value">{{ runtimeData.efficiency }} 海里/升</text>
+                </view>
               </view>
             </view>
           </view>
         </view>
-      </view>
 
-      <!-- AI建议 -->
-      <view class="suggestions-section">
-        <view class="section-title">
-          <text class="title-icon">💡</text>
-          <text class="title-text">AI优化建议</text>
-        </view>
-        <view class="suggestions-list">
-          <view
-            v-for="suggestion in aiSuggestions"
-            :key="suggestion.id"
-            class="suggestion-card"
-            :class="suggestion.impact"
-          >
-            <view class="suggestion-header">
-              <text class="suggestion-icon">{{ getSuggestionIcon(suggestion.type) }}</text>
-              <text class="suggestion-title">{{ suggestion.title }}</text>
-              <view class="impact-badge" :class="suggestion.impact">
-                {{ getImpactText(suggestion.impact) }}
+        <!-- AI建议 -->
+        <view class="suggestions-section">
+          <view class="section-title">
+            <text class="title-icon">💡</text>
+            <text class="title-text">AI优化建议</text>
+          </view>
+          <view class="suggestions-list">
+            <view
+              v-for="suggestion in aiSuggestions"
+              :key="suggestion.id"
+              class="suggestion-card"
+              :class="suggestion.impact"
+            >
+              <view class="suggestion-header">
+                <text class="suggestion-icon">{{ getSuggestionIcon(suggestion.type) }}</text>
+                <text class="suggestion-title">{{ suggestion.title }}</text>
+                <view class="impact-badge" :class="suggestion.impact">
+                  {{ getImpactText(suggestion.impact) }}
+                </view>
               </view>
-            </view>
-            <text class="suggestion-description">{{ suggestion.description }}</text>
-            <view class="suggestion-footer">
-              <text class="savings-text">{{ suggestion.savings }}</text>
-              <view class="apply-btn" @click="handleApplySuggestion(suggestion)">
-                应用建议
+              <text class="suggestion-description">{{ suggestion.description }}</text>
+              <view class="suggestion-footer">
+                <text class="savings-text">{{ suggestion.savings }}</text>
+                <view class="apply-btn" @click="handleApplySuggestion(suggestion)">
+                  应用建议
+                </view>
               </view>
             </view>
           </view>
         </view>
-      </view>
 
-      <!-- 历史趋势 -->
-      <view class="trends-section">
-        <view class="section-title">
-          <text class="title-icon">📈</text>
-          <text class="title-text">历史趋势分析</text>
-        </view>
-        <view class="trend-chart">
-          <view class="chart-legend">
-            <view class="legend-item">
-              <view class="legend-color red" />
-              <text class="legend-text">电池电量</text>
-            </view>
-            <view class="legend-item">
-              <view class="legend-color blue" />
-              <text class="legend-text">能耗功率</text>
-            </view>
+        <!-- 历史趋势 -->
+        <view class="trends-section">
+          <view class="section-title">
+            <text class="title-icon">📈</text>
+            <text class="title-text">历史趋势分析</text>
           </view>
-          <view class="chart-placeholder">
-            <text class="chart-text">📊 趋势图表区域</text>
-            <text class="chart-subtitle">电池电量持续下降，建议尽快充电</text>
+          <view class="trend-chart">
+            <view class="chart-legend">
+              <view class="legend-item">
+                <view class="legend-color red" />
+                <text class="legend-text">电池电量</text>
+              </view>
+              <view class="legend-item">
+                <view class="legend-color blue" />
+                <text class="legend-text">能耗功率</text>
+              </view>
+            </view>
+            <view class="chart-placeholder">
+              <text class="chart-text">📊 趋势图表区域</text>
+              <text class="chart-subtitle">电池电量持续下降，建议尽快充电</text>
+            </view>
           </view>
         </view>
       </view>
@@ -603,7 +605,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 104rpx;
-  padding: 32rpx;
+  // padding: 32rpx;
 }
 
 .section-title {
@@ -1156,7 +1158,7 @@ onUnmounted(() => {
   .content-area {
     top: 120rpx;
     bottom: 100rpx;
-    padding: 24rpx;
+    // padding: 24rpx;
   }
 
   .battery-grid {
@@ -1193,7 +1195,7 @@ onUnmounted(() => {
   .content-area {
     top: 160rpx;
     bottom: 120rpx;
-    padding: 40rpx 32rpx;
+    // padding: 40rpx 32rpx;
   }
 
   .battery-grid {

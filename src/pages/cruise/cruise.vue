@@ -553,7 +553,7 @@ const handleTabChange = (tab: string) => {
   top: 140rpx;
   left: 0;
   right: 0;
-  bottom: 104rpx;
+  bottom: 96rpx; /* 优化间距，减少与底部菜单的距离 */
 }
 
 @keyframes pulse {
@@ -595,7 +595,7 @@ const handleTabChange = (tab: string) => {
   
   .map-area {
     top: 120rpx;
-    bottom: 100rpx;
+    bottom: 96rpx; /* 优化间距，减少与底部菜单的距离 */
   }
 }
 
@@ -632,7 +632,7 @@ const handleTabChange = (tab: string) => {
   
   .map-area {
     top: 160rpx;
-    bottom: 120rpx;
+    bottom: 96rpx; /* 优化间距，减少与底部菜单的距离 */
   }
 }
 </style>

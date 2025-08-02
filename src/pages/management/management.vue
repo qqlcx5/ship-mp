@@ -1,172 +1,3 @@
-<template>
-  <view class="management-container">
-    <!-- 顶部状态栏 -->
-    <view class="management-header">
-      <view class="header-left">
-        <view class="back-btn" @click="goBack">
-          <text class="back-icon">←</text>
-        </view>
-        <view class="title-section">
-          <text class="management-icon">⚙️</text>
-          <text class="title">综合管理中心</text>
-        </view>
-        <view class="system-status">
-          <view class="status-dot"></view>
-          <text class="status-text">系统正常</text>
-        </view>
-      </view>
-
-      <view class="management-summary">
-        <text class="summary-text">船只: </text>
-        <text class="accent-text">{{ totalShips }}艘</text>
-        <text class="summary-separator">|</text>
-        <text class="summary-text">人员: </text>
-        <text class="accent-text">{{ totalPersonnel }}人</text>
-        <text class="summary-separator">|</text>
-        <text class="summary-text">任务: </text>
-        <text class="accent-text">{{ activeTasks }}个</text>
-      </view>
-    </view>
-
-    <!-- 主要内容区域 -->
-    <scroll-view class="content-area" scroll-y>
-      <!-- 船只管理 -->
-      <view class="ships-section">
-        <view class="section-title">
-          <text class="title-icon">🚢</text>
-          <text class="title-text">船只管理</text>
-          <button class="add-btn" @click="handleAddShip">
-            <text class="add-icon">+</text>
-          </button>
-        </view>
-        <view class="ships-grid">
-          <view
-            v-for="ship in ships"
-            :key="ship.id"
-            class="ship-card"
-            :class="ship.status"
-            @click="handleShipClick(ship)"
-          >
-            <view class="ship-thumbnail">
-              <text class="ship-icon">🚢</text>
-            </view>
-            <view class="ship-info">
-              <text class="ship-name">{{ ship.name }}</text>
-              <text class="ship-type">{{ ship.type }}</text>
-              <view class="ship-status">
-                <view class="status-dot" :class="ship.status"></view>
-                <text class="status-text">{{ getShipStatusText(ship.status) }}</text>
-              </view>
-              <text class="ship-location">{{ ship.location }}</text>
-            </view>
-            <view class="ship-actions">
-              <button class="action-btn control" @click.stop="handleShipControl(ship)">
-                <text class="action-icon">🎮</text>
-              </button>
-              <button class="action-btn settings" @click.stop="handleShipSettings(ship)">
-                <text class="action-icon">⚙️</text>
-              </button>
-            </view>
-          </view>
-        </view>
-      </view>
-
-      <!-- 人员管理 -->
-      <view class="personnel-section">
-        <view class="section-title">
-          <text class="title-icon">👥</text>
-          <text class="title-text">人员管理</text>
-          <button class="add-btn" @click="handleAddPersonnel">
-            <text class="add-icon">+</text>
-          </button>
-        </view>
-        <view class="personnel-list">
-          <view
-            v-for="person in personnel"
-            :key="person.id"
-            class="personnel-card"
-            @click="handlePersonnelClick(person)"
-          >
-            <view class="avatar">
-              <text class="avatar-text">{{ person.name.charAt(0) }}</text>
-            </view>
-            <view class="personnel-info">
-              <text class="person-name">{{ person.name }}</text>
-              <text class="person-role">{{ person.role }}</text>
-              <text class="person-department">{{ person.department }}</text>
-            </view>
-            <view class="personnel-status">
-              <view class="status-indicator" :class="person.status"></view>
-              <text class="status-label">{{ getPersonnelStatusText(person.status) }}</text>
-            </view>
-            <view class="contact-actions">
-              <button class="contact-btn call" @click.stop="handleCall(person)">
-                <text class="contact-icon">📞</text>
-              </button>
-              <button class="contact-btn message" @click.stop="handleMessage(person)">
-                <text class="contact-icon">💬</text>
-              </button>
-            </view>
-          </view>
-        </view>
-      </view>
-
-      <!-- 任务管理 -->
-      <view class="tasks-section">
-        <view class="section-title">
-          <text class="title-icon">📋</text>
-          <text class="title-text">任务管理</text>
-          <button class="add-btn" @click="handleAddTask">
-            <text class="add-icon">+</text>
-          </button>
-        </view>
-        <view class="tasks-list">
-          <view
-            v-for="task in tasks"
-            :key="task.id"
-            class="task-card"
-            :class="task.priority"
-            @click="handleTaskClick(task)"
-          >
-            <view class="task-header">
-              <text class="task-title">{{ task.title }}</text>
-              <view class="priority-badge" :class="task.priority">
-                {{ getPriorityText(task.priority) }}
-              </view>
-            </view>
-            <text class="task-description">{{ task.description }}</text>
-            <view class="task-meta">
-              <text class="task-assignee">负责人: {{ task.assignee }}</text>
-              <text class="task-deadline">截止: {{ task.deadline }}</text>
-            </view>
-            <view class="task-progress">
-              <text class="progress-label">进度: {{ task.progress }}%</text>
-              <view class="progress-bar">
-                <view class="progress-fill" :style="{ width: task.progress + '%' }"></view>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </scroll-view>
-
-    <!-- 底部菜单栏 -->
-    <BottomMenu
-      :active-tab="'management'"
-      @tab-change="handleTabChange"
-    />
-
-    <!-- 详情弹窗 -->
-    <ManagementModal
-      v-if="showModal"
-      :type="modalType"
-      :data="modalData"
-      @close="showModal = false"
-      @save="handleModalSave"
-    />
-  </view>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
 import BottomMenu from '@/components/BottomMenu.vue'
@@ -219,7 +50,7 @@ const ships = ref<Ship[]>([
     status: 'online',
     location: '福建海域A区',
     battery: 85,
-    speed: 8.5
+    speed: 8.5,
   },
   {
     id: '002',
@@ -228,7 +59,7 @@ const ships = ref<Ship[]>([
     status: 'warning',
     location: '福建海域B区',
     battery: 45,
-    speed: 6.2
+    speed: 6.2,
   },
   {
     id: '003',
@@ -237,8 +68,8 @@ const ships = ref<Ship[]>([
     status: 'maintenance',
     location: '港口维修区',
     battery: 0,
-    speed: 0
-  }
+    speed: 0,
+  },
 ])
 
 const personnel = ref<Personnel[]>([
@@ -249,7 +80,7 @@ const personnel = ref<Personnel[]>([
     department: '指挥部',
     status: 'online',
     phone: '13800138001',
-    email: 'captain@ship.com'
+    email: 'captain@ship.com',
   },
   {
     id: '002',
@@ -258,7 +89,7 @@ const personnel = ref<Personnel[]>([
     department: '技术部',
     status: 'busy',
     phone: '13800138002',
-    email: 'engineer@ship.com'
+    email: 'engineer@ship.com',
   },
   {
     id: '003',
@@ -267,8 +98,8 @@ const personnel = ref<Personnel[]>([
     department: '操作部',
     status: 'offline',
     phone: '13800138003',
-    email: 'operator@ship.com'
-  }
+    email: 'operator@ship.com',
+  },
 ])
 
 const tasks = ref<Task[]>([
@@ -280,7 +111,7 @@ const tasks = ref<Task[]>([
     deadline: '2024-01-15',
     priority: 'high',
     progress: 75,
-    status: 'in-progress'
+    status: 'in-progress',
   },
   {
     id: '002',
@@ -290,7 +121,7 @@ const tasks = ref<Task[]>([
     deadline: '2024-01-20',
     priority: 'medium',
     progress: 30,
-    status: 'in-progress'
+    status: 'in-progress',
   },
   {
     id: '003',
@@ -300,15 +131,15 @@ const tasks = ref<Task[]>([
     deadline: '2024-01-25',
     priority: 'low',
     progress: 10,
-    status: 'pending'
-  }
+    status: 'pending',
+  },
 ])
 
-const goBack = () => {
+function goBack() {
   uni.navigateBack()
 }
 
-const getShipStatusText = (status: string) => {
+function getShipStatusText(status: string) {
   switch (status) {
     case 'online':
       return '在线'
@@ -323,7 +154,7 @@ const getShipStatusText = (status: string) => {
   }
 }
 
-const getPersonnelStatusText = (status: string) => {
+function getPersonnelStatusText(status: string) {
   switch (status) {
     case 'online':
       return '在线'
@@ -336,7 +167,7 @@ const getPersonnelStatusText = (status: string) => {
   }
 }
 
-const getPriorityText = (priority: string) => {
+function getPriorityText(priority: string) {
   switch (priority) {
     case 'high':
       return '高优先级'
@@ -349,25 +180,25 @@ const getPriorityText = (priority: string) => {
   }
 }
 
-const handleAddShip = () => {
+function handleAddShip() {
   modalType.value = 'ship'
   modalData.value = null
   showModal.value = true
 }
 
-const handleShipClick = (ship: Ship) => {
+function handleShipClick(ship: Ship) {
   modalType.value = 'ship'
   modalData.value = ship
   showModal.value = true
 }
 
-const handleShipControl = (ship: Ship) => {
+function handleShipControl(ship: Ship) {
   uni.navigateTo({
-    url: `/pages/manual/manual?shipId=${ship.id}`
+    url: `/pages/manual/manual?shipId=${ship.id}`,
   })
 }
 
-const handleShipSettings = (ship: Ship) => {
+function handleShipSettings(ship: Ship) {
   uni.showActionSheet({
     itemList: ['查看详情', '远程控制', '维护记录', '删除船只'],
     success: (res) => {
@@ -385,11 +216,11 @@ const handleShipSettings = (ship: Ship) => {
           handleDeleteShip(ship)
           break
       }
-    }
+    },
   })
 }
 
-const handleDeleteShip = (ship: Ship) => {
+function handleDeleteShip(ship: Ship) {
   uni.showModal({
     title: '删除确认',
     content: `确定要删除船只"${ship.name}"吗？`,
@@ -402,57 +233,57 @@ const handleDeleteShip = (ship: Ship) => {
           uni.showToast({ title: '删除成功', icon: 'success' })
         }
       }
-    }
+    },
   })
 }
 
-const handleAddPersonnel = () => {
+function handleAddPersonnel() {
   modalType.value = 'personnel'
   modalData.value = null
   showModal.value = true
 }
 
-const handlePersonnelClick = (person: Personnel) => {
+function handlePersonnelClick(person: Personnel) {
   modalType.value = 'personnel'
   modalData.value = person
   showModal.value = true
 }
 
-const handleCall = (person: Personnel) => {
+function handleCall(person: Personnel) {
   uni.makePhoneCall({
-    phoneNumber: person.phone
+    phoneNumber: person.phone,
   })
 }
 
-const handleMessage = (person: Personnel) => {
+function handleMessage(person: Personnel) {
   uni.showToast({
     title: `发送消息给${person.name}`,
-    icon: 'none'
+    icon: 'none',
   })
 }
 
-const handleAddTask = () => {
+function handleAddTask() {
   modalType.value = 'task'
   modalData.value = null
   showModal.value = true
 }
 
-const handleTaskClick = (task: Task) => {
+function handleTaskClick(task: Task) {
   modalType.value = 'task'
   modalData.value = task
   showModal.value = true
 }
 
-const handleModalSave = (data: any) => {
+function handleModalSave(data: any) {
   // 处理保存逻辑
   showModal.value = false
   uni.showToast({
     title: '保存成功',
-    icon: 'success'
+    icon: 'success',
   })
 }
 
-const handleTabChange = (tab: string) => {
+function handleTabChange(tab: string) {
   switch (tab) {
     case 'dashboard':
       uni.navigateTo({ url: '/pages/dashboard/dashboard' })
@@ -470,12 +301,184 @@ const handleTabChange = (tab: string) => {
 }
 </script>
 
+<template>
+  <view class="management-container">
+    <!-- 顶部状态栏 -->
+    <view class="management-header">
+      <view class="header-left">
+        <view class="back-btn" @click="goBack">
+          <text class="back-icon">←</text>
+        </view>
+        <view class="title-section">
+          <text class="management-icon">⚙️</text>
+          <text class="title">综合管理中心</text>
+        </view>
+        <view class="system-status">
+          <view class="status-dot" />
+          <text class="status-text">系统正常</text>
+        </view>
+      </view>
+
+      <view class="management-summary">
+        <text class="summary-text">船只: </text>
+        <text class="accent-text">{{ totalShips }}艘</text>
+        <text class="summary-separator">|</text>
+        <text class="summary-text">人员: </text>
+        <text class="accent-text">{{ totalPersonnel }}人</text>
+        <text class="summary-separator">|</text>
+        <text class="summary-text">任务: </text>
+        <text class="accent-text">{{ activeTasks }}个</text>
+      </view>
+    </view>
+
+    <!-- 主要内容区域 -->
+    <scroll-view class="content-area" scroll-y>
+      <view class="p-[24rpx]">
+        <!-- 船只管理 -->
+        <view class="ships-section">
+          <view class="section-title">
+            <text class="title-icon">🚢</text>
+            <text class="title-text">船只管理</text>
+            <button class="add-btn" @click="handleAddShip">
+              <text class="add-icon">+</text>
+            </button>
+          </view>
+          <view class="ships-grid">
+            <view
+              v-for="ship in ships"
+              :key="ship.id"
+              class="ship-card"
+              :class="ship.status"
+              @click="handleShipClick(ship)"
+            >
+              <view class="ship-thumbnail">
+                <text class="ship-icon">🚢</text>
+              </view>
+              <view class="ship-info">
+                <text class="ship-name">{{ ship.name }}</text>
+                <text class="ship-type">{{ ship.type }}</text>
+                <view class="ship-status">
+                  <view class="status-dot" :class="ship.status" />
+                  <text class="status-text">{{ getShipStatusText(ship.status) }}</text>
+                </view>
+                <text class="ship-location">{{ ship.location }}</text>
+              </view>
+              <view class="ship-actions">
+                <button class="action-btn control" @click.stop="handleShipControl(ship)">
+                  <text class="action-icon">🎮</text>
+                </button>
+                <button class="action-btn settings" @click.stop="handleShipSettings(ship)">
+                  <text class="action-icon">⚙️</text>
+                </button>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 人员管理 -->
+        <view class="personnel-section">
+          <view class="section-title">
+            <text class="title-icon">👥</text>
+            <text class="title-text">人员管理</text>
+            <button class="add-btn" @click="handleAddPersonnel">
+              <text class="add-icon">+</text>
+            </button>
+          </view>
+          <view class="personnel-list">
+            <view
+              v-for="person in personnel"
+              :key="person.id"
+              class="personnel-card"
+              @click="handlePersonnelClick(person)"
+            >
+              <view class="avatar">
+                <text class="avatar-text">{{ person.name.charAt(0) }}</text>
+              </view>
+              <view class="personnel-info">
+                <text class="person-name">{{ person.name }}</text>
+                <text class="person-role">{{ person.role }}</text>
+                <text class="person-department">{{ person.department }}</text>
+              </view>
+              <view class="personnel-status">
+                <view class="status-indicator" :class="person.status" />
+                <text class="status-label">{{ getPersonnelStatusText(person.status) }}</text>
+              </view>
+              <view class="contact-actions">
+                <button class="contact-btn call" @click.stop="handleCall(person)">
+                  <text class="contact-icon">📞</text>
+                </button>
+                <button class="contact-btn message" @click.stop="handleMessage(person)">
+                  <text class="contact-icon">💬</text>
+                </button>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 任务管理 -->
+        <view class="tasks-section">
+          <view class="section-title">
+            <text class="title-icon">📋</text>
+            <text class="title-text">任务管理</text>
+            <button class="add-btn" @click="handleAddTask">
+              <text class="add-icon">+</text>
+            </button>
+          </view>
+          <view class="tasks-list">
+            <view
+              v-for="task in tasks"
+              :key="task.id"
+              class="task-card"
+              :class="task.priority"
+              @click="handleTaskClick(task)"
+            >
+              <view class="task-header">
+                <text class="task-title">{{ task.title }}</text>
+                <view class="priority-badge" :class="task.priority">
+                  {{ getPriorityText(task.priority) }}
+                </view>
+              </view>
+              <text class="task-description">{{ task.description }}</text>
+              <view class="task-meta">
+                <text class="task-assignee">负责人: {{ task.assignee }}</text>
+                <text class="task-deadline">截止: {{ task.deadline }}</text>
+              </view>
+              <view class="task-progress">
+                <text class="progress-label">进度: {{ task.progress }}%</text>
+                <view class="progress-bar">
+                  <view class="progress-fill" :style="{ width: `${task.progress}%` }" />
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 底部菜单栏 -->
+    <BottomMenu
+      active-tab="management"
+      @tab-change="handleTabChange"
+    />
+
+    <!-- 详情弹窗 -->
+    <ManagementModal
+      v-if="showModal"
+      :type="modalType"
+      :data="modalData"
+      @close="showModal = false"
+      @save="handleModalSave"
+    />
+  </view>
+</template>
+
 <style lang="scss" scoped>
 .management-container {
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(rgba(11, 20, 38, 0.85), rgba(26, 54, 93, 0.85)),
-              url('https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=1200&h=800&fit=crop');
+  background:
+    linear-gradient(rgba(11, 20, 38, 0.85), rgba(26, 54, 93, 0.85)),
+    url('https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=1200&h=800&fit=crop');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -527,7 +530,7 @@ const handleTabChange = (tab: string) => {
   gap: 16rpx;
 
   .management-icon {
-    color: #4FD1C7;
+    color: #4fd1c7;
     font-size: 32rpx;
   }
 
@@ -546,13 +549,13 @@ const handleTabChange = (tab: string) => {
   .status-dot {
     width: 16rpx;
     height: 16rpx;
-    background: #10B981;
+    background: #10b981;
     border-radius: 50%;
     animation: pulse 2s infinite;
   }
 
   .status-text {
-    color: #10B981;
+    color: #10b981;
     font-size: 24rpx;
   }
 }
@@ -569,7 +572,7 @@ const handleTabChange = (tab: string) => {
   }
 
   .accent-text {
-    color: #4FD1C7;
+    color: #4fd1c7;
     font-weight: 600;
   }
 
@@ -584,7 +587,7 @@ const handleTabChange = (tab: string) => {
   left: 0;
   right: 0;
   bottom: 104rpx;
-  padding: 32rpx;
+  // padding: 32rpx;
 }
 
 .section-title {
@@ -595,7 +598,7 @@ const handleTabChange = (tab: string) => {
 
   .title-icon {
     font-size: 32rpx;
-    color: #4FD1C7;
+    color: #4fd1c7;
   }
 
   .title-text {
@@ -616,7 +619,7 @@ const handleTabChange = (tab: string) => {
     justify-content: center;
 
     .add-icon {
-      color: #4FD1C7;
+      color: #4fd1c7;
       font-size: 32rpx;
       font-weight: bold;
     }
@@ -704,7 +707,7 @@ const handleTabChange = (tab: string) => {
 
   .ship-location {
     display: block;
-    color: #4FD1C7;
+    color: #4fd1c7;
     font-size: 22rpx;
   }
 }
@@ -721,19 +724,19 @@ const handleTabChange = (tab: string) => {
     border-radius: 50%;
 
     &.online {
-      background: #10B981;
+      background: #10b981;
     }
 
     &.warning {
-      background: #F59E0B;
+      background: #f59e0b;
     }
 
     &.offline {
-      background: #6B7280;
+      background: #6b7280;
     }
 
     &.maintenance {
-      background: #EF4444;
+      background: #ef4444;
     }
   }
 
@@ -811,7 +814,7 @@ const handleTabChange = (tab: string) => {
   width: 80rpx;
   height: 80rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4FD1C7, #10B981);
+  background: linear-gradient(135deg, #4fd1c7, #10b981);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -837,7 +840,7 @@ const handleTabChange = (tab: string) => {
 
   .person-role {
     display: block;
-    color: #4FD1C7;
+    color: #4fd1c7;
     font-size: 24rpx;
     margin-bottom: 4rpx;
   }
@@ -861,17 +864,17 @@ const handleTabChange = (tab: string) => {
     border-radius: 50%;
 
     &.online {
-      background: #10B981;
+      background: #10b981;
       animation: pulse 2s infinite;
     }
 
     &.busy {
-      background: #F59E0B;
+      background: #f59e0b;
       animation: pulse 2s infinite;
     }
 
     &.offline {
-      background: #6B7280;
+      background: #6b7280;
     }
   }
 
@@ -904,7 +907,7 @@ const handleTabChange = (tab: string) => {
     background: rgba(34, 197, 94, 0.2);
 
     .contact-icon {
-      color: #22C55E;
+      color: #22c55e;
     }
 
     &:hover {
@@ -916,7 +919,7 @@ const handleTabChange = (tab: string) => {
     background: rgba(59, 130, 246, 0.2);
 
     .contact-icon {
-      color: #3B82F6;
+      color: #3b82f6;
     }
 
     &:hover {
@@ -981,17 +984,17 @@ const handleTabChange = (tab: string) => {
 
   &.high {
     background: rgba(239, 68, 68, 0.2);
-    color: #EF4444;
+    color: #ef4444;
   }
 
   &.medium {
     background: rgba(245, 158, 11, 0.2);
-    color: #F59E0B;
+    color: #f59e0b;
   }
 
   &.low {
     background: rgba(16, 185, 129, 0.2);
-    color: #10B981;
+    color: #10b981;
   }
 }
 
@@ -1017,7 +1020,7 @@ const handleTabChange = (tab: string) => {
 
 .task-progress {
   .progress-label {
-    color: #4FD1C7;
+    color: #4fd1c7;
     font-size: 22rpx;
     margin-bottom: 8rpx;
     display: block;
@@ -1032,7 +1035,7 @@ const handleTabChange = (tab: string) => {
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(to right, #4FD1C7, #10B981);
+      background: linear-gradient(to right, #4fd1c7, #10b981);
       border-radius: 4rpx;
       transition: width 0.3s ease;
     }
@@ -1040,8 +1043,13 @@ const handleTabChange = (tab: string) => {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 /* 横屏适配 */
@@ -1054,7 +1062,7 @@ const handleTabChange = (tab: string) => {
   .content-area {
     top: 120rpx;
     bottom: 100rpx;
-    padding: 24rpx;
+    // padding: 24rpx;
   }
 
   .ships-grid {
@@ -1095,7 +1103,7 @@ const handleTabChange = (tab: string) => {
   .content-area {
     top: 160rpx;
     bottom: 120rpx;
-    padding: 40rpx 32rpx;
+    // padding: 40rpx 32rpx;
   }
 
   .ships-grid {
