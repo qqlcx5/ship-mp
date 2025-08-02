@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>船舶智能管理系统 - 设计稿预览</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ocean-blue': '#0B1426',
+                        'ocean-light': '#1A365D',
+                        'ocean-accent': '#4FD1C7',
+                        'ocean-warning': '#F56565'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Leaflet样式 */
+        .leaflet-container {
+            background: #1e40af;
+        }
+        .leaflet-control-zoom {
+            border: none !important;
+            background: rgba(0,0,0,0.7) !important;
+            backdrop-filter: blur(10px);
+        }
+        .leaflet-control-zoom a {
+            background: rgba(255,255,255,0.1) !important;
+            color: white !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+        }
+        .leaflet-control-zoom a:hover {
+            background: rgba(79,209,199,0.8) !important;
+        }
+        
+        /* 船只标记样式 */
+        .ship-marker {
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .ship-marker:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        .ship-popup {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .leaflet-popup-content-wrapper {
+            background: rgba(0,0,0,0.9) !important;
+            border: 1px solid rgba(79,209,199,0.5) !important;
+            border-radius: 8px !important;
+            backdrop-filter: blur(10px);
+        }
+        .leaflet-popup-content {
+            color: white !important;
+            margin: 12px !important;
+        }
+        .leaflet-popup-tip {
+            background: rgba(0,0,0,0.9) !important;
+        }
+        
+        /* 增强型滑块样式 - 适合单手操作 */
+        .joystick-container {
+            width: 140px;
+            height: 140px;
+            position: relative;
+            background: radial-gradient(circle, rgba(79,209,199,0.1) 0%, rgba(0,0,0,0.8) 70%);
+            border-radius: 50%;
+            border: 3px solid rgba(79,209,199,0.5);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 0 20px rgba(79,209,199,0.1);
+        }
+        
+        .joystick-handle {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, #4FD1C7, #2DD4BF);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 15px rgba(79,209,199,0.4);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            touch-action: none;
+        }
+        
+        .joystick-handle:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4), 0 0 25px rgba(79,209,199,0.6);
+        }
+        
+        .joystick-handle:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+        
+        /* 方向指示器 */
+        .direction-indicator {
+            position: absolute;
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        /* 统一的左侧按钮样式 */
+        .control-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .control-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .control-button:hover::before {
+            left: 100%;
+        }
+        
+        .control-button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+        
+        .control-button:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        /* 自动巡航按钮样式 - 无阴影 */
+        .cruise-control-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cruise-control-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .cruise-control-button:hover::before {
+            left: 100%;
+        }
+        
+        .cruise-control-button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .cruise-control-button:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        /* AI管理专用卡片样式 */
+        .ai-card {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .ai-card:hover {
+            background: rgba(0,0,0,0.7);
+            border-color: rgba(79,209,199,0.5);
+            transform: translateY(-2px);
+        }
+        
+        /* 电池指示器样式 */
+        .battery-indicator {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            margin: 0 auto;
+        }
+        
+        .battery-indicator::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 12px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 0 2px 2px 0;
+        }
+        
+        .battery-level {
+            height: 100%;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .battery-level.critical {
+            background: linear-gradient(90deg, #EF4444, #DC2626);
+            animation: batteryPulse 1.5s infinite;
+        }
+        
+        .battery-level.warning {
+            background: linear-gradient(90deg, #F59E0B, #D97706);
+        }
+        
+        .battery-level.good {
+            background: linear-gradient(90deg, #10B981, #059669);
+        }
+        
+        @keyframes batteryPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        /* 数据展示圆环 */
+        .data-ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+        }
+        
+        .data-ring::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            padding: 2px;
+            background: conic-gradient(from 0deg, var(--ring-color, #4FD1C7), transparent);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: xor;
+        }
+        
+        /* 状态指示器 */
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        
+        .status-online { background-color: #10B981; animation: pulse 2s infinite; }
+        .status-warning { background-color: #F59E0B; animation: pulse 2s infinite; }
+        .status-error { background-color: #EF4444; animation: pulse 2s infinite; }
+        .status-offline { background-color: #6B7280; }
+        
+        /* 数据卡片样式 */
+        .data-card {
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .data-card:hover {
+            background: rgba(79,209,199,0.1);
+            border-color: rgba(79,209,199,0.3);
+        }
+        
+        /* 背景样式 */
+        .ocean-background {
+            background-image: 
+                linear-gradient(rgba(11, 20, 38, 0.85), rgba(26, 54, 93, 0.85)),
+                url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&h=800&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        .ocean-background-alt {
+            background-image: 
+                linear-gradient(rgba(11, 20, 38, 0.85), rgba(26, 54, 93, 0.85)),
+                url('https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=1200&h=800&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        /* 路径线样式 */
+        .route-line {
+            stroke: #4FD1C7;
+            stroke-width: 3;
+            fill: none;
+            stroke-dasharray: 8,4;
+            animation: dash 2s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -12; }
+        }
+        
+        /* 航点样式 */
+        .waypoint {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .waypoint:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        }
+        
+        /* 固定底部菜单栏 - 调整高度 */
+        .bottom-menu {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 52px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(255,255,255,0.2);
+            z-index: 1000;
+        }
+        
+        .menu-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.7);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+        }
+        
+        .menu-item:hover,
+        .menu-item.active {
+            color: #4FD1C7;
+            background: rgba(79,209,199,0.1);
+        }
+        
+        .menu-item i {
+            font-size: 16px;
+            margin-bottom: 3px;
+        }
+        
+        .menu-item span {
+            font-size: 10px;
+            font-weight: 500;
+        }
+        
+        /* 综合管理专用样式 */
+        .management-card {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .management-card:hover {
+            background: rgba(79,209,199,0.1);
+            border-color: rgba(79,209,199,0.5);
+            transform: translateY(-2px);
+        }
+        
+        /* 人员头像样式 */
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4FD1C7, #10B981);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        /* 船只缩略图样式 */
+        .ship-thumbnail {
+            width: 60px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            margin-right: 12px;
+            flex-shrink: 0;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        /* 滚动条样式 */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(79,209,199,0.5);
+            border-radius: 2px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(79,209,199,0.7);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold text-center mb-8 text-ocean-blue">船舶智能管理系统 - 设计稿预览</h1>
+        
+        <!-- 横屏版本 -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-semibold mb-4 text-ocean-light">横屏版本 (Landscape) - Leaflet + 高德地图</h2>
+            <div class="grid grid-cols-2 gap-6">
+                
+                <!-- 登录页面 -->
+                <div class="border-2 border-gray-300 rounded-lg overflow-hidden">
+                    <div class="bg-gray-200 p-2 text-sm font-semibold">登录页面 - 横屏</div>
+                    <div class="w-full h-96 bg-gradient-to-br from-ocean-blue via-ocean-light to-blue-900 relative overflow-hidden">
+                        <!-- 海洋背景图片 -->
+                        <div class="absolute inset-0 opacity-20">
+                            <img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800&h=400&fit=crop" 
+                                 alt="Ocean waves background" class="w-full h-full object-cover">
+                        </div>
+                        
+                        <!-- 登录内容 -->
+                        <div class="relative h-full flex items-center justify-center">
+                            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 w-80 text-center border border-white/20">
+                                <!-- Logo -->
+                                <div class="mb-6">
+                                    <div class="w-16 h-16 bg-gradient-to-r from-ocean-accent to-blue-400 rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg">
+                                        <i class="fas fa-ship text-2xl text-white"></i>
+                                    </div>
+                                    <h2 class="text-2xl font-bold text-white">海洋智控</h2>
+                                    <p class="text-white/70 text-sm">船舶智能管理系统</p>
+                                </div>
+                                
+                                <!-- 蓝牙连接状态 -->
+                                <div class="mb-6">
+                                    <div class="flex items-center justify-center mb-4">
+                                        <div class="w-3 h-3 bg-ocean-accent rounded-full animate-pulse mr-2"></div>
+                                        <span class="text-white text-sm">正在搜索蓝牙设备...</span>
+                                    </div>
+                                    <div class="bg-white/20 rounded-lg p-3 border border-white/30">
+                                        <div class="flex items-center justify-between text-white text-sm">
+                                            <span>主控设备-001</span>
+                                            <i class="fas fa-bluetooth text-ocean-accent"></i>
+                                        </div>
+                                        <div class="text-xs text-white/60 mt-1">信号强度: 85%</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 连接按钮 -->
+                                <button class="w-full bg-gradient-to-r from-ocean-accent to-blue-400 hover:from-teal-500 hover:to-blue-500 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 shadow-lg">
+                                    <i class="fas fa-link mr-2"></i>
+                                    连接设备
+                                </button>
+                                
+                                <div class="mt-4 text-white/60 text-xs">
+                                    请确保蓝牙已开启并靠近设备
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主控台页面 - Leaflet + 高德地图 -->
+                <div class="border-2 border-gray-300 rounded-lg overflow-hidden">
+                    <div class="bg-gray-200 p-2 text-sm font-semibold">主控台页面 - 横屏 (Leaflet + 高德地图)</div>
+                    <div class="w-full h-96 bg-ocean-blue relative">
+                        <!-- 顶部状态栏 -->
+                        <div class="absolute top-0 left-0 right-0 bg-black/50 backdrop-blur-sm p-3 flex justify-between items-center z-[1000] border-b border-white/20">
+                            <div class="flex items-center space-x-4">
+                                <h3 class="text-white font-semibold flex items-center">
+                                    <i class="fas fa-anchor mr-2 text-ocean-accent"></i>
+                                    福建海域监控中心
+                                </h3>
+                                <div class="flex items-center text-green-400 text-sm">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                                    系统在线
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-6 text-white text-sm">
+                                <span class="flex items-center">
+                                    <i class="fas fa-ship mr-1 text-ocean-accent"></i>
+                                    7艘在线
+                                </span>
+                                <span class="flex items-center">
+                                    <i class="fas fa-satellite-dish mr-1 text-green-400"></i>
+                                    信号良好
+                                </span>
+                                <span class="flex items-center">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    14:32
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Leaflet地图容器 -->
+                        <div class="absolute inset-0 pt-16 pb-14">
+                            <div id="mapContainer" class="w-full h-full"></div>
+                        </div>
+                        
+                        <!-- 底部菜单栏 -->
+                        <div class="bottom-menu">
+                            <div class="flex h-full">
+                                <div class="menu-item">
+                                    <i class="fas fa-gamepad"></i>
+                                    <span>手动导航</span>
+                                </div>
+                                <div class="menu-item">
+                                    <i class="fas fa-route"></i>
+                                    <span>自动巡航</span>
+                                </div>
+                                <div class="menu-item">
+                                    <i class="fas fa-brain"></i>
+                                    <span>AI管理</span>
+                                </div>
+                                <div class="menu-item">
+                                    <i class="fas fa-cogs"></i>
+                                    <span>综合管理</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 手动导航页面 -->
+                <div class="border-2 border-gray-300 rounded-lg overflow-hidden">
+                    <div class="bg-gray-200 p-2 text-sm font-semibold">手动导航页面 - 横屏 (单手操控优化)</div>
+                    <div class="w-full h-96 bg-ocean-blue relative">
+                        <!-- 顶部状态栏 -->
+                        <div class="absolute top-0 left-0 right-0 bg-black/50 backdrop-blur-sm p-2 flex justify-between items-center z-[1000] border-b border-white/20">
+                            <div class="flex items-center space-x-3">
+                                <button class="text-white hover:text-ocean-accent">
+                                    <i class="fas fa-arrow-left text-lg"></i>
+                                </button>
+                                <h3 class="text-white font-semibold flex items-center">
+                                    <i class="fas fa-gamepad mr-2 text-ocean-accent"></i>
+                                    手动导航控制
+                                </h3>
+                                <div class="flex items-center text-green-400 text-xs">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full mr-1 animate-pulse"></div>
+                                    遥控连接
+                                </div>
+                            </div>
+                            <!-- 右上角实时参数 -->
+                            <div class="bg-black/30 rounded-lg p-2 border border-white/20">
+                                <div class="grid grid-cols-2 gap-3 text-xs text-white">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-bolt text-yellow-400 mr-1"></i>
+                                        <span>功率: <span class="text-ocean-accent font-mono">85W</span></span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-plug text-green-400 mr-1"></i>
+                                        <span>电压: <span class="text-ocean-accent font-mono">12.5V</span></span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-tachometer-alt text-blue-400 mr-1"></i>
+                                        <span>速度: <span class="text-ocean-accent font-mono">8节</span></span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-clock text-purple-400 mr-1"></i>
+                                        <span>运行: <span class="text-ocean-accent font-mono">02:34:15</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Leaflet地图区域 -->
+                        <div class="absolute inset-0 pt-14 pb-14">
+                            <div id="manualMapContainer" class="w-full h-full"></div>
+                        </div>
+                        
+                        <!-- 右下角增强型摇杆控制器 -->
+                        <div class="absolute bottom-16 right-4 z-[1000]">
+                            <div class="joystick-container">
+                                <!-- 方向指示器 -->
+                                <div class="direction-indicator" style="top: 8px; left: 50%; transform: translateX(-50%);">前</div>
+                                <div class="direction-indicator" style="bottom: 8px; left: 50%; transform: translateX(-50%);">后</div>
+                                <div class="direction-indicator" style="left: 8px; top: 50%; transform: translateY(-50%);">左</div>
+                                <div class="direction-indicator" style="right: 8px; top: 50%; transform: translateY(-50%);">右</div>
+                                
+                                <!-- 摇杆手柄 -->
+                                <div class="joystick-handle" id="joystickHandle">
+                                    <i class="fas fa-crosshairs"></i>
+                                </div>
+                                
+                                <!-- 控制值显示 -->
+                                <div class="absolute -top-14 left-1/2 transform -translate-x-1/2 bg-black/70 text-white text-xs p-2 rounded-lg border border-white/20 min-w-[100px] text-center">
+                                    <div>X: <span id="joystickX" class="text-ocean-accent font-mono">0</span></div>
+                                    <div>Y: <span id="joystickY" class="text-ocean-accent font-mono">0</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 左侧统一控制按钮 -->
+                        <div class="absolute left-4 top-1/2 transform -translate-y-1/2 z-[1000]">
+                            <div class="space-y-3">
+                                <!-- 急停按钮 -->
+                                <div class="relative group">
+                                    <button class="control-button bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500">
+                                        <i class="fas fa-stop"></i>
+                                    </button>
+                                    <div class="absolute left-14 top-1/2 transform -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        急停
+                                    </div>
+                                </div>
+                                
+                                <!-- 锚泊按钮 -->
+                                <div class="relative group">
+                                    <button class="control-button bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500">
+                                        <i class="fas fa-anchor"></i>
+                                    </button>
+                                    <div class="absolute left-14 top-1/2 transform -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        锚泊
+                                    </div>
+                                </div>
+                                
+                                <!-- 警报按钮 -->
+                                <div class="relative group">
+                                    <button class="control-button bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400">
+                                        <i class="fas fa-exclamation-triangle animate-pulse"></i>
+                                    </button>
+                                    <div class="absolute left-14 top-1/2 transform -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        警报
+                                    </div>
+                                </div>
+                                
+                                <!-- 回收按钮 -->
+                                <div class="relative group">
+                                    <button class="control-button bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500">
+                                        <i class="fas fa-home"></i>
+                                    </button>
+                                    <div class="absolute left-14 top-1/2 transform -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        回收
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 底部菜单栏 -->
+                        <div class="bottom-menu">
+                            <div class="flex h-full">
+                                <div class="menu-item active">
+                                    <i class="fas fa-gamepad"></i>
+                                    <span>手动导航</span>
+                                </div>
+                                <div class="menu-item">
+                                    <i class="fas fa-route"></i>
+                                    <span>自动巡航</span>
+                                </div>
+                                <div class="menu-item">
+                                    <i class="fas fa-brain"></i>
+                                    <span>AI管理</span>
+                                </div>
+                                <div class="menu-item">
+                                    <i class="fas fa-cogs"></i>
+                                    <span>综合管理</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 自动巡航页面 -->
+                <div class="border-2 border-gray-300 rounded-lg overflow-hidden">
+                    <div class="bg-gray-200 p-2 text-sm font-semibold">自动巡航页面 - 横屏 (Leaflet轨迹规划)</div>
+                    <div class="w-full h-96 bg-ocean-blue relative">
+                        <!-- 顶部状态栏 -->
+                        <div class="absolute top-0 left-0 right-0 bg-black/50 backdrop-blur-sm p-2 flex justify-between items-center z-[1000] border-b border-white/20">
+                            <div class="flex items-center space-x-3">
+                                <button class="text-white hover:text-ocean-accent">
+                                    <i class="fas fa-arrow-left text-lg"></i>
+                                </button>
+                                <h3 class="text-white font-semibold flex items-center">
+                                    <i class="fas fa-route mr-2 text-ocean-accent"></i>
+                                    自动巡航规划
+                                </h3>
+                                <div class="flex items-center text-green-400 text-xs">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full mr-1 animate-pulse"></div>
+                                    自动模式
+                                </div>
+                            </div>
+                            <div class="text-white text-xs">
+                                航点: <span class="text-ocean-accent">3/5</span> | 总距离: <span class="text-ocean-accent">12.5km</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 左上角统一控制面板 - 垂直排列，无阴影 -->
+                        <div class="absolute top-14 left-4 z-[1000]">
+                            <div class="bg-black/50 backdrop-blur-sm rounded-xl border border-white/20 p-3">
+                                <div class="space-y-3">
+                                    <!-- 自动开关 -->
+                                    <div class="relative group">
+                                        <button class="cruise-control-button bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500">
+                                            <i class="fas fa-power-off"></i>
+                                        </button>
+                                        <div class="absolute left-12 top-1/2 transform -translate-y-1/2 text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 px-2 py-1 rounded">自动开关</div>
+                                    </div>
+                                    
+                                    <!-- 添加航点 -->
+                                    <div class="relative group">
+                                        <button class="cruise-control-button bg-gradient-to-r from-ocean-accent to-teal-500 hover:from-cyan-400 hover:to-teal-400">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <div class="absolute left-12 top-1/2 transform -translate-y-1/2 text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 px-2 py-1 rounded">添加航点</div>
+                                    </div>
+                                    
+                                    <!-- 删除航点 -->
+                                    <div class="relative group">
+                                        <button class="cruise-control-button bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-400 hover:to-pink-500">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <div class="absolute left-12 top-1/2 transform -translate-y-1/2 text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 px-2 py-1 rounded">删除航点</div>
+                                    </div>
+                                    
+                                    <!-- 高级设置 -->
+                                    <div class="relative group">
+                                        <button class="cruise-control-button bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500" id="advancedSettingsBtn">
+                                            <i class="fas fa-cog"></i>
+                                        </button>
+                                        <div class="absolute left-12 top-1/2 transform -translate-y-1/2 text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 px-2 py-1 rounded">高级设置</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 右侧高级设置面板 -->
+                        <div class="absolute top-14 right-4 z-[1000] hidden" id="advancedSettingsPanel">
+                            <div class="bg-black/50 backdrop-blur-sm rounded-xl border border-white/20 p-4">
+                                <div class="space-y-2">
+                                    <button class="w-36 h-10 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-lg flex items-center justify-center text-white text-xs font-medium transition-all">
+                                        <i class="fas fa-trash-alt mr-2"></i>删除所有路径
+                                    </button>
+                                    <button class="w-36 h-10 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 rounded-lg flex items-center justify-center text-white text-xs font-medium transition-all">
+                                        <i class="fas fa-crosshairs mr-2"></i>设置舵机零点
+                                    </button>
+                                    <button class="w-36 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg flex items-center justify-center text-white text-xs font-medium transition-all">
+                                        <i class="fas fa-compass mr-2"></i>标定磁力计
+                                    </button>
+                                    <button class="w-36 h-10 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 rounded-lg flex items-center justify-center text-white text-xs font-medium transition-all">
+                                        <i class="fas fa-balance-scale mr-2"></i>加速度计开关
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Leaflet地图区域 -->
+                        <div class="absolute inset-0 pt-14 pb-14">
+                            <div id="cruiseMapContainer" class="w-full h-full"></div>
+                        </div>
+                        
+                        <!-- 底部菜单栏 -->
+                        <div class="bottom-menu">
+                            <div class="flex h-full">
+                                <div class="menu-item">
+                                    <i class="fas fa-gamepad"></i>
+                                    <span>手动导航</span>
+                                </div>
+                                <div class="menu-item active">
+                                    <i class="fas fa-route"></i>
+                                    <span>自动巡航</span>
+                                </div>
+                                <div class="menu-item">
+                                    <i class="fas fa-brain"></i>
+                                    <span>AI管理</span>
+                                </div>
+                                <div class="menu-item">
+                                    <i class="fas fa-cogs"></i>
+                                    <span>综合管理</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI管理页面 - 重新设计 -->
+                <div class="border-2 border-gray-300 rounded-lg overflow-hidden">
+                    <div class="bg-gray-200 p-2 text-sm font-semibold">AI管理页面 - 横屏 (电量数据智能AI)</div>
+                    <div class="w-full h-96 ocean-background relative">
+                        <!-- 顶部状态栏 -->
+                        <div class="absolute top-0 left-0 right-0 bg-black/50 backdrop-blur-sm p-2 flex justify-between items-center z-[1000] border-b border-white/20">
+                            <div class="flex items-center space-x-3">
+                                <button class="text-white hover:text-ocean-accent">
+                                    <i class="fas fa-arrow-left text-lg"></i>
+                                </button>
+                                <h3 class="text-white font-semibold flex items-center">
+                                    <i class="fas fa-brain mr-2 text-ocean-accent"></i>
+                                    AI智能电量管理
+                                </h3>
+                                <div class="flex items-center text-green-400 text-xs">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full mr-1 animate-pulse"></div>
+                                    AI监控活跃
+                                </div>
+                            </div>
+                            <div class="text-white text-xs">
+                                电池状态: <span class="text-yellow-400">18%警告</span> | 预计续航: <span class="text-ocean-accent">2.5小时</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 主要内容区域 -->
+                        <div class="absolute inset-0 pt-12 pb-14 p-4 custom-scrollbar overflow-y-auto">
+                            <!-- 电池状态监控 -->
+                            <div class="grid grid-cols-3 gap-3 mb-4">
+                                <!-- 主电池 -->
+                                <div class="ai-card">
+                                    <div class="text-center">
+                                        <div class="battery-indicator mb-3">
+                                            <div class="battery-level critical" style="width: 18%;"></div>
+                                        </div>
+                                        <div class="text-xs text-white mb-1">主电池</div>
+                                        <div class="text-lg font-bold text-red-400 mb-1">18%</div>
+                                        <div class="flex items-center justify-center text-xs">
+                                            <span class="status-indicator status-error"></span>
+                                            <span class="text-red-400">低电量警告</span>
+                                        </div>
+                                        <div class="text-xs text-gray-300 mt-1">12.1V</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 备用电池 -->
+                                <div class="ai-card">
+                                    <div class="text-center">
+                                        <div class="battery-indicator mb-3">
+                                            <div class="battery-level good" style="width: 76%;"></div>
+                                        </div>
+                                        <div class="text-xs text-white mb-1">备用电池</div>
+                                        <div class="text-lg font-bold text-green-400 mb-1">76%</div>
+                                        <div class="flex items-center justify-center text-xs">
+                                            <span class="status-indicator status-online"></span>
+                                            <span class="text-green-400">正常</span>
+                                        </div>
+                                        <div class="text-xs text-gray-300 mt-1">12.8V</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 太阳能充电 -->
+                                <div class="ai-card">
+                                    <div class="text-center">
+                                        <div class="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full mx-auto mb-2 flex items-center justify-center">
+                                            <i class="fas fa-solar-panel text-white text-lg"></i>
+                                        </div>
+                                        <div class="text-xs text-white mb-1">太阳能</div>
+                                        <div class="text-lg font-bold text-yellow-400 mb-1">45W</div>
+                                        <div class="flex items-center justify-center text-xs">
+                                            <span class="status-indicator status-online"></span>
+                                            <span class="text-green-400">充电中</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- AI智能分析 -->
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <!-- 能耗统计 -->
+                                <div class="ai-card">
+                                    <div class="flex items-center mb-3">
+                                        <i class="fas fa-chart-pie text-ocean-accent mr-2"></i>
+                                        <span class="text-white text-sm font-medium">能耗统计分析</span>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs text-gray-300">推进系统</span>
+                                            <div class="flex items-center">
+                                                <div class="w-16 h-1 bg-gray-600 rounded-full mr-2">
+                                                    <div class="w-4/5 h-full bg-red-400 rounded-full"></div>
+                                                </div>
+                                                <span class="text-xs text-red-400">64%</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs text-gray-300">导航设备</span>
+                                            <div class="flex items-center">
+                                                <div class="w-16 h-1 bg-gray-600 rounded-full mr-2">
+                                                    <div class="w-2/5 h-full bg-blue-400 rounded-full"></div>
+                                                </div>
+                                                <span class="text-xs text-blue-400">18%</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs text-gray-300">通讯系统</span>
+                                            <div class="flex items-center">
+                                                <div class="w-16 h-1 bg-gray-600 rounded-full mr-2">
+                                                    <div class="w-1/5 h-full bg-green-400 rounded-full"></div>
+                                                </div>
+                                                <span class="text-xs text-green-400">12%</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs text-gray-300">其他设备</span>
+                                            <div class="flex items-center">
+                                                <div class="w-16 h-1 bg-gray-600 rounded-full mr-2">
+                                                    <div class="w-1/12 h-full bg-purple-400 rounded-full"></div>
+                                                </div>
+                                                <span class="text-xs text-purple-400">6%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 运行数据 -->
+                                <div class="ai-card">
+                                    <div class="flex items-center mb-3">
+                                        <i class="fas fa-database text-ocean-accent mr-2"></i>
+                                        <span class="text-white text-sm font-medium">累计运行数据</span>
+                                    </div>
+                                    <div class="space-y-2 text-xs">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-300">总航程</span>
+                                            <span class="text-ocean-accent font-mono">1,847.6 海里</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-300">总油耗</span>
+                                            <span class="text-ocean-accent font-mono">356.8 升</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-300">平均油耗</span>
+                                            <span class="text-green-400 font-mono">19.3 升/100海里</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-300">运行时长</span>
+                                            <span class="text-ocean-accent font-mono">248小时32分</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-300">平均速度</span>
+                                            <span class="text-ocean-accent font-mono">7.4 节</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-300">碳排放</span>
+                                            <span class="text-yellow-400 font-mono">924.7 kg CO₂</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- AI建议和预警 -->
+                            <div class="ai-card">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-lightbulb text-ocean-accent mr-2"></i>
+                                        <span class="text-white text-sm font-medium">AI智能建议</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded hover:bg-red-500/30 transition-colors">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>电量预警
+                                        </button>
+                                        <button class="text-xs bg-ocean-accent/20 text-ocean-accent px-2 py-1 rounded hover:bg-ocean-accent/30 transition-colors">
+                                            优化建议
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="space-y-2 text-xs text-gray-300">
+                                    <div class="flex items-start bg-red-500/10 border border-red-500/20 rounded-lg p-2">
+                                        <div class="w-2 h-2 bg-red-400 rounded-full mt-1 mr-2 flex-shrink-0 animate-pulse"></div>
+                                        <div>
+                                            <div class="text-red-400 font-medium mb-1">⚠️ 低电量警告</div>
+                                            <div>主电池电量仅剩18%，建议立即返港充电或启用备用电源</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-2">
+                                        <div class="w-2 h-2 bg-yellow-400 rounded-full mt-1 mr-2 flex-shrink-0"></div>
+                                        <div>
+                                            <div class="text-yellow-400 font-medium mb-1">💡 节能建议</div>
+                                            <div>降低航速至6节可延长续航时间约40%，当前推进系统功耗过高</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start bg-green-500/10 border border-green-500/20 rounded-lg p-2">
+                                        <div class="w-2 h-2 bg-green-400 rounded-full mt-1 mr-2 flex-shrink-0"></div>
+                                        <div>
+                                            <div class="text-green-400 font-medium mb-1">🔋 充电建议</div>
+                                            <div>太阳能板工作正常，预计4小时后可恢复30%电量</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 底部菜单栏 -->
+                        <div class="bottom-menu">
+                            <div class="flex h-full">
+                                <div class="menu-item">
+                                    <i class="fas fa-gamepad"></i>
+                                    <span>手动导航</span>
+                                </div>
+                                <div class="menu-item">
+                                    <i class="fas fa-route"></i>
+                                    <span>自动巡航</span>
+                                </div>
+                                <div class="menu-item active">
+                                    <i class="fas fa-brain"></i>
+                                    <span>AI管理</span>
+                                </div>
+                                <div class="menu-item">
+                                    <i class="fas fa-cogs"></i>
+                                    <span>综合管理</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 综合管理页面 - 重新设计 -->
+                <div class="border-2 border-gray-300 rounded-lg overflow-hidden">
+                    <div class="bg-gray-200 p-2 text-sm font-semibold">综合管理页面 - 横屏 (船体与人员管理)</div>
+                    <div class="w-full h-96 ocean-background-alt relative">
+                        <!-- 顶部状态栏 -->
+                        <div class="absolute top-0 left-0 right-0 bg-black/50 backdrop-blur-sm p-2 flex justify-between items-center z-[1000] border-b border-white/20">
+                            <div class="flex items-center space-x-3">
+                                <button class="text-white hover:text-ocean-accent">
+                                    <i class="fas fa-arrow-left text-lg"></i>
+                                </button>
+                                <h3 class="text-white font-semibold flex items-center">
+                                    <i class="fas fa-cogs mr-2 text-ocean-accent"></i>
+                                    综合管理中心
+                                </h3>
+                                <div class="flex items-center text-green-400 text-xs">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full mr-1 animate-pulse"></div>
+                                    管理系统在线
+                                </div>
+                            </div>
+                            <div class="text-white text-xs">
+                                船队规模: <span class="text-ocean-accent">5艘</span> | 管理人员: <span class="text-ocean-accent">12人</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 主要内容区域 -->
+                        <div class="absolute inset-0 pt-12 pb-14 p-4 custom-scrollbar overflow-y-auto">
+                            <!-- 船体管理 -->
+                            <div class="management-card mb-4">
+                                <div class="flex items-center mb-3">
+                                    <i class="fas fa-ship text-ocean-accent mr-2"></i>
+                                    <span class="text-white text-sm font-medium">船队管理</span>
+                                    <div class="ml-auto flex items-center space-x-2">
+                                        <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">5艘在役</span>
+                                        <button class="text-xs bg-ocean-accent/20 text-ocean-accent px-2 py-1 rounded hover:bg-ocean-accent/30 transition-colors">
+                                            添加船只
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <!-- 海洋科研船-001 -->
+                                    <div class="bg-black/30 rounded-lg p-3 border border-white/10 hover:border-ocean-accent/30 transition-all">
+                                        <div class="flex items-center">
+                                            <div class="ship-thumbnail bg-gradient-to-r from-blue-600 to-indigo-700">
+                                                <i class="fas fa-ship"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <span class="text-white text-sm font-medium">海洋科研船-001</span>
+                                                    <div class="flex items-center">
+                                                        <span class="status-indicator status-online"></span>
+                                                        <span class="text-green-400 text-xs">作业中</span>
+                                                    </div>
+                                                </div>
+                                                <div class="grid grid-cols-4 gap-2 text-xs text-gray-300">
+                                                    <div>船长: <span class="text-ocean-accent">28.5m</span></div>
+                                                    <div>载重: <span class="text-ocean-accent">45吨</span></div>
+                                                    <div>续航: <span class="text-green-400">580海里</span></div>
+                                                    <div>船员: <span class="text-ocean-accent">6人</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 海警巡逻艇-002 -->
+                                    <div class="bg-black/30 rounded-lg p-3 border border-white/10 hover:border-ocean-accent/30 transition-all">
+                                        <div class="flex items-center">
+                                            <div class="ship-thumbnail bg-gradient-to-r from-green-600 to-emerald-700">
+                                                <i class="fas fa-shield-alt"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <span class="text-white text-sm font-medium">海警巡逻艇-002</span>
+                                                    <div class="flex items-center">
+                                                        <span class="status-indicator status-online"></span>
+                                                        <span class="text-green-400 text-xs">巡逻中</span>
+                                                    </div>
+                                                </div>
+                                                <div class="grid grid-cols-4 gap-2 text-xs text-gray-300">
+                                                    <div>船长: <span class="text-ocean-accent">32.0m</span></div>
+                                                    <div>载重: <span class="text-ocean-accent">25吨</span></div>
+                                                    <div>续航: <span class="text-green-400">720海里</span></div>
+                                                    <div>船员: <span class="text-ocean-accent">8人</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 货运船-003 -->
+                                    <div class="bg-black/30 rounded-lg p-3 border border-white/10 hover:border-ocean-accent/30 transition-all">
+                                        <div class="flex items-center">
+                                            <div class="ship-thumbnail bg-gradient-to-r from-orange-600 to-red-700">
+                                                <i class="fas fa-anchor"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <span class="text-white text-sm font-medium">货运船-003</span>
+                                                    <div class="flex items-center">
+                                                        <span class="status-indicator status-warning"></span>
+                                                        <span class="text-yellow-400 text-xs">维护中</span>
+                                                    </div>
+                                                </div>
+                                                <div class="grid grid-cols-4 gap-2 text-xs text-gray-300">
+                                                    <div>船长: <span class="text-ocean-accent">45.2m</span></div>
+                                                    <div>载重: <span class="text-ocean-accent">120吨</span></div>
+                                                    <div>续航: <span class="text-yellow-400">420海里</span></div>
+                                                    <div>船员: <span class="text-ocean-accent">5人</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 人员管理 -->
+                            <div class="management-card">
+                                <div class="flex items-center mb-3">
+                                    <i class="fas fa-users text-ocean-accent mr-2"></i>
+                                    <span class="text-white text-sm font-medium">人员管理</span>
+                                    <div class="ml-auto flex items-center space-x-2">
+                                        <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">12人在岗</span>
+                                        <button class="text-xs bg-ocean-accent/20 text-ocean-accent px-2 py-1 rounded hover:bg-ocean-accent/30 transition-colors">
+                                            人员调度
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <!-- 管理人员 -->
+                                    <div class="space-y-2">
+                                        <div class="text-xs text-gray-400 mb-2">管理人员</div>
+                                        
+                                        <div class="bg-black/30 rounded-lg p-2 border border-white/10">
+                                            <div class="flex items-center">
+                                                <div class="avatar">李</div>
+                                                <div class="flex-1">
+                                                    <div class="text-white text-xs font-medium">李海峰 - 舰队指挥</div>
+                                                    <div class="text-gray-400 text-xs">15年经验 | 高级船长</div>
+                                                    <div class="flex items-center text-xs mt-1">
+                                                        <span class="status-indicator status-online"></span>
+                                                        <span class="text-green-400">在岗</span>
+                                                        <span class="text-gray-400 ml-2">科研船-001</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-black/30 rounded-lg p-2 border border-white/10">
+                                            <div class="flex items-center">
+                                                <div class="avatar bg-gradient-to-br from-purple-500 to-indigo-600">王</div>
+                                                <div class="flex-1">
+                                                    <div class="text-white text-xs font-medium">王明轩 - 技术主管</div>
+                                                    <div class="text-gray-400 text-xs">12年经验 | 高级工程师</div>
+                                                    <div class="flex items-center text-xs mt-1">
+                                                        <span class="status-indicator status-online"></span>
+                                                        <span class="text-green-400">在岗</span>
+                                                        <span class="text-gray-400 ml-2">巡逻艇-002</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-black/30 rounded-lg p-2 border border-white/10">
+                                            <div class="flex items-center">
+                                                <div class="avatar bg-gradient-to-br from-yellow-500 to-orange-600">陈</div>
+                                                <div class="flex-1">
+                                                    <div class="text-white text-xs font-medium">陈思雨 - 调度中心</div>
+                                                    <div class="text-gray-400 text-xs">8年经验 | 调度专员</div>
+                                                    <div class="flex items-center text-xs mt-1">
+                                                        <span class="status-indicator status-online"></span>
+                                                        <span class="text-green-400">在岗</span>
+                                                        <span class="text-gray-400 ml-2">指挥中心</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 作业人员 -->
+                                    <div class="space-y-2">
+                                        <div class="text-xs text-gray-400 mb-2">作业人员</div>
+                                        
+                                        <div class="bg-black/30 rounded-lg p-2 border border-white/10">
+                                            <div class="text-white text-xs font-medium mb-2">科研船-001 船员</div>
+                                            <div class="flex flex-wrap gap-1">
+                                                <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">张伟 - 船长</span>
+                                                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">刘强 - 轮机</span>
+                                                <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">赵敏 - 导航</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-black/30 rounded-lg p-2 border border-white/10">
+                                            <div class="text-white text-xs font-medium mb-2">巡逻艇-002 船员</div>
+                                            <div class="flex flex-wrap gap-1">
+                                                <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">吴军 - 船长</span>
+                                                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">马超 - 副船长</span>
+                                                <span class="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">林涛 - 通讯</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-black/30 rounded-lg p-2 border border-white/10">
+                                            <div class="text-white text-xs font-medium mb-2">后勤保障团队</div>
+                                            <div class="flex flex-wrap gap-1">
+                                                <span class="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded">孙丽 - 补给</span>
+                                                <span class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">周杰 - 维修</span>
+                                                <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded">钱晨 - 后勤</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 底部菜单栏 -->
+                        <div class="bottom-menu">
+                            <div class="flex h-full">
+                                <div class="menu-item">
+                                    <i class="fas fa-gamepad"></i>
+                                    <span>手动导航</span>
+                                </div>
+                                <div class="menu-item">
+                                    <i class="fas fa-route"></i>
+                                    <span>自动巡航</span>
+                                </div>
+                                <div class="menu-item">
+                                    <i class="fas fa-brain"></i>
+                                    <span>AI管理</span>
+                                </div>
+                                <div class="menu-item active">
+                                    <i class="fas fa-cogs"></i>
+                                    <span>综合管理</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化主控台Leaflet地图
+        function initMainMap() {
+            try {
+                const fujianCenter = [26.1, 119.3];
+                const map = L.map('mapContainer', {
+                    center: fujianCenter,
+                    zoom: 10,
+                    zoomControl: true
+                });
+
+                const amapVectorLayer = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+                    attribution: '© 高德地图',
+                    subdomains: ['1', '2', '3', '4'],
+                    maxZoom: 18
+                });
+
+                amapVectorLayer.addTo(map);
+
+                // 添加船只标记
+                const ships = [
+                    {name: '东海渔船-001', type: '渔船', position: [26.1, 119.3], course: 45, speed: 12, status: '正常', color: '#4FD1C7', icon: 'fa-ship'},
+                    {name: '海警巡逻-002', type: '巡逻船', position: [26.3, 119.5], course: 120, speed: 8, status: '巡逻中', color: '#10B981', icon: 'fa-shield-alt'},
+                    {name: '货运船-003', type: '货船', position: [25.9, 119.1], course: 270, speed: 15, status: '运输中', color: '#F59E0B', icon: 'fa-anchor'},
+                    {name: '海洋科研-004', type: '科研船', position: [26.5, 119.7], course: 180, speed: 5, status: '采样中', color: '#8B5CF6', icon: 'fa-microscope'},
+                    {name: '海事执法-005', type: '执法船', position: [26.0, 119.6], course: 90, speed: 10, status: '待命', color: '#EF4444', icon: 'fa-shield'},
+                    {name: '救援船-006', type: '救援船', position: [26.4, 119.2], course: 225, speed: 6, status: '待命', color: '#F97316', icon: 'fa-life-ring'},
+                    {name: '补给船-007', type: '补给船', position: [25.8, 119.4], course: 315, speed: 9, status: '补给中', color: '#06B6D4', icon: 'fa-truck'}
+                ];
+
+                ships.forEach(ship => {
+                    const shipIcon = L.divIcon({
+                        className: 'ship-marker',
+                        html: `<div class="ship-marker w-8 h-8 animate-pulse" style="background-color: ${ship.color};">
+                                   <i class="fas ${ship.icon} text-white text-sm"></i>
+                               </div>`,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16],
+                        popupAnchor: [0, -16]
+                    });
+
+                    const marker = L.marker(ship.position, { icon: shipIcon }).addTo(map);
+                    const popupContent = `
+                        <div class="ship-popup">
+                            <div class="font-semibold mb-2 flex items-center" style="color: ${ship.color};">
+                                <i class="fas ${ship.icon} mr-2"></i>${ship.name}
+                            </div>
+                            <div class="space-y-1 text-sm">
+                                <div class="flex justify-between"><span class="text-gray-300">类型:</span><span class="text-white">${ship.type}</span></div>
+                                <div class="flex justify-between"><span class="text-gray-300">经度:</span><span class="text-white">${ship.position[1].toFixed(3)}°E</span></div>
+                                <div class="flex justify-between"><span class="text-gray-300">纬度:</span><span class="text-white">${ship.position[0].toFixed(3)}°N</span></div>
+                                <div class="flex justify-between"><span class="text-gray-300">航向:</span><span class="text-white">${ship.course}°</span></div>
+                                <div class="flex justify-between"><span class="text-gray-300">速度:</span><span class="text-white">${ship.speed}节</span></div>
+                                <div class="flex justify-between"><span class="text-gray-300">状态:</span><span style="color: ${ship.color};">${ship.status}</span></div>
+                            </div>
+                        </div>
+                    `;
+                    marker.bindPopup(popupContent, { maxWidth: 200, className: 'custom-popup' });
+                    marker.on('mouseover', function() { this.openPopup(); });
+                });
+
+            } catch (error) {
+                console.error('主控台地图初始化失败:', error);
+            }
+        }
+        
+        // 初始化手动导航Leaflet地图
+        function initManualMap() {
+            try {
+                const center = [26.1, 119.3];
+                const map = L.map('manualMapContainer', {
+                    center: center,
+                    zoom: 13,
+                    zoomControl: true
+                });
+
+                const amapVectorLayer = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+                    attribution: '© 高德地图',
+                    subdomains: ['1', '2', '3', '4'],
+                    maxZoom: 18
+                });
+
+                amapVectorLayer.addTo(map);
+
+                // 添加当前控制船只
+                const controlShipIcon = L.divIcon({
+                    className: 'ship-marker',
+                    html: `<div class="ship-marker w-10 h-10 animate-pulse" style="background-color: #4FD1C7;">
+                               <i class="fas fa-ship text-white"></i>
+                           </div>`,
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+
+                const controlShip = L.marker(center, { icon: controlShipIcon }).addTo(map);
+
+                console.log('手动导航地图初始化成功');
+            } catch (error) {
+                console.error('手动导航地图初始化失败:', error);
+            }
+        }
+        
+        // 初始化自动巡航Leaflet地图
+        function initCruiseMap() {
+            try {
+                const center = [26.1, 119.3];
+                const map = L.map('cruiseMapContainer', {
+                    center: center,
+                    zoom: 12,
+                    zoomControl: true
+                });
+
+                const amapVectorLayer = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+                    attribution: '© 高德地图',
+                    subdomains: ['1', '2', '3', '4'],
+                    maxZoom: 18
+                });
+
+                amapVectorLayer.addTo(map);
+
+                // 添加当前船只
+                const shipIcon = L.divIcon({
+                    className: 'ship-marker',
+                    html: `<div class="ship-marker w-8 h-8" style="background-color: #4FD1C7;">
+                               <i class="fas fa-ship text-white"></i>
+                           </div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+
+                const ship = L.marker([26.05, 119.25], { icon: shipIcon }).addTo(map);
+
+                // 添加航点
+                const waypoints = [
+                    { position: [26.12, 119.35], number: 1 },
+                    { position: [26.18, 119.42], number: 2 },
+                    { position: [26.25, 119.38], number: 3 }
+                ];
+
+                waypoints.forEach(waypoint => {
+                    const waypointIcon = L.divIcon({
+                        className: 'waypoint',
+                        html: `<div class="waypoint" style="background-color: #F59E0B;">
+                                   ${waypoint.number}
+                               </div>`,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16]
+                    });
+
+                    L.marker(waypoint.position, { icon: waypointIcon }).addTo(map);
+                });
+
+                // 添加路径线
+                const routeCoords = [
+                    [26.05, 119.25],
+                    [26.12, 119.35],
+                    [26.18, 119.42],
+                    [26.25, 119.38]
+                ];
+
+                L.polyline(routeCoords, {
+                    color: '#4FD1C7',
+                    weight: 3,
+                    opacity: 0.8,
+                    dashArray: '8, 4'
+                }).addTo(map);
+
+                console.log('自动巡航地图初始化成功');
+            } catch (error) {
+                console.error('自动巡航地图初始化失败:', error);
+            }
+        }
+        
+        // 增强型摇杆控制逻辑
+        function initJoystickControl() {
+            const joystick = document.getElementById('joystickHandle');
+            if (!joystick) return;
+            
+            const joystickContainer = joystick.parentElement;
+            const xDisplay = document.getElementById('joystickX');
+            const yDisplay = document.getElementById('joystickY');
+            
+            let isDragging = false;
+            let containerRect;
+            
+            function updatePosition(clientX, clientY) {
+                if (!containerRect) return;
+                
+                const centerX = containerRect.left + containerRect.width / 2;
+                const centerY = containerRect.top + containerRect.height / 2;
+                const radius = containerRect.width / 2 - 25; // 留出摇杆手柄的空间
+                
+                let deltaX = clientX - centerX;
+                let deltaY = clientY - centerY;
+                
+                // 限制在圆形范围内
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                if (distance > radius) {
+                    deltaX = (deltaX / distance) * radius;
+                    deltaY = (deltaY / distance) * radius;
+                }
+                
+                // 更新摇杆位置
+                joystick.style.left = `calc(50% + ${deltaX}px)`;
+                joystick.style.top = `calc(50% + ${deltaY}px)`;
+                
+                // 计算控制值 (-100 到 100)
+                const xValue = Math.round((deltaX / radius) * 100);
+                const yValue = Math.round((-deltaY / radius) * 100); // Y轴翻转
+                
+                // 更新显示
+                if (xDisplay) xDisplay.textContent = xValue;
+                if (yDisplay) yDisplay.textContent = yValue;
+                
+                // 发送控制指令
+                console.log(`摇杆控制 - X: ${xValue}, Y: ${yValue}`);
+            }
+            
+            function resetPosition() {
+                joystick.style.left = '50%';
+                joystick.style.top = '50%';
+                if (xDisplay) xDisplay.textContent = '0';
+                if (yDisplay) yDisplay.textContent = '0';
+                console.log('摇杆复位');
+            }
+            
+            // 鼠标事件
+            joystick.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                containerRect = joystickContainer.getBoundingClientRect();
+                joystick.style.cursor = 'grabbing';
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    updatePosition(e.clientX, e.clientY);
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    joystick.style.cursor = 'pointer';
+                    resetPosition();
+                }
+            });
+            
+            // 触摸事件（移动设备支持）
+            joystick.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                containerRect = joystickContainer.getBoundingClientRect();
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchmove', (e) => {
+                if (isDragging && e.touches.length > 0) {
+                    updatePosition(e.touches[0].clientX, e.touches[0].clientY);
+                    e.preventDefault();
+                }
+            });
+            
+            document.addEventListener('touchend', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    resetPosition();
+                }
+            });
+        }
+        
+        // 高级设置面板切换
+        function initSettingsPanel() {
+            const settingsBtn = document.getElementById('advancedSettingsBtn');
+            const settingsPanel = document.getElementById('advancedSettingsPanel');
+
+            if (settingsBtn && settingsPanel) {
+                settingsBtn.addEventListener('click', function() {
+                    settingsPanel.classList.toggle('hidden');
+                });
+            }
+        }
+        
+        // 页面加载完成后初始化所有功能
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initMainMap();
+                initManualMap();
+                initCruiseMap();
+                initJoystickControl();
+                initSettingsPanel();
+                console.log('所有地图和控制器初始化完成');
+            }, 800);
+        });
+    </script>
+</body>
+</html>
