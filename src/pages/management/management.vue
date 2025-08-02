@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import BottomMenu from '@/components/BottomMenu.vue'
-// import ManagementModal from '@/components/ManagementModal.vue'
+import ManagementModal from '@/components/ManagementModal.vue'
 
 interface Ship {
   id: string
@@ -38,9 +38,9 @@ const showModal = ref(false)
 const modalType = ref('')
 const modalData = ref(null)
 
-const totalShips = ref(7)
-const totalPersonnel = ref(15)
-const activeTasks = ref(8)
+const totalShips = ref(6)
+const totalPersonnel = ref(8)
+const activeTasks = ref(5)
 
 const ships = ref<Ship[]>([
   {
@@ -70,13 +70,40 @@ const ships = ref<Ship[]>([
     battery: 0,
     speed: 0,
   },
+  {
+    id: '004',
+    name: '海巡004',
+    type: '运输船',
+    status: 'online',
+    location: '福建海域C区',
+    battery: 92,
+    speed: 12.3,
+  },
+  {
+    id: '005',
+    name: '海巡005',
+    type: '科研船',
+    status: 'offline',
+    location: '港口停泊区',
+    battery: 68,
+    speed: 0,
+  },
+  {
+    id: '006',
+    name: '海巡006',
+    type: '执法船',
+    status: 'online',
+    location: '福建海域D区',
+    battery: 78,
+    speed: 15.8,
+  }
 ])
 
 const personnel = ref<Personnel[]>([
   {
     id: '001',
     name: '张船长',
-    role: '船长',
+    role: '总船长',
     department: '指挥部',
     status: 'online',
     phone: '13800138001',
@@ -98,6 +125,51 @@ const personnel = ref<Personnel[]>([
     department: '操作部',
     status: 'offline',
     phone: '13800138003',
+    email: 'operator@ship.com',
+  },
+  {
+    id: '004',
+    name: '陈副船长',
+    role: '副船长',
+    department: '指挥部',
+    status: 'online',
+    phone: '13800138004',
+    email: 'vice.captain@ship.com',
+  },
+  {
+    id: '005',
+    name: '刘维修师',
+    role: '维修技师',
+    department: '维修部',
+    status: 'busy',
+    phone: '13800138005',
+    email: 'maintenance@ship.com',
+  },
+  {
+    id: '006',
+    name: '赵调度员',
+    role: '调度员',
+    department: '调度中心',
+    status: 'online',
+    phone: '13800138006',
+    email: 'dispatcher@ship.com',
+  },
+  {
+    id: '007',
+    name: '孙安全员',
+    role: '安全员',
+    department: '安全部',
+    status: 'online',
+    phone: '13800138007',
+    email: 'safety@ship.com',
+  },
+  {
+    id: '008',
+    name: '周通信员',
+    role: '通信员',
+    department: '通信部',
+    status: 'busy',
+    phone: '13800138008',
     email: 'operator@ship.com',
   },
 ])
@@ -333,83 +405,95 @@ function handleTabChange(tab: string) {
 
     <!-- 主要内容区域 -->
     <scroll-view class="content-area" scroll-y>
-      <view class="p-[24rpx]">
-        <!-- 船只管理 -->
-        <view class="ships-section">
-          <view class="section-title">
-            <text class="title-icon">🚢</text>
-            <text class="title-text">船只管理</text>
-            <button class="add-btn" @click="handleAddShip">
-              <text class="add-icon">+</text>
-            </button>
-          </view>
-          <view class="ships-grid">
-            <view
-              v-for="ship in ships"
-              :key="ship.id"
-              class="ship-card"
-              :class="ship.status"
-              @click="handleShipClick(ship)"
-            >
-              <view class="ship-thumbnail">
-                <text class="ship-icon">🚢</text>
-              </view>
-              <view class="ship-info">
-                <text class="ship-name">{{ ship.name }}</text>
-                <text class="ship-type">{{ ship.type }}</text>
-                <view class="ship-status">
-                  <view class="status-dot" :class="ship.status" />
-                  <text class="status-text">{{ getShipStatusText(ship.status) }}</text>
+      <view class="management-content">
+        <!-- 并排布局容器 -->
+        <view class="dual-panel-container">
+          <!-- 船只管理面板 -->
+          <view class="management-panel ships-panel">
+            <view class="panel-header">
+              <text class="panel-icon">🚢</text>
+              <text class="panel-title">船只管理</text>
+              <text class="panel-count">{{ totalShips }}艘</text>
+              <button class="add-btn" @click="handleAddShip">
+                <text class="add-icon">+</text>
+              </button>
+            </view>
+            <view class="ships-compact-list">
+              <view
+                v-for="ship in ships"
+                :key="ship.id"
+                class="ship-compact-card"
+                :class="ship.status"
+                @click="handleShipClick(ship)"
+              >
+                <view class="ship-basic-info">
+                  <view class="ship-header">
+                    <text class="ship-name">{{ ship.name }}</text>
+                    <view class="status-indicator" :class="ship.status" />
+                  </view>
+                  <text class="ship-type">{{ ship.type }}</text>
+                  <text class="ship-location">{{ ship.location }}</text>
                 </view>
-                <text class="ship-location">{{ ship.location }}</text>
-              </view>
-              <view class="ship-actions">
-                <button class="action-btn control" @click.stop="handleShipControl(ship)">
-                  <text class="action-icon">🎮</text>
-                </button>
-                <button class="action-btn settings" @click.stop="handleShipSettings(ship)">
-                  <text class="action-icon">⚙️</text>
-                </button>
+                <view class="ship-metrics">
+                  <view class="metric-item">
+                    <text class="metric-label">电量</text>
+                    <text class="metric-value">{{ ship.battery }}%</text>
+                  </view>
+                  <view class="metric-item">
+                    <text class="metric-label">航速</text>
+                    <text class="metric-value">{{ ship.speed }}节</text>
+                  </view>
+                </view>
+                <view class="ship-actions">
+                  <button class="action-btn control" @click.stop="handleShipControl(ship)">
+                    <text class="action-icon">🎮</text>
+                  </button>
+                  <button class="action-btn settings" @click.stop="handleShipSettings(ship)">
+                    <text class="action-icon">⚙️</text>
+                  </button>
+                </view>
               </view>
             </view>
           </view>
-        </view>
 
-        <!-- 人员管理 -->
-        <view class="personnel-section">
-          <view class="section-title">
-            <text class="title-icon">👥</text>
-            <text class="title-text">人员管理</text>
-            <button class="add-btn" @click="handleAddPersonnel">
-              <text class="add-icon">+</text>
-            </button>
-          </view>
-          <view class="personnel-list">
-            <view
-              v-for="person in personnel"
-              :key="person.id"
-              class="personnel-card"
-              @click="handlePersonnelClick(person)"
-            >
-              <view class="avatar">
-                <text class="avatar-text">{{ person.name.charAt(0) }}</text>
-              </view>
-              <view class="personnel-info">
-                <text class="person-name">{{ person.name }}</text>
-                <text class="person-role">{{ person.role }}</text>
-                <text class="person-department">{{ person.department }}</text>
-              </view>
-              <view class="personnel-status">
-                <view class="status-indicator" :class="person.status" />
-                <text class="status-label">{{ getPersonnelStatusText(person.status) }}</text>
-              </view>
-              <view class="contact-actions">
-                <button class="contact-btn call" @click.stop="handleCall(person)">
-                  <text class="contact-icon">📞</text>
-                </button>
-                <button class="contact-btn message" @click.stop="handleMessage(person)">
-                  <text class="contact-icon">💬</text>
-                </button>
+          <!-- 人员管理面板 -->
+          <view class="management-panel personnel-panel">
+            <view class="panel-header">
+              <text class="panel-icon">👥</text>
+              <text class="panel-title">人员管理</text>
+              <text class="panel-count">{{ totalPersonnel }}人</text>
+              <button class="add-btn" @click="handleAddPersonnel">
+                <text class="add-icon">+</text>
+              </button>
+            </view>
+            <view class="personnel-compact-list">
+              <view
+                v-for="person in personnel"
+                :key="person.id"
+                class="personnel-compact-card"
+                @click="handlePersonnelClick(person)"
+              >
+                <view class="personnel-basic-info">
+                  <view class="avatar-small">
+                    <text class="avatar-text">{{ person.name.charAt(0) }}</text>
+                  </view>
+                  <view class="person-details">
+                    <view class="person-header">
+                      <text class="person-name">{{ person.name }}</text>
+                      <view class="status-indicator" :class="person.status" />
+                    </view>
+                    <text class="person-role">{{ person.role }}</text>
+                    <text class="person-department">{{ person.department }}</text>
+                  </view>
+                </view>
+                <view class="contact-actions">
+                  <button class="contact-btn call" @click.stop="handleCall(person)">
+                    <text class="contact-icon">📞</text>
+                  </button>
+                  <button class="contact-btn message" @click.stop="handleMessage(person)">
+                    <text class="contact-icon">💬</text>
+                  </button>
+                </view>
               </view>
             </view>
           </view>
@@ -590,10 +674,359 @@ function handleTabChange(tab: string) {
   // padding: 32rpx;
 }
 
+.management-content {
+  padding: 32rpx;
+  height: 100%;
+}
+
+/* 并排布局容器 */
+.dual-panel-container {
+  display: flex;
+  gap: 24rpx;
+  height: 100%;
+}
+
+.management-panel {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(15rpx);
+  border: 2rpx solid rgba(255, 255, 255, 0.2);
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 面板头部 */
+.panel-header {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  border-bottom: 2rpx solid rgba(255, 255, 255, 0.1);
+  background: rgba(79, 209, 199, 0.05);
+}
+
+.panel-icon {
+  font-size: 32rpx;
+  color: #4fd1c7;
+  margin-right: 16rpx;
+}
+
+.panel-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: white;
+  flex: 1;
+}
+
+.panel-count {
+  font-size: 24rpx;
+  color: #4fd1c7;
+  font-weight: 600;
+  margin-right: 16rpx;
+}
+
+.add-btn {
+  width: 56rpx;
+  height: 56rpx;
+  background: rgba(79, 209, 199, 0.2);
+  border: 2rpx solid rgba(79, 209, 199, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .add-icon {
+    color: #4fd1c7;
+    font-size: 28rpx;
+    font-weight: bold;
+  }
+}
+
+/* 船只紧凑列表 */
+.ships-compact-list {
+  flex: 1;
+  padding: 16rpx;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.ship-compact-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2rpx solid rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  padding: 20rpx;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(79, 209, 199, 0.1);
+    border-color: rgba(79, 209, 199, 0.3);
+    transform: translateY(-2rpx);
+  }
+
+  &.active {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+  }
+
+  &.maintenance {
+    border-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+  }
+
+  &.offline {
+    border-color: #6b7280;
+    background: rgba(107, 114, 128, 0.1);
+  }
+}
+
+.ship-basic-info {
+  margin-bottom: 12rpx;
+}
+
+.ship-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.ship-name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: white;
+}
+
+.ship-type {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.ship-location {
+  font-size: 20rpx;
+  color: #4fd1c7;
+  display: block;
+}
+
+.ship-metrics {
+  display: flex;
+  gap: 16rpx;
+  margin: 12rpx 0;
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8rpx 12rpx;
+  background: rgba(79, 209, 199, 0.1);
+  border-radius: 8rpx;
+  flex: 1;
+}
+
+.metric-label {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 4rpx;
+}
+
+.metric-value {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #4fd1c7;
+}
+
+.ship-actions {
+  display: flex;
+  gap: 8rpx;
+}
+
+.action-btn {
+  flex: 1;
+  height: 56rpx;
+  border-radius: 12rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+
+  .action-icon {
+    color: white;
+    font-size: 20rpx;
+  }
+
+  &.control {
+    background: rgba(79, 209, 199, 0.2);
+
+    &:hover {
+      background: rgba(79, 209, 199, 0.4);
+    }
+  }
+
+  &.settings {
+    background: rgba(107, 114, 128, 0.2);
+
+    &:hover {
+      background: rgba(107, 114, 128, 0.4);
+    }
+  }
+}
+
+/* 人员紧凑列表 */
+.personnel-compact-list {
+  flex: 1;
+  padding: 16rpx;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.personnel-compact-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2rpx solid rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  padding: 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(79, 209, 199, 0.1);
+    border-color: rgba(79, 209, 199, 0.3);
+    transform: translateY(-2rpx);
+  }
+}
+
+.personnel-basic-info {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex: 1;
+}
+
+.avatar-small {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4fd1c7, #10b981);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar-text {
+  color: white;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+.person-details {
+  flex: 1;
+}
+
+.person-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4rpx;
+}
+
+.person-name {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: white;
+}
+
+.person-role {
+  font-size: 20rpx;
+  color: #4fd1c7;
+  display: block;
+  margin-bottom: 2rpx;
+}
+
+.person-department {
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.7);
+  display: block;
+}
+
+.status-indicator {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+
+  &.online {
+    background: #10b981;
+  }
+
+  &.busy {
+    background: #f59e0b;
+  }
+
+  &.offline {
+    background: #6b7280;
+  }
+}
+
+.contact-actions {
+  display: flex;
+  gap: 8rpx;
+}
+
+.contact-btn {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+
+  .contact-icon {
+    font-size: 20rpx;
+  }
+
+  &.call {
+    background: rgba(34, 197, 94, 0.2);
+
+    .contact-icon {
+      color: #22c55e;
+    }
+
+    &:hover {
+      background: rgba(34, 197, 94, 0.4);
+    }
+  }
+
+  &.message {
+    background: rgba(59, 130, 246, 0.2);
+
+    .contact-icon {
+      color: #3b82f6;
+    }
+
+    &:hover {
+      background: rgba(59, 130, 246, 0.4);
+    }
+  }
+}
+
 .section-title {
   display: flex;
   align-items: center;
   gap: 16rpx;
+  margin-top: 12rpx;
   margin-bottom: 24rpx;
 
   .title-icon {
@@ -1052,6 +1485,22 @@ function handleTabChange(tab: string) {
   }
 }
 
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .dual-panel-container {
+    flex-direction: column;
+    gap: 16rpx;
+  }
+  
+  .management-panel {
+    min-height: 400rpx;
+  }
+  
+  .management-content {
+    padding: 16rpx;
+  }
+}
+
 /* 横屏适配 */
 @media (orientation: landscape) {
   .management-header {
@@ -1062,7 +1511,15 @@ function handleTabChange(tab: string) {
   .content-area {
     top: 120rpx;
     bottom: 100rpx;
-    // padding: 24rpx;
+  }
+
+  .dual-panel-container {
+    flex-direction: row;
+    gap: 16rpx;
+  }
+
+  .management-content {
+    padding: 16rpx;
   }
 
   .ships-grid {
@@ -1103,7 +1560,15 @@ function handleTabChange(tab: string) {
   .content-area {
     top: 160rpx;
     bottom: 120rpx;
-    // padding: 40rpx 32rpx;
+  }
+
+  .dual-panel-container {
+    flex-direction: column;
+    gap: 20rpx;
+  }
+
+  .management-content {
+    padding: 24rpx 16rpx;
   }
 
   .ships-grid {
