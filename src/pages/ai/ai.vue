@@ -362,7 +362,7 @@ onUnmounted(() => {
 
     <!-- 主要内容区域 -->
     <scroll-view class="content-area" scroll-y>
-      <view class="p-[24rpx]">
+      <view class="p-[24rpx] pb-[280rpx]">
         <!-- 电池状态监控 -->
         <view class="battery-section">
           <view class="section-title">
