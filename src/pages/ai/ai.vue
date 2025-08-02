@@ -253,22 +253,25 @@ function checkBatteryWarning() {
   const mainBattery = batteries.value.find(b => b.id === 'main')
   if (mainBattery && mainBattery.level < 20 && !batteryWarningShown.value) {
     showBatteryWarning.value = true
-    uni.showModal({
-      title: '电量低提醒',
-      content: `主电池电量已低于20%（当前${mainBattery.level.toFixed(1)}%），请尽快充电或返回港口！`,
-      showCancel: false,
-      confirmText: '知道了',
-      success: () => {
-        showBatteryWarning.value = false
-        batteryWarningShown.value = true
-      }
-    })
   }
   
   // 当电池电量恢复到20%以上时，重置预警状态
   if (mainBattery && mainBattery.level >= 20) {
     batteryWarningShown.value = false
   }
+}
+
+function handleBatteryWarningClose() {
+  showBatteryWarning.value = false
+  // 5分钟后再次检查
+  setTimeout(() => {
+    batteryWarningShown.value = false
+  }, 5 * 60 * 1000)
+}
+
+function handleBatteryWarningConfirm() {
+  showBatteryWarning.value = false
+  batteryWarningShown.value = true
 }
 
 function handleTabChange(tab: string) {
@@ -630,6 +633,54 @@ onUnmounted(() => {
             </view>
           </view>
         </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 电量警告弹窗 -->
+  <view v-if="showBatteryWarning" class="battery-warning-overlay" @click="handleBatteryWarningClose">
+    <view class="battery-warning-modal" @click.stop>
+      <view class="warning-header">
+        <view class="warning-icon-container">
+          <text class="warning-icon">⚠️</text>
+          <view class="warning-pulse"></view>
+        </view>
+        <text class="warning-title">电量低警告</text>
+      </view>
+      
+      <view class="warning-content">
+        <view class="battery-status">
+          <view class="battery-visual">
+            <view class="battery-shell">
+              <view class="battery-level-critical" :style="{ width: `${batteries.find(b => b.id === 'main')?.level || 0}%` }"></view>
+            </view>
+            <view class="battery-tip"></view>
+          </view>
+          <text class="battery-percentage">{{ batteries.find(b => b.id === 'main')?.level?.toFixed(1) || 0 }}%</text>
+        </view>
+        
+        <view class="warning-message">
+          <text class="message-text">主电池电量已低于20%，请立即采取以下措施：</text>
+          <view class="action-list">
+            <view class="action-item">
+              <text class="action-icon">🔌</text>
+              <text class="action-text">尽快返回港口充电</text>
+            </view>
+            <view class="action-item">
+              <text class="action-icon">⚡</text>
+              <text class="action-text">启用备用电源系统</text>
+            </view>
+            <view class="action-item">
+              <text class="action-icon">🐌</text>
+              <text class="action-text">降低航行速度节省电量</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <view class="warning-footer">
+        <button class="warning-btn warning-btn-secondary" @click="handleBatteryWarningClose">稍后提醒</button>
+        <button class="warning-btn warning-btn-primary" @click="handleBatteryWarningConfirm">知道了</button>
       </view>
     </view>
   </view>
@@ -1634,8 +1685,256 @@ onUnmounted(() => {
     grid-template-columns: repeat(3, 1fr);
     gap: 16rpx;
   }
+}
 
-  .analysis-grid {
+/* 电量警告弹窗样式 */
+.battery-warning-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10rpx);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.battery-warning-modal {
+  width: 600rpx;
+  max-width: 90vw;
+  background: linear-gradient(135deg, rgba(20, 30, 48, 0.95), rgba(30, 40, 60, 0.95));
+  border: 2rpx solid rgba(255, 87, 87, 0.3);
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 20rpx 60rpx rgba(255, 87, 87, 0.2);
+  animation: slideUp 0.4s ease-out;
+}
+
+.warning-header {
+  padding: 40rpx 32rpx 24rpx;
+  text-align: center;
+  position: relative;
+}
+
+.warning-icon-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 16rpx;
+}
+
+.warning-icon {
+  font-size: 80rpx;
+  filter: drop-shadow(0 0 20rpx rgba(255, 87, 87, 0.6));
+  animation: pulse 2s infinite;
+}
+
+.warning-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120rpx;
+  height: 120rpx;
+  border: 4rpx solid rgba(255, 87, 87, 0.3);
+  border-radius: 50%;
+  animation: ripple 2s infinite;
+}
+
+.warning-title {
+  color: #ff5757;
+  font-size: 36rpx;
+  font-weight: bold;
+  text-shadow: 0 2rpx 8rpx rgba(255, 87, 87, 0.3);
+}
+
+.warning-content {
+  padding: 0 32rpx 32rpx;
+}
+
+.battery-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+  margin-bottom: 32rpx;
+  padding: 24rpx;
+  background: rgba(255, 87, 87, 0.1);
+  border-radius: 16rpx;
+  border: 1rpx solid rgba(255, 87, 87, 0.2);
+}
+
+.battery-visual {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.battery-shell {
+  width: 80rpx;
+  height: 40rpx;
+  border: 3rpx solid #ff5757;
+  border-radius: 6rpx;
+  position: relative;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.battery-level-critical {
+  height: 100%;
+  background: linear-gradient(90deg, #ff5757, #ff3030);
+  border-radius: 3rpx;
+  transition: width 0.3s ease;
+  animation: batteryBlink 1.5s infinite;
+}
+
+.battery-tip {
+  width: 6rpx;
+  height: 20rpx;
+  background: #ff5757;
+  border-radius: 0 3rpx 3rpx 0;
+}
+
+.battery-percentage {
+  color: #ff5757;
+  font-size: 32rpx;
+  font-weight: bold;
+  text-shadow: 0 2rpx 8rpx rgba(255, 87, 87, 0.3);
+}
+
+.warning-message {
+  text-align: left;
+}
+
+.message-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 28rpx;
+  line-height: 1.5;
+  margin-bottom: 24rpx;
+  display: block;
+}
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.action-icon {
+  font-size: 32rpx;
+  width: 40rpx;
+  text-align: center;
+}
+
+.action-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 26rpx;
+  flex: 1;
+}
+
+.warning-footer {
+  padding: 24rpx 32rpx 32rpx;
+  display: flex;
+  gap: 16rpx;
+  justify-content: flex-end;
+}
+
+.warning-btn {
+  padding: 16rpx 32rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120rpx;
+}
+
+.warning-btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+.warning-btn-primary {
+  background: linear-gradient(135deg, #ff5757, #ff3030);
+  color: white;
+  box-shadow: 0 8rpx 24rpx rgba(255, 87, 87, 0.3);
+
+  &:hover {
+    background: linear-gradient(135deg, #ff3030, #ff1010);
+    box-shadow: 0 12rpx 32rpx rgba(255, 87, 87, 0.4);
+    transform: translateY(-2rpx);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100rpx) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes batteryBlink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0.6;
+  }
+}
+
+.analysis-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 16rpx;
   }
@@ -1648,7 +1947,6 @@ onUnmounted(() => {
   .trajectory-summary {
     gap: 12rpx;
   }
-}
 
 /* 竖屏适配 */
 @media (orientation: portrait) {
