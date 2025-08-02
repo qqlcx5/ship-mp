@@ -1,15 +1,34 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, reactive } from 'vue'
 import BottomMenu from '@/components/BottomMenu.vue'
 import ControlButton from '@/components/ControlButton.vue'
 import JoystickController from '@/components/JoystickController.vue'
 import MapComponent from '@/components/MapComponent.vue'
+import { formatVoltage, formatCurrent, formatSpeed, formatPercentage, formatNumber } from '@/utils/index'
 
 interface RealTimeData {
   power: number
   voltage: number
   speed: number
   runtime: string
+  current: number
+  remainingPower: number
+  operatingPower: number
+}
+
+interface WeatherData {
+  condition: string
+  temperature: number
+  humidity: number
+  windSpeed: number
+  windDirection: string
+}
+
+interface SeaCondition {
+  waveHeight: number
+  seaState: string
+  visibility: number
+  waterTemperature: number
 }
 
 interface ControlItem {
@@ -19,11 +38,29 @@ interface ControlItem {
   color: 'red' | 'yellow' | 'orange' | 'blue' | 'green' | 'purple'
 }
 
-const realTimeData = ref<RealTimeData>({
+const realTimeData = reactive<RealTimeData>({
   power: 85,
   voltage: 12.5,
   speed: 8.0,
   runtime: '02:34:15',
+  current: 7.1,
+  remainingPower: 78.5,
+  operatingPower: 92.3
+})
+
+const weatherData = reactive<WeatherData>({
+  condition: '晴朗',
+  temperature: 22.5,
+  humidity: 65.2,
+  windSpeed: 3.8,
+  windDirection: '东北风'
+})
+
+const seaCondition = reactive<SeaCondition>({
+  waveHeight: 1.2,
+  seaState: '轻浪',
+  visibility: 8.5,
+  waterTemperature: 18.7
 })
 
 const joystickX = ref(0)
@@ -81,7 +118,7 @@ function handleEmergencyStop() {
         // 执行急停逻辑
         joystickX.value = 0
         joystickY.value = 0
-        realTimeData.value.speed = 0
+        realTimeData.speed = 0
         uni.showToast({
           title: '已执行紧急停止',
           icon: 'success',
@@ -126,7 +163,7 @@ function handleJoystickControl(data: { x: number, y: number }) {
 
   // 根据摇杆输入计算速度（范围0-100转换为0-10节）
   const magnitude = Math.sqrt(data.x * data.x + data.y * data.y)
-  realTimeData.value.speed = Math.round((magnitude / 100) * 10 * 100) / 100
+  realTimeData.speed = Math.round(magnitude * 10 * 100) / 100
 
   // 更新船只位置（模拟）
   // 修正坐标系：X控制经度（左右），Y控制纬度（上下）
@@ -160,8 +197,23 @@ function handleTabChange(tab: string) {
 
 function updateRealTimeData() {
   // 模拟实时数据更新
-  realTimeData.value.power = 80 + Math.random() * 10
-  realTimeData.value.voltage = 12.0 + Math.random() * 1.0
+  realTimeData.power = Math.round((80 + Math.random() * 20) * 100) / 100
+  realTimeData.voltage = Math.round((12 + Math.random() * 2) * 100) / 100
+  realTimeData.current = Math.round((6 + Math.random() * 3) * 100) / 100
+  realTimeData.remainingPower = Math.round((70 + Math.random() * 20) * 100) / 100
+  realTimeData.operatingPower = Math.round((85 + Math.random() * 15) * 100) / 100
+  
+  // 更新天气数据
+  weatherData.temperature = Math.round((20 + Math.random() * 10) * 10) / 10
+  weatherData.humidity = Math.round((60 + Math.random() * 20) * 10) / 10
+  weatherData.windSpeed = Math.round((2 + Math.random() * 5) * 10) / 10
+  weatherData.condition = ['晴朗', '多云', '阴天'][Math.floor(Math.random() * 3)]
+  
+  // 更新海况数据
+  seaCondition.waveHeight = Math.round((0.8 + Math.random() * 1.0) * 10) / 10
+  seaCondition.visibility = Math.round((7 + Math.random() * 5) * 10) / 10
+  seaCondition.waterTemperature = Math.round((16 + Math.random() * 6) * 10) / 10
+  seaCondition.seaState = ['平静', '轻浪', '中浪'][Math.floor(Math.random() * 3)]
 
   // 更新运行时间
   const now = new Date()
@@ -170,7 +222,11 @@ function updateRealTimeData() {
   const hours = Math.floor(diff / (1000 * 60 * 60))
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
   const seconds = Math.floor((diff % (1000 * 60)) / 1000)
-  realTimeData.value.runtime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  realTimeData.runtime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  
+  // 更新船只电量和速度
+  currentShip.value.battery = Math.round(realTimeData.remainingPower)
+  currentShip.value.speed = Math.round(realTimeData.speed * 10) / 10
 }
 
 onMounted(() => {
@@ -201,31 +257,7 @@ onUnmounted(() => {
           <view class="status-dot" />
           <text class="status-text">遥控连接</text>
         </view>
-      </view>
-
-      <!-- 实时参数显示 -->
-      <view class="params-display">
-        <view class="param-item">
-          <text class="param-icon">⚡</text>
-          <text class="param-label">功率:</text>
-          <text class="param-value">{{ realTimeData.power }}W</text>
-        </view>
-        <view class="param-item">
-          <text class="param-icon">🔌</text>
-          <text class="param-label">电压:</text>
-          <text class="param-value">{{ realTimeData.voltage }}V</text>
-        </view>
-        <view class="param-item">
-          <text class="param-icon">🏃</text>
-          <text class="param-label">速度:</text>
-          <text class="param-value">{{ realTimeData.speed }}节</text>
-        </view>
-        <view class="param-item">
-          <text class="param-icon">⏱️</text>
-          <text class="param-label">运行:</text>
-          <text class="param-value">{{ realTimeData.runtime }}</text>
-        </view>
-      </view>
+      </view>      
     </view>
 
     <!-- 地图区域 -->
@@ -235,6 +267,78 @@ onUnmounted(() => {
         :center="mapCenter"
         @ship-click="handleShipClick"
       />
+      
+      <!-- 实时数据显示卡片 -->
+      <view class="data-cards-container">
+        <!-- 天气海况卡片 -->
+        <view class="data-card weather-card">
+          <view class="card-header">
+            <text class="card-icon">🌤️</text>
+            <text class="card-title">天气海况 {{ weatherData.condition }}</text>
+          </view>
+          <view class="card-grid">
+            <view class="card-item">
+               <text class="item-icon">🌡️</text>
+               <view class="item-content">
+                 <text class="item-label">温度</text>
+                 <text class="item-value">{{ formatNumber(weatherData.temperature) }}°C</text>
+               </view>
+             </view>
+             <view class="card-item">
+               <text class="item-icon">💨</text>
+               <view class="item-content">
+                 <text class="item-label">风速</text>
+                 <text class="item-value">{{ formatNumber(weatherData.windSpeed) }}m/s</text>
+               </view>
+             </view>
+             <view class="card-item full-width">
+               <text class="item-icon">👁️</text>
+               <view class="item-content">
+                 <text class="item-label">能见度</text>
+                 <text class="item-value">{{ formatNumber(seaCondition.visibility) }}km</text>
+               </view>
+             </view>
+          </view>
+        </view>
+        
+        <!-- 船舶状态卡片 -->
+        <view class="data-card ship-card">
+          <view class="card-header">
+            <text class="card-icon">🚢</text>
+            <text class="card-title">船舶状态</text>
+          </view>
+          <view class="card-grid">
+            <view class="card-item">
+               <text class="item-icon">⚡</text>
+               <view class="item-content">
+                 <text class="item-label">时速</text>
+                 <text class="item-value">{{ formatSpeed(realTimeData.speed) }}</text>
+               </view>
+             </view>
+             <view class="card-item">
+               <text class="item-icon">🔋</text>
+               <view class="item-content">
+                 <text class="item-label">电量</text>
+                 <text class="item-value">{{ formatPercentage(realTimeData.remainingPower) }}</text>
+               </view>
+             </view>
+             <view class="card-item">
+               <text class="item-icon">🔌</text>
+               <view class="item-content">
+                 <text class="item-label">电流</text>
+                 <text class="item-value">{{ formatCurrent(realTimeData.current) }}</text>
+               </view>
+             </view>
+             <view class="card-item">
+               <text class="item-icon">⚡</text>
+               <view class="item-content">
+                 <text class="item-label">电压</text>
+                 <text class="item-value">{{ formatVoltage(realTimeData.voltage) }}</text>
+               </view>
+             </view>
+          </view>
+        </view>
+      </view>
     </view>
 
     <!-- 左侧控制按钮 -->
@@ -387,6 +491,109 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 140rpx; /* 增加底部边距，避免被底部栏遮挡 */
+}
+
+.data-cards-container {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.data-card {
+  background: rgba(26, 35, 50, 0.85);
+  border: 1rpx solid rgba(79, 209, 199, 0.3);
+  border-radius: 12rpx;
+  padding: 16rpx;
+  backdrop-filter: blur(20rpx);
+  -webkit-backdrop-filter: blur(20rpx);
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.3);
+  min-width: 280rpx;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(26, 35, 50, 0.9);
+    border-color: rgba(79, 209, 199, 0.5);
+    transform: translateY(-2rpx);
+    box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.4);
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 12rpx;
+  padding-bottom: 8rpx;
+  border-bottom: 1rpx solid rgba(79, 209, 199, 0.2);
+
+  .card-icon {
+    font-size: 24rpx;
+  }
+
+  .card-title {
+    color: #4fd1c7;
+    font-size: 24rpx;
+    font-weight: 600;
+  }
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12rpx;
+
+  .card-item {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    padding: 8rpx;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8rpx;
+    border: 1rpx solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(79, 209, 199, 0.1);
+      border-color: rgba(79, 209, 199, 0.3);
+    }
+
+    &.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .item-icon {
+      font-size: 20rpx;
+      min-width: 20rpx;
+    }
+
+    .item-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2rpx;
+      flex: 1;
+      min-width: 0;
+
+      .item-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 18rpx;
+        line-height: 1;
+      }
+
+      .item-value {
+        color: #4fd1c7;
+        font-size: 20rpx;
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
 }
 
 .left-controls {

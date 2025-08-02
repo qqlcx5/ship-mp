@@ -170,3 +170,24 @@ export function getEnvBaseUploadUrl() {
 
   return baseUploadUrl
 }
+
+// 数值格式化函数
+export function formatNumber(value: number): string {
+  return value.toFixed(1)
+}
+
+export function formatSpeed(value: number): string {
+  return value.toFixed(1)
+}
+
+export function formatPercentage(value: number): string {
+  return value.toFixed(1)
+}
+
+export function formatVoltage(value: number): string {
+  return value.toFixed(1)
+}
+
+export function formatCurrent(value: number): string {
+  return value.toFixed(1)
+}
