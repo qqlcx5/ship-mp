@@ -8,7 +8,7 @@
         </view>
         <view class="title-section">
           <text class="route-icon">🗺️</text>
-          <text class="title">自动巡航规划</text>
+          <text class="title">自动巡航</text>
         </view>
         <view class="auto-status">
           <view class="status-dot"></view>
@@ -29,9 +29,9 @@
         <CruiseControlButton 
           v-for="control in cruiseControls"
           :key="control.key"
-          :icon="control.icon"
-          :label="control.label"
-          :color="control.color"
+          :icon="control.key === 'add-waypoint' && isAddingWaypoint ? '✕' : control.icon"
+          :label="control.key === 'add-waypoint' && isAddingWaypoint ? '取消' : control.label"
+          :color="control.key === 'add-waypoint' && isAddingWaypoint ? 'orange' : control.color"
           @click="handleControlClick(control.key)"
         />
       </view>
@@ -56,8 +56,9 @@
     <!-- 地图区域 -->
     <view class="map-area">
       <CruiseMapComponent 
-        :ships="[currentShip]"
-        :waypoints="waypoints"
+      :ships="[currentShip]"
+      :waypoints="waypoints"
+      :isAddingWaypoint="isAddingWaypoint"
         :route-path="routePath"
         :center="mapCenter"
         @waypoint-add="handleWaypointAdd"
@@ -115,6 +116,7 @@ interface AdvancedSetting {
 const showAdvancedPanel = ref(false)
 const showWaypointModal = ref(false)
 const selectedWaypoint = ref<Waypoint | null>(null)
+const isAddingWaypoint = ref(false) // 是否处于添加航点模式
 
 const currentWaypoint = ref(3)
 const totalWaypoints = ref(5)
@@ -231,15 +233,20 @@ const handleAutoToggle = () => {
 }
 
 const handleAddWaypoint = () => {
-  selectedWaypoint.value = {
-    id: Date.now().toString(),
-    lat: mapCenter.value.lat,
-    lng: mapCenter.value.lng,
-    name: `航点${waypoints.value.length}`,
-    speed: 6,
-    waitTime: 300
+  if (!isAddingWaypoint.value) {
+    isAddingWaypoint.value = true
+    uni.showToast({
+      title: '请在地图上点击添加航点',
+      icon: 'none',
+      duration: 2000
+    })
+  } else {
+    isAddingWaypoint.value = false
+    uni.showToast({
+      title: '已退出添加模式',
+      icon: 'none'
+    })
   }
-  showWaypointModal.value = true
 }
 
 const handleRemoveWaypoint = () => {
@@ -295,15 +302,22 @@ const handleClearRoute = () => {
 }
 
 const handleWaypointAdd = (position: { lat: number; lng: number }) => {
-  selectedWaypoint.value = {
-    id: Date.now().toString(),
-    lat: position.lat,
-    lng: position.lng,
-    name: `航点${waypoints.value.length}`,
-    speed: 6,
-    waitTime: 300
+  if (isAddingWaypoint.value) {
+    selectedWaypoint.value = {
+      id: Date.now().toString(),
+      lat: position.lat,
+      lng: position.lng,
+      name: `航点${waypoints.value.length + 1}`,
+      speed: 6,
+      waitTime: 300
+    }
+    showWaypointModal.value = true
+    isAddingWaypoint.value = false // 退出添加模式
+    uni.showToast({
+      title: '航点已添加，请设置参数',
+      icon: 'success'
+    })
   }
-  showWaypointModal.value = true
 }
 
 const handleWaypointRemove = (waypointId: string) => {

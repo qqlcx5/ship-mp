@@ -73,13 +73,13 @@
           </view>
           <view class="form-item">
             <text class="form-label">截止日期</text>
-            <picker v-model="formData.deadline" mode="date" class="form-picker">
+            <picker :value="formData.deadline" mode="date" class="form-picker" @change="handleDateChange">
               <view class="picker-text">{{ formData.deadline || '请选择截止日期' }}</view>
             </picker>
           </view>
           <view class="form-item">
             <text class="form-label">优先级</text>
-            <picker v-model="formData.priority" :range="priorityOptions" class="form-picker">
+            <picker :value="formData.priority" :range="priorityOptions" class="form-picker" @change="handlePriorityChange">
               <view class="picker-text">{{ getPriorityText(formData.priority) }}</view>
             </picker>
           </view>
@@ -185,6 +185,17 @@ const handleOverlayClick = () => {
 // 处理关闭
 const handleClose = () => {
   emit('close')
+}
+
+// 处理日期选择变化
+const handleDateChange = (e: any) => {
+  formData.value.deadline = e.detail.value
+}
+
+// 处理优先级选择变化
+const handlePriorityChange = (e: any) => {
+  const index = e.detail.value
+  formData.value.priority = priorityOptions[index]
 }
 
 // 处理保存

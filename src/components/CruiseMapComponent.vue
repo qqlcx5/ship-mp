@@ -23,6 +23,14 @@
     />
     <!-- #endif -->
     
+    <!-- 添加航点模式提示 -->
+    <view class="add-waypoint-overlay" v-if="isAddingWaypoint">
+      <view class="add-waypoint-tip">
+        <text class="tip-icon">📍</text>
+        <text class="tip-text">点击地图添加航点</text>
+      </view>
+    </view>
+    
     <!-- 航点信息面板 -->
     <view class="waypoint-info" v-if="selectedWaypointInfo">
       <view class="info-header">
@@ -77,6 +85,7 @@ interface Props {
   waypoints: Waypoint[]
   routePath: { lat: number; lng: number }[]
   center: { lat: number; lng: number }
+  isAddingWaypoint?: boolean
 }
 
 const props = defineProps<Props>()
@@ -93,8 +102,8 @@ const selectedWaypointInfo = ref<Waypoint | null>(null)
 
 // 转换船只数据为地图标记
 const mapMarkers = computed(() => {
-  const shipMarkers = props.ships.map(ship => ({
-    id: ship.id,
+  const shipMarkers = props.ships.map((ship, index) => ({
+    id: index,
     latitude: ship.lat,
     longitude: ship.lng,
     title: ship.name,
@@ -106,14 +115,17 @@ const mapMarkers = computed(() => {
       color: '#ffffff',
       fontSize: 12,
       borderRadius: 8,
+      borderWidth: 1,
+      borderColor: '#333333',
       bgColor: 'rgba(0,0,0,0.8)',
       padding: 8,
+      textAlign: 'center',
       display: 'BYCLICK'
     }
   }))
   
   const waypointMarkers = props.waypoints.map((waypoint, index) => ({
-    id: `waypoint-${waypoint.id}`,
+    id: 1000 + index,
     latitude: waypoint.lat,
     longitude: waypoint.lng,
     title: waypoint.name,
@@ -125,8 +137,11 @@ const mapMarkers = computed(() => {
       color: '#ffffff',
       fontSize: 12,
       borderRadius: 8,
+      borderWidth: 1,
+      borderColor: '#4FD1C7',
       bgColor: 'rgba(79,209,199,0.9)',
       padding: 8,
+      textAlign: 'center',
       display: 'BYCLICK'
     }
   }))
@@ -218,7 +233,7 @@ const handleMarkerTap = (e: any) => {
 }
 
 const handleMapTap = (e: any) => {
-  if (routeMode.value) {
+  if (routeMode.value || props.isAddingWaypoint) {
     const { latitude, longitude } = e.detail
     emit('waypointAdd', { lat: latitude, lng: longitude })
   }
@@ -472,7 +487,57 @@ onMounted(() => {
   .info-header .waypoint-name {
     font-size: 32rpx;
   }
-  
+}
+
+/* 添加航点模式提示样式 */
+.add-waypoint-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.add-waypoint-tip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(79, 209, 199, 0.95);
+  color: white;
+  padding: 24rpx 48rpx;
+  border-radius: 48rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.3);
+  animation: pulse 2s infinite;
+}
+
+.tip-icon {
+  font-size: 32rpx;
+}
+
+.tip-text {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* 竖屏适配下的info-item样式 */
+@media (orientation: portrait) {
   .info-item {
     .info-label,
     .info-value {
