@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, reactive } from 'vue'
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import BottomMenu from '@/components/BottomMenu.vue'
 import ControlButton from '@/components/ControlButton.vue'
 import JoystickController from '@/components/JoystickController.vue'
 import MapComponent from '@/components/MapComponent.vue'
-import { formatVoltage, formatCurrent, formatSpeed, formatPercentage, formatNumber } from '@/utils/index'
+import { formatCurrent, formatNumber, formatPercentage, formatSpeed, formatVoltage } from '@/utils/index'
 
 interface RealTimeData {
   power: number
@@ -45,7 +45,7 @@ const realTimeData = reactive<RealTimeData>({
   runtime: '02:34:15',
   current: 7.1,
   remainingPower: 78.5,
-  operatingPower: 92.3
+  operatingPower: 92.3,
 })
 
 const weatherData = reactive<WeatherData>({
@@ -53,14 +53,14 @@ const weatherData = reactive<WeatherData>({
   temperature: 22.5,
   humidity: 65.2,
   windSpeed: 3.8,
-  windDirection: '东北风'
+  windDirection: '东北风',
 })
 
 const seaCondition = reactive<SeaCondition>({
   waveHeight: 1.2,
   seaState: '轻浪',
   visibility: 8.5,
-  waterTemperature: 18.7
+  waterTemperature: 18.7,
 })
 
 const joystickX = ref(0)
@@ -202,13 +202,13 @@ function updateRealTimeData() {
   realTimeData.current = Math.round((6 + Math.random() * 3) * 100) / 100
   realTimeData.remainingPower = Math.round((70 + Math.random() * 20) * 100) / 100
   realTimeData.operatingPower = Math.round((85 + Math.random() * 15) * 100) / 100
-  
+
   // 更新天气数据
   weatherData.temperature = Math.round((20 + Math.random() * 10) * 10) / 10
   weatherData.humidity = Math.round((60 + Math.random() * 20) * 10) / 10
   weatherData.windSpeed = Math.round((2 + Math.random() * 5) * 10) / 10
   weatherData.condition = ['晴朗', '多云', '阴天'][Math.floor(Math.random() * 3)]
-  
+
   // 更新海况数据
   seaCondition.waveHeight = Math.round((0.8 + Math.random() * 1.0) * 10) / 10
   seaCondition.visibility = Math.round((7 + Math.random() * 5) * 10) / 10
@@ -223,7 +223,7 @@ function updateRealTimeData() {
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
   const seconds = Math.floor((diff % (1000 * 60)) / 1000)
   realTimeData.runtime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-  
+
   // 更新船只电量和速度
   currentShip.value.battery = Math.round(realTimeData.remainingPower)
   currentShip.value.speed = Math.round(realTimeData.speed * 10) / 10
@@ -257,7 +257,7 @@ onUnmounted(() => {
           <view class="status-dot" />
           <text class="status-text">遥控连接</text>
         </view>
-      </view>      
+      </view>
     </view>
 
     <!-- 地图区域 -->
@@ -267,7 +267,7 @@ onUnmounted(() => {
         :center="mapCenter"
         @ship-click="handleShipClick"
       />
-      
+
       <!-- 实时数据显示卡片 -->
       <view class="data-cards-container">
         <!-- 天气海况卡片 -->
@@ -278,29 +278,29 @@ onUnmounted(() => {
           </view>
           <view class="card-grid">
             <view class="card-item">
-               <text class="item-icon">🌡️</text>
-               <view class="item-content">
-                 <text class="item-label">温度</text>
-                 <text class="item-value">{{ formatNumber(weatherData.temperature) }}°C</text>
-               </view>
-             </view>
-             <view class="card-item">
-               <text class="item-icon">💨</text>
-               <view class="item-content">
-                 <text class="item-label">风速</text>
-                 <text class="item-value">{{ formatNumber(weatherData.windSpeed) }}m/s</text>
-               </view>
-             </view>
-             <view class="card-item full-width">
-               <text class="item-icon">👁️</text>
-               <view class="item-content">
-                 <text class="item-label">能见度</text>
-                 <text class="item-value">{{ formatNumber(seaCondition.visibility) }}km</text>
-               </view>
-             </view>
+              <text class="item-icon">🌡️</text>
+              <view class="item-content">
+                <text class="item-label">温度</text>
+                <text class="item-value">{{ formatNumber(weatherData.temperature) }}°C</text>
+              </view>
+            </view>
+            <view class="card-item">
+              <text class="item-icon">💨</text>
+              <view class="item-content">
+                <text class="item-label">风速</text>
+                <text class="item-value">{{ formatNumber(weatherData.windSpeed) }}m/s</text>
+              </view>
+            </view>
+            <view class="card-item full-width">
+              <text class="item-icon">👁️</text>
+              <view class="item-content">
+                <text class="item-label">能见度</text>
+                <text class="item-value">{{ formatNumber(seaCondition.visibility) }}km</text>
+              </view>
+            </view>
           </view>
         </view>
-        
+
         <!-- 船舶状态卡片 -->
         <view class="data-card ship-card">
           <view class="card-header">
@@ -309,33 +309,33 @@ onUnmounted(() => {
           </view>
           <view class="card-grid">
             <view class="card-item">
-               <text class="item-icon">⚡</text>
-               <view class="item-content">
-                 <text class="item-label">时速</text>
-                 <text class="item-value">{{ formatSpeed(realTimeData.speed) }}</text>
-               </view>
-             </view>
-             <view class="card-item">
-               <text class="item-icon">🔋</text>
-               <view class="item-content">
-                 <text class="item-label">电量</text>
-                 <text class="item-value">{{ formatPercentage(realTimeData.remainingPower) }}</text>
-               </view>
-             </view>
-             <view class="card-item">
-               <text class="item-icon">🔌</text>
-               <view class="item-content">
-                 <text class="item-label">电流</text>
-                 <text class="item-value">{{ formatCurrent(realTimeData.current) }}</text>
-               </view>
-             </view>
-             <view class="card-item">
-               <text class="item-icon">⚡</text>
-               <view class="item-content">
-                 <text class="item-label">电压</text>
-                 <text class="item-value">{{ formatVoltage(realTimeData.voltage) }}</text>
-               </view>
-             </view>
+              <text class="item-icon">⚡</text>
+              <view class="item-content">
+                <text class="item-label">时速</text>
+                <text class="item-value">{{ formatSpeed(realTimeData.speed) }}</text>
+              </view>
+            </view>
+            <view class="card-item">
+              <text class="item-icon">🔋</text>
+              <view class="item-content">
+                <text class="item-label">电量</text>
+                <text class="item-value">{{ formatPercentage(realTimeData.remainingPower) }}</text>
+              </view>
+            </view>
+            <view class="card-item">
+              <text class="item-icon">🔌</text>
+              <view class="item-content">
+                <text class="item-label">电流</text>
+                <text class="item-value">{{ formatCurrent(realTimeData.current) }}</text>
+              </view>
+            </view>
+            <view class="card-item">
+              <text class="item-icon">⚡</text>
+              <view class="item-content">
+                <text class="item-label">电压</text>
+                <text class="item-value">{{ formatVoltage(realTimeData.voltage) }}</text>
+              </view>
+            </view>
           </view>
         </view>
       </view>
@@ -384,7 +384,7 @@ onUnmounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  height: 140rpx;
+  height: 100rpx;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(20rpx);
   padding: 16rpx 32rpx;
@@ -487,10 +487,10 @@ onUnmounted(() => {
 
 .map-area {
   position: absolute;
-  top: 140rpx;
+  top: 100rpx;
   left: 0;
   right: 0;
-  bottom: 140rpx; /* 增加底部边距，避免被底部栏遮挡 */
+  bottom: 104rpx; /* 增加底部边距，避免被底部栏遮挡 */
 }
 
 .data-cards-container {
@@ -660,7 +660,7 @@ onUnmounted(() => {
 /* 竖屏适配 */
 @media (orientation: portrait) {
   .manual-header {
-    height: 160rpx;
+    height: 100rpx;
     flex-direction: column;
     gap: 16rpx;
     padding: 24rpx 32rpx;
@@ -677,8 +677,8 @@ onUnmounted(() => {
   }
 
   .map-area {
-    top: 160rpx;
-    bottom: 160rpx; /* 竖屏时增加底部边距 */
+    top: 100rpx;
+    bottom: 104rpx; /* 竖屏时增加底部边距 */
   }
 
   .left-controls {
