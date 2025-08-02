@@ -103,10 +103,10 @@ function handleTouchEnd() {
         <text class="value-number">{{ controlValue.y }}</text>
       </view>
     </view>
-    <view class="control-info">
+    <!-- <view class="control-info">
       <text class="info-text">智能摇杆控制器</text>
       <text class="info-desc">范围：±100 精确控制 | 松手保持航向</text>
-    </view>
+    </view> -->
 
     <!-- 摇杆容器 -->
     <view ref="joystickContainer" class="joystick-container">
