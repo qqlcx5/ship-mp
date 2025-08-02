@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, ref } from 'vue'
 
 interface Props {
   xValue: number
@@ -13,7 +13,8 @@ const emit = defineEmits<{
 
 const joystickContainer = ref<HTMLElement>()
 const isDragging = ref(false)
-const handlePosition = ref({ x: 0, y: 0 })
+const handlePosition = ref({ x: -maxDistance, y: -maxDistance })
+const controlValue = ref({ x: -100, y: -100 })
 const containerSize = 280 // rpx
 const handleSize = 100 // rpx
 const maxDistance = (containerSize - handleSize) / 2
@@ -68,39 +69,24 @@ function handleTouchMove(e: TouchEvent) {
       newY = Math.sin(angle) * maxDistance
     }
 
+    // 更新手柄位置
     handlePosition.value = { x: newX, y: newY }
 
-    // 计算标准化的控制值 (-1 到 1)
+    // 计算控制值 (-100 到 100)
     // 修正坐标系：右为正X，上为负Y（因为屏幕坐标系Y向下为正）
-    const normalizedX = newX / maxDistance
-    const normalizedY = -newY / maxDistance // Y轴反转，向上为正
+    const controlX = Math.round((newX / maxDistance) * 100)
+    const controlY = Math.round((-newY / maxDistance) * 100) // Y轴反转，向上为正
 
-    emit('control', { x: normalizedX, y: normalizedY })
+    controlValue.value = { x: controlX, y: controlY }
+    emit('control', { x: controlX, y: controlY })
   }).exec()
 }
 
 function handleTouchEnd() {
   isDragging.value = false
-
-  // 回弹到中心
-  handlePosition.value = { x: 0, y: 0 }
-  emit('control', { x: 0, y: 0 })
+  // 智能摇杆：松手后保持当前位置，不回原点
+  // 位置和控制值都保持不变
 }
-
-// 监听外部控制值变化
-function updateHandlePosition() {
-  if (!isDragging.value) {
-    handlePosition.value = {
-      x: props.xValue * maxDistance,
-      y: -props.yValue * maxDistance,
-    }
-  }
-}
-
-// 当props变化时更新位置
-nextTick(() => {
-  updateHandlePosition()
-})
 </script>
 
 <template>
@@ -109,12 +95,16 @@ nextTick(() => {
     <view class="control-display">
       <view class="control-value">
         <text class="value-label">X:</text>
-        <text class="value-number">{{ xValue.toFixed(2) }}</text>
+        <text class="value-number">{{ controlValue.x }}</text>
       </view>
       <view class="control-value">
         <text class="value-label">Y:</text>
-        <text class="value-number">{{ yValue.toFixed(2) }}</text>
+        <text class="value-number">{{ controlValue.y }}</text>
       </view>
+    </view>
+    <view class="control-info">
+      <text class="info-text">智能摇杆控制器</text>
+      <text class="info-desc">范围：±100 精确控制 | 松手保持航向</text>
     </view>
 
     <!-- 摇杆容器 -->
@@ -176,6 +166,30 @@ nextTick(() => {
     font-family: monospace;
     font-weight: 600;
     min-width: 60rpx;
+  }
+}
+
+.control-info {
+  background: rgba(79, 209, 199, 0.1);
+  color: white;
+  padding: 12rpx 20rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(79, 209, 199, 0.3);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+
+  .info-text {
+    font-size: 22rpx;
+    font-weight: 600;
+    color: #4fd1c7;
+  }
+
+  .info-desc {
+    font-size: 18rpx;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.2;
   }
 }
 

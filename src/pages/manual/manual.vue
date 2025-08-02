@@ -124,18 +124,18 @@ function handleJoystickControl(data: { x: number, y: number }) {
   joystickX.value = data.x
   joystickY.value = data.y
 
-  // 根据摇杆输入计算速度
+  // 根据摇杆输入计算速度（范围0-100转换为0-10节）
   const magnitude = Math.sqrt(data.x * data.x + data.y * data.y)
-  realTimeData.value.speed = Math.round(magnitude * 10 * 100) / 100
+  realTimeData.value.speed = Math.round((magnitude / 100) * 10 * 100) / 100
 
   // 更新船只位置（模拟）
   // 修正坐标系：X控制经度（左右），Y控制纬度（上下）
-  const moveSpeed = 0.0001
-  currentShip.value.lat += data.y * moveSpeed // Y轴控制纬度：正值向北，负值向南
-  currentShip.value.lng += data.x * moveSpeed // X轴控制经度：正值向东，负值向西
+  const moveSpeed = 0.00001 // 调整移动速度，适配新的控制范围
+  currentShip.value.lat += (data.y / 100) * moveSpeed // Y轴控制纬度：正值向北，负值向南
+  currentShip.value.lng += (data.x / 100) * moveSpeed // X轴控制经度：正值向东，负值向西
 
   // 更新船只航向
-  if (magnitude > 0.1) {
+  if (magnitude > 10) { // 调整阈值，适配新的控制范围
     currentShip.value.course = Math.round((Math.atan2(data.x, data.y) * 180 / Math.PI + 360) % 360)
   }
 }
