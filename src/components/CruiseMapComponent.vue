@@ -118,8 +118,8 @@ const mapMarkers = computed(() => {
     longitude: waypoint.lng,
     title: waypoint.name,
     iconPath: getWaypointIcon(index),
-    width: 32,
-    height: 32,
+    width: 48,
+    height: 48,
     callout: {
       content: `${waypoint.name}\n速度: ${waypoint.speed}节\n等待: ${waypoint.waitTime}秒`,
       color: '#ffffff',
@@ -151,22 +151,53 @@ const routePolyline = computed(() => {
 })
 
 const getShipIcon = (status: string) => {
-  switch (status) {
-    case 'online':
-      return '/static/icons/ship-online.png'
-    case 'warning':
-      return '/static/icons/ship-warning.png'
-    case 'offline':
-      return '/static/icons/ship-offline.png'
-    default:
-      return '/static/icons/ship-default.png'
+  const colors = {
+    online: '#10B981',
+    warning: '#F59E0B',
+    offline: '#6B7280',
+    default: '#4FD1C7'
   }
+  const color = colors[status as keyof typeof colors] || colors.default
+  
+  // 现代化船只图标 - 流线型设计 (增大尺寸)
+  const svg = `
+    <svg width="48" height="48" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <!-- 船体 -->
+      <path d="M16 6C12 6 8 12 8 22L16 26L24 22C24 12 20 6 16 6Z" fill="${color}" stroke="white" stroke-width="2"/>
+      <!-- 船舱 -->
+      <rect x="12" y="12" width="8" height="4" fill="white" fill-opacity="0.8" rx="1"/>
+      <!-- 桅杆 -->
+      <rect x="15" y="8" width="2" height="6" fill="white"/>
+      <!-- 方向指示 -->
+      <polygon points="16,8 14,10 18,10" fill="white"/>
+    </svg>
+  `
+  return `data:image/svg+xml;base64,${btoa(svg)}`
 }
 
 const getWaypointIcon = (index: number) => {
-  if (index === 0) return '/static/icons/waypoint-start.png'
-  if (index === props.waypoints.length - 1) return '/static/icons/waypoint-end.png'
-  return '/static/icons/waypoint-normal.png'
+  const colors = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899']
+  const color = colors[index % colors.length]
+  
+  // 真实小船图标，编号在右下方
+  const svg = `
+    <svg width="48" height="48" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <!-- 真实船体 -->
+      <path d="M30 15C22 15 15 22 15 40L30 45L45 40C45 22 38 15 30 15Z" fill="${color}" stroke="white" stroke-width="2"/>
+      <!-- 船舱 -->
+      <rect x="24" y="25" width="12" height="8" fill="white" fill-opacity="0.9" rx="2"/>
+      <!-- 桅杆 -->
+      <rect x="28" y="18" width="4" height="10" fill="white"/>
+      <!-- 船头 -->
+      <path d="M15 35L10 32L15 40Z" fill="${color}"/>
+      <!-- 船尾 -->
+      <path d="M45 35L50 32L45 40Z" fill="${color}"/>
+      <!-- 小编号在右下方 -->
+      <circle cx="48" cy="48" r="6" fill="white" stroke="${color}" stroke-width="1"/>
+      <text x="48" y="51" text-anchor="middle" font-size="10" font-weight="bold" fill="${color}">${index + 1}</text>
+    </svg>
+  `
+  return `data:image/svg+xml;base64,${btoa(svg)}`
 }
 
 const handleMarkerTap = (e: any) => {

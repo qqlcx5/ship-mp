@@ -110,14 +110,33 @@
         
         // 添加船只标记
         ships.forEach(ship => {
-            const marker = L.circleMarker([ship.lat, ship.lng], {
-                radius: 8,
-                fillColor: getShipColor(ship.status),
-                color: 'white',
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.8
-            }).addTo(map);
+            // 创建船体图标 - 现代化流线型设计 (增大尺寸)
+            const shipIcon = L.divIcon({
+                className: 'ship-icon',
+                html: `
+                    <div style="
+                        width: 48px;
+                        height: 48px;
+                        position: relative;
+                        transform: rotate(${ship.course || 0}deg);
+                    ">
+                        <svg width="48" height="48" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- 船体 -->
+                            <path d="M16 6C12 6 8 12 8 22L16 26L24 22C24 12 20 6 16 6Z" fill="${getShipColor(ship.status)}" stroke="white" stroke-width="2"/>
+                            <!-- 船舱 -->
+                            <rect x="12" y="12" width="8" height="4" fill="white" fill-opacity="0.8" rx="1"/>
+                            <!-- 桅杆 -->
+                            <rect x="15" y="8" width="2" height="6" fill="white"/>
+                            <!-- 方向指示 -->
+                            <polygon points="16,8 14,10 18,10" fill="white"/>
+                        </svg>
+                    </div>
+                `,
+                iconSize: [48, 48],
+                iconAnchor: [24, 24]
+            });
+            
+            const marker = L.marker([ship.lat, ship.lng], { icon: shipIcon }).addTo(map);
             
             marker.bindPopup(`
                 <div style="color: white;">
@@ -140,25 +159,49 @@
                 fillOpacity: 0.8
             }).addTo(map);
             
-            // 添加航点编号
+            // 添加真实小船图标，编号在右下方
             const divIcon = L.divIcon({
-                className: 'waypoint-number',
-                html: `<div style="
-                    width: 24px; 
-                    height: 24px; 
-                    border-radius: 50%; 
-                    background: ${getWaypointColor(index)}; 
-                    border: 3px solid white; 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    color: white; 
-                    font-weight: bold; 
-                    font-size: 12px;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                ">${index + 1}</div>`,
-                iconSize: [30, 30],
-                iconAnchor: [15, 15]
+                className: 'waypoint-real-boat',
+                html: `
+                    <div style="
+                        width: 48px;
+                        height: 48px;
+                        position: relative;
+                    ">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- 船体主体 -->
+                            <path d="M24 12C18 12 12 18 12 32L24 38L36 32C36 18 30 12 24 12Z" fill="${getWaypointColor(index)}" stroke="white" stroke-width="2"/>
+                            <!-- 船舱 -->
+                            <rect x="19" y="20" width="10" height="6" fill="white" fill-opacity="0.9" rx="2"/>
+                            <!-- 桅杆 -->
+                            <rect x="23" y="14" width="3" height="8" fill="white"/>
+                            <!-- 船头 -->
+                            <path d="M12 28L8 26L12 32Z" fill="${getWaypointColor(index)}"/>
+                            <!-- 船尾 -->
+                            <path d="M36 28L40 26L36 32Z" fill="${getWaypointColor(index)}"/>
+                        </svg>
+                        <!-- 小编号在右下方 -->
+                        <div style="
+                            position: absolute;
+                            right: -6px;
+                            bottom: -6px;
+                            width: 16px;
+                            height: 16px;
+                            background: white;
+                            border: 1px solid ${getWaypointColor(index)};
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 10px;
+                            font-weight: bold;
+                            color: ${getWaypointColor(index)};
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+                        ">${index + 1}</div>
+                    </div>
+                `,
+                iconSize: [48, 48],
+                iconAnchor: [24, 24]
             });
             
             const numberMarker = L.marker([waypoint.lat, waypoint.lng], { icon: divIcon }).addTo(map);
@@ -217,14 +260,65 @@
             }
         }
         
-        // 地图点击事件（添加航点）
-        map.on('click', function(e) {
-            if (window.parent) {
-                window.parent.postMessage({
-                    type: 'waypointAdd',
-                    lat: e.latlng.lat,
-                    lng: e.latlng.lng
-                }, '*');
+        // 海洋区域检测函数（基于坐标和地图瓦片）
+        async function isInOcean(lat, lng) {
+            // 简化的海洋检测：检查坐标是否在水域范围内
+            // 基于中国沿海区域的粗略判断
+            const oceanBounds = {
+                minLat: 18.0,
+                maxLat: 42.0,
+                minLng: 105.0,
+                maxLng: 125.0
+            };
+            
+            // 检查是否在合理的水域范围内
+            if (lat < oceanBounds.minLat || lat > oceanBounds.maxLat || 
+                lng < oceanBounds.minLng || lng > oceanBounds.maxLng) {
+                return false;
+            }
+            
+            // 排除主要陆地（简化的中国海岸线检测）
+            const landAreas = [
+                // 台湾岛
+                { minLat: 21.8, maxLat: 25.4, minLng: 119.9, maxLng: 122.0 },
+                // 海南岛
+                { minLat: 18.1, maxLat: 20.2, minLng: 108.6, maxLng: 111.1 },
+                // 其他主要陆地
+                { minLat: 25.0, maxLat: 41.0, minLng: 118.0, maxLng: 123.0 }
+            ];
+            
+            for (const area of landAreas) {
+                if (lat >= area.minLat && lat <= area.maxLat && 
+                    lng >= area.minLng && lng <= area.maxLng) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // 地图点击事件（添加航点 - 限制在海上）
+        map.on('click', async function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            // 检查是否在海洋区域
+            const isOcean = await isInOcean(lat, lng);
+            
+            if (isOcean) {
+                if (window.parent) {
+                    window.parent.postMessage({
+                        type: 'waypointAdd',
+                        lat: lat,
+                        lng: lng
+                    }, '*');
+                }
+            } else {
+                // 显示提示信息
+                L.popup()
+                    .setLatLng([lat, lng])
+                    .setContent('<div style="color: white;">⚠️ 航点只能在海上添加</div>')
+                    .openOn(map);
             }
         });
         

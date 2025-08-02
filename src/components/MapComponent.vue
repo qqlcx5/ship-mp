@@ -75,16 +75,28 @@ const mapMarkers = computed(() => {
 })
 
 const getShipIcon = (status: string) => {
-  switch (status) {
-    case 'online':
-      return '/static/icons/ship-online.png'
-    case 'warning':
-      return '/static/icons/ship-warning.png'
-    case 'offline':
-      return '/static/icons/ship-offline.png'
-    default:
-      return '/static/icons/ship-default.png'
+  const colors = {
+    online: '#10B981',
+    warning: '#F59E0B',
+    offline: '#6B7280',
+    default: '#4FD1C7'
   }
+  const color = colors[status as keyof typeof colors] || colors.default
+  
+  // 现代化船只图标 - 流线型设计 (增大尺寸)
+  const svg = `
+    <svg width="48" height="48" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <!-- 船体 -->
+      <path d="M16 6C12 6 8 12 8 22L16 26L24 22C24 12 20 6 16 6Z" fill="${color}" stroke="white" stroke-width="2"/>
+      <!-- 船舱 -->
+      <rect x="12" y="12" width="8" height="4" fill="white" fill-opacity="0.8" rx="1"/>
+      <!-- 桅杆 -->
+      <rect x="15" y="8" width="2" height="6" fill="white"/>
+      <!-- 方向指示 -->
+      <polygon points="16,8 14,10 18,10" fill="white"/>
+    </svg>
+  `
+  return `data:image/svg+xml;base64,${btoa(svg)}`
 }
 
 const handleMarkerTap = (e: any) => {
