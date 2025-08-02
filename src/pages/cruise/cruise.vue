@@ -3,9 +3,9 @@
     <!-- 顶部状态栏 -->
     <view class="cruise-header">
       <view class="header-left">
-        <button class="back-btn" @click="goBack">
+        <view class="back-btn" @click="goBack">
           <text class="back-icon">←</text>
-        </button>
+        </view>
         <view class="title-section">
           <text class="route-icon">🗺️</text>
           <text class="title">自动巡航规划</text>
