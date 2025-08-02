@@ -65,16 +65,7 @@ const batteries = ref<Battery[]>([
     status: 'good',
     temperature: 28,
     cycles: 856,
-  },
-  {
-    id: 'solar',
-    name: '太阳能',
-    level: 45,
-    voltage: 13.2,
-    status: 'good',
-    temperature: 42,
-    cycles: 0,
-  },
+  }
 ])
 
 const energyConsumption = ref<EnergyConsumption>({
