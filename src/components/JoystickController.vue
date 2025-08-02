@@ -11,13 +11,14 @@ const emit = defineEmits<{
   control: [data: { x: number, y: number }]
 }>()
 
+const containerSize = 280 // rpx
+const handleSize = 100 // rpx
+const maxDistance = (containerSize - handleSize) / 2
+
 const joystickContainer = ref<HTMLElement>()
 const isDragging = ref(false)
 const handlePosition = ref({ x: -maxDistance, y: -maxDistance })
 const controlValue = ref({ x: -100, y: -100 })
-const containerSize = 280 // rpx
-const handleSize = 100 // rpx
-const maxDistance = (containerSize - handleSize) / 2
 
 const handleStyle = computed(() => {
   return {
