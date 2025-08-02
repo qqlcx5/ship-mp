@@ -1,0 +1,356 @@
+/* 船舶智能管理系统 - 响应式设计样式 */
+
+/* 全局响应式变量 */
+:root {
+  /* 横屏模式变量 */
+  --landscape-header-height: 100rpx;
+  --landscape-bottom-height: 100rpx;
+  --landscape-padding: 24rpx;
+  --landscape-gap: 16rpx;
+  --landscape-font-size: 24rpx;
+  --landscape-icon-size: 28rpx;
+  
+  /* 竖屏模式变量 */
+  --portrait-header-height: 160rpx;
+  --portrait-bottom-height: 120rpx;
+  --portrait-padding: 32rpx;
+  --portrait-gap: 24rpx;
+  --portrait-font-size: 28rpx;
+  --portrait-icon-size: 32rpx;
+  
+  /* 通用颜色变量 */
+  --ocean-blue: #0B1426;
+  --ocean-light: #1A365D;
+  --ocean-accent: #4FD1C7;
+  --ocean-warning: #F56565;
+  --ocean-success: #10B981;
+  --ocean-info: #3B82F6;
+}
+
+/* 基础响应式布局 */
+.responsive-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 横屏适配 */
+@media (orientation: landscape) {
+  .responsive-container {
+    /* 横屏下的容器样式 */
+    .header {
+      height: var(--landscape-header-height);
+      padding: 12rpx var(--landscape-padding);
+      
+      .title {
+        font-size: var(--landscape-font-size);
+      }
+      
+      .icon {
+        font-size: var(--landscape-icon-size);
+      }
+    }
+    
+    .content {
+      top: var(--landscape-header-height);
+      bottom: var(--landscape-bottom-height);
+      padding: var(--landscape-padding);
+    }
+    
+    .bottom-menu {
+      height: var(--landscape-bottom-height);
+      
+      .menu-item {
+        .menu-icon {
+          font-size: var(--landscape-icon-size);
+        }
+        
+        .menu-label {
+          font-size: calc(var(--landscape-font-size) - 4rpx);
+        }
+      }
+    }
+    
+    /* 横屏下的网格布局 */
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--landscape-gap);
+    }
+    
+    .grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--landscape-gap);
+    }
+    
+    .grid-4 {
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--landscape-gap);
+    }
+    
+    /* 横屏下的卡片样式 */
+    .card {
+      padding: calc(var(--landscape-padding) * 0.75);
+      border-radius: 16rpx;
+      
+      .card-title {
+        font-size: var(--landscape-font-size);
+      }
+      
+      .card-content {
+        font-size: calc(var(--landscape-font-size) - 2rpx);
+      }
+    }
+    
+    /* 横屏下的按钮样式 */
+    .btn {
+      height: 64rpx;
+      padding: 12rpx 24rpx;
+      font-size: calc(var(--landscape-font-size) - 2rpx);
+      border-radius: 12rpx;
+    }
+    
+    .btn-icon {
+      width: 64rpx;
+      height: 64rpx;
+      
+      .icon {
+        font-size: var(--landscape-icon-size);
+      }
+    }
+  }
+}
+
+/* 竖屏适配 */
+@media (orientation: portrait) {
+  .responsive-container {
+    /* 竖屏下的容器样式 */
+    .header {
+      height: var(--portrait-header-height);
+      padding: var(--portrait-padding);
+      flex-direction: column;
+      gap: 16rpx;
+      
+      .title {
+        font-size: var(--portrait-font-size);
+      }
+      
+      .icon {
+        font-size: var(--portrait-icon-size);
+      }
+    }
+    
+    .content {
+      top: var(--portrait-header-height);
+      bottom: var(--portrait-bottom-height);
+      padding: var(--portrait-padding);
+    }
+    
+    .bottom-menu {
+      height: var(--portrait-bottom-height);
+      
+      .menu-item {
+        .menu-icon {
+          font-size: var(--portrait-icon-size);
+        }
+        
+        .menu-label {
+          font-size: calc(var(--portrait-font-size) - 4rpx);
+        }
+      }
+    }
+    
+    /* 竖屏下的网格布局 */
+    .grid-2 {
+      grid-template-columns: 1fr;
+      gap: var(--portrait-gap);
+    }
+    
+    .grid-3 {
+      grid-template-columns: 1fr;
+      gap: var(--portrait-gap);
+    }
+    
+    .grid-4 {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--portrait-gap);
+    }
+    
+    /* 竖屏下的卡片样式 */
+    .card {
+      padding: var(--portrait-padding);
+      border-radius: 24rpx;
+      
+      .card-title {
+        font-size: var(--portrait-font-size);
+      }
+      
+      .card-content {
+        font-size: calc(var(--portrait-font-size) - 2rpx);
+      }
+    }
+    
+    /* 竖屏下的按钮样式 */
+    .btn {
+      height: 88rpx;
+      padding: 16rpx 32rpx;
+      font-size: var(--portrait-font-size);
+      border-radius: 16rpx;
+    }
+    
+    .btn-icon {
+      width: 96rpx;
+      height: 96rpx;
+      
+      .icon {
+        font-size: var(--portrait-icon-size);
+      }
+    }
+    
+    /* 竖屏下的特殊布局 */
+    .flex-row {
+      flex-direction: column;
+      gap: var(--portrait-gap);
+    }
+    
+    .side-panel {
+      position: static;
+      width: 100%;
+      margin-bottom: var(--portrait-gap);
+    }
+  }
+}
+
+/* 通用响应式工具类 */
+.hide-landscape {
+  @media (orientation: landscape) {
+    display: none !important;
+  }
+}
+
+.hide-portrait {
+  @media (orientation: portrait) {
+    display: none !important;
+  }
+}
+
+.show-landscape {
+  display: none;
+  
+  @media (orientation: landscape) {
+    display: block !important;
+  }
+}
+
+.show-portrait {
+  display: none;
+  
+  @media (orientation: portrait) {
+    display: block !important;
+  }
+}
+
+/* 响应式文字大小 */
+.text-responsive {
+  @media (orientation: landscape) {
+    font-size: var(--landscape-font-size);
+  }
+  
+  @media (orientation: portrait) {
+    font-size: var(--portrait-font-size);
+  }
+}
+
+.text-small-responsive {
+  @media (orientation: landscape) {
+    font-size: calc(var(--landscape-font-size) - 4rpx);
+  }
+  
+  @media (orientation: portrait) {
+    font-size: calc(var(--portrait-font-size) - 4rpx);
+  }
+}
+
+.text-large-responsive {
+  @media (orientation: landscape) {
+    font-size: calc(var(--landscape-font-size) + 4rpx);
+  }
+  
+  @media (orientation: portrait) {
+    font-size: calc(var(--portrait-font-size) + 4rpx);
+  }
+}
+
+/* 响应式间距 */
+.padding-responsive {
+  @media (orientation: landscape) {
+    padding: var(--landscape-padding);
+  }
+  
+  @media (orientation: portrait) {
+    padding: var(--portrait-padding);
+  }
+}
+
+.margin-responsive {
+  @media (orientation: landscape) {
+    margin: var(--landscape-padding);
+  }
+  
+  @media (orientation: portrait) {
+    margin: var(--portrait-padding);
+  }
+}
+
+.gap-responsive {
+  @media (orientation: landscape) {
+    gap: var(--landscape-gap);
+  }
+  
+  @media (orientation: portrait) {
+    gap: var(--portrait-gap);
+  }
+}
+
+/* 响应式动画 */
+@media (orientation: landscape) {
+  .transition-responsive {
+    transition: all 0.2s ease;
+  }
+}
+
+@media (orientation: portrait) {
+  .transition-responsive {
+    transition: all 0.3s ease;
+  }
+}
+
+/* 设备特定样式 */
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block;
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none;
+  }
+  
+  .desktop-only {
+    display: block;
+  }
+}
+
+/* 高分辨率屏幕适配 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .high-dpi {
+    /* 高分辨率屏幕下的样式调整 */
+    border-width: 1rpx;
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+  }
+}

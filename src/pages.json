@@ -1,10 +1,10 @@
 {
   "globalStyle": {
-    "navigationStyle": "default",
-    "navigationBarTitleText": "unibest",
-    "navigationBarBackgroundColor": "#f8f8f8",
-    "navigationBarTextStyle": "black",
-    "backgroundColor": "#FFFFFF"
+    "navigationStyle": "custom",
+    "navigationBarTitleText": "海洋智控",
+    "navigationBarBackgroundColor": "#0B1426",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0B1426"
   },
   "easycom": {
     "autoscan": true,
@@ -14,40 +14,59 @@
       "^(?!z-paging-refresh|z-paging-load-more)z-paging(.*)": "z-paging/components/z-paging$1/z-paging$1.vue"
     }
   },
-  "tabBar": {
-    "custom": false,
-    "color": "#999999",
-    "selectedColor": "#018d71",
-    "backgroundColor": "#F8F8F8",
-    "borderStyle": "black",
-    "height": "50px",
-    "fontSize": "10px",
-    "iconWidth": "24px",
-    "spacing": "3px",
-    "list": [
-      {
-        "iconPath": "static/tabbar/home.png",
-        "selectedIconPath": "static/tabbar/homeHL.png",
-        "pagePath": "pages/index/index",
-        "text": "首页",
-        "icon": "home",
-        "iconType": "uiLib"
-      },
-      {
-        "iconPath": "static/tabbar/example.png",
-        "selectedIconPath": "static/tabbar/exampleHL.png",
-        "pagePath": "pages/about/about",
-        "text": "关于",
-        "icon": "i-carbon-code",
-        "iconType": "unocss"
-      }
-    ]
-  },
+
   "pages": [
     {
-      "path": "pages/index/index",
+      "path": "pages/login/login",
       "type": "home",
-      "layout": "tabbar",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "海洋智控登录"
+      }
+    },
+    {
+      "path": "pages/dashboard/dashboard",
+      "type": "page",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "主控台"
+      }
+    },
+    {
+      "path": "pages/manual/manual",
+      "type": "page",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "手动导航"
+      }
+    },
+    {
+      "path": "pages/cruise/cruise",
+      "type": "page",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "自动巡航"
+      }
+    },
+    {
+      "path": "pages/ai/ai",
+      "type": "page",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "AI管理"
+      }
+    },
+    {
+      "path": "pages/management/management",
+      "type": "page",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "综合管理"
+      }
+    },
+    {
+      "path": "pages/index/index",
+      "type": "page",
       "style": {
         "navigationStyle": "custom",
         "navigationBarTitleText": "首页"
@@ -56,7 +75,6 @@
     {
       "path": "pages/about/about",
       "type": "page",
-      "layout": "tabbar",
       "style": {
         "navigationBarTitleText": "关于"
       }
@@ -64,7 +82,6 @@
     {
       "path": "pages/about/alova",
       "type": "page",
-      "layout": "default",
       "style": {
         "navigationBarTitleText": "Alova 请求演示"
       }
@@ -72,7 +89,6 @@
     {
       "path": "pages/about/vue-query",
       "type": "page",
-      "layout": "default",
       "style": {
         "navigationBarTitleText": "Vue Query 请求演示"
       }

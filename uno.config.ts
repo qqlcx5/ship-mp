@@ -55,6 +55,11 @@ export default defineConfig({
     colors: {
       /** 主题色，用法如: text-primary */
       primary: 'var(--wot-color-theme,#0957DE)',
+      /** 海洋主题色 */
+      'ocean-blue': '#0B1426',
+      'ocean-light': '#1A365D',
+      'ocean-accent': '#4FD1C7',
+      'ocean-warning': '#F56565',
     },
     fontSize: {
       /** 提供更小号的字体，用法如：text-2xs */
