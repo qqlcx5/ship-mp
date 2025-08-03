@@ -66,13 +66,13 @@ const seaCondition = reactive<SeaCondition>({
 const joystickX = ref(0)
 const joystickY = ref(0)
 
-const mapCenter = ref({ lat: 26.0614, lng: 119.3061 })
+const mapCenter = ref({ lat: 24.4797, lng: 118.0819 })
 
 const currentShip = ref({
   id: '001',
   name: '当前船只',
-  lat: 26.0654, // 更靠近海岸的位置
-  lng: 119.3081, // 更靠近海岸的位置
+  lat: 24.4837, // 更靠近海岸的位置
+  lng: 118.0859, // 更靠近海岸的位置
   status: 'online' as const,
   speed: 8.0,
   battery: 85,

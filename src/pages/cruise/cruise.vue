@@ -100,14 +100,14 @@ interface CruiseControl {
   key: string
   icon: string
   label: string
-  color: string
+  color: 'green' | 'blue' | 'red' | 'purple' | 'yellow' | 'orange'
 }
 
 interface AdvancedSetting {
   key: string
   icon: string
   label: string
-  color: string
+  color: 'green' | 'blue' | 'red' | 'purple' | 'yellow' | 'orange'
 }
 
 const showAdvancedPanel = ref(false)
@@ -119,13 +119,13 @@ const currentWaypoint = ref(3)
 const totalWaypoints = ref(5)
 const totalDistance = ref(12.5)
 
-const mapCenter = ref({ lat: 26.0614, lng: 119.3061 })
+const mapCenter = ref({ lat: 24.4797, lng: 118.0819 })
 
 const currentShip = ref({
   id: '001',
   name: '巡航船只',
-  lat: 26.0614,
-  lng: 119.3061,
+  lat: 24.4797,
+  lng: 118.0819,
   status: 'online' as const,
   speed: 6.5,
   battery: 78,
@@ -135,40 +135,40 @@ const currentShip = ref({
 const waypoints = ref<Waypoint[]>([
   {
     id: '1',
-    lat: 26.0614,
-    lng: 119.3061,
+    lat: 24.4797,
+    lng: 118.0819,
     name: '起始点',
     speed: 8,
     waitTime: 0
   },
   {
     id: '2',
-    lat: 26.0714,
-    lng: 119.3161,
+    lat: 24.4897,
+    lng: 118.0919,
     name: '航点1',
     speed: 6,
     waitTime: 300
   },
   {
     id: '3',
-    lat: 26.0814,
-    lng: 119.3261,
+    lat: 24.4997,
+    lng: 118.1019,
     name: '航点2',
     speed: 7,
     waitTime: 600
   },
   {
     id: '4',
-    lat: 26.0714,
-    lng: 119.3361,
+    lat: 24.4897,
+    lng: 118.1119,
     name: '航点3',
     speed: 5,
     waitTime: 900
   },
   {
     id: '5',
-    lat: 26.0614,
-    lng: 119.3261,
+    lat: 24.4797,
+    lng: 118.1019,
     name: '终点',
     speed: 8,
     waitTime: 0
