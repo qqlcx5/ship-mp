@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import type { NoticeInfo, SlideItem } from '@/api/types/common'
+import { getNoticeInfo, getSlideList } from '@/api/home'
 import { useThemeStore } from '@/store'
 import { safeAreaInsets } from '@/utils/systemInfo'
 
@@ -16,30 +18,12 @@ definePage({
 })
 
 const themeStore = useThemeStore()
-
-// 轮播图数据
-const bannerList = ref([
-  {
-    id: 1,
-    title: '精选好物',
-    subtitle: '发现生活之美',
-    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=200&fit=crop',
-  },
-  {
-    id: 2,
-    title: '限时特惠',
-    subtitle: '品质生活，优惠价格',
-    image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400&h=200&fit=crop',
-  },
-  {
-    id: 3,
-    title: '新品上市',
-    subtitle: '潮流前沿，抢先体验',
-    image: 'https://images.unsplash.com/photo-1534723328310-e82dad3ee43f?w=400&h=200&fit=crop',
-  },
-])
-
-const currentBanner = ref(0)
+// 获取轮播图数据
+const {
+  data: slideList,
+  loading: slideLoading,
+  error: slideError,
+} = useRequest(() => getSlideList(), { immediate: true })
 
 // 快捷功能菜单
 const quickMenus = ref([
@@ -52,14 +36,22 @@ const quickMenus = ref([
 // 公告信息
 const announcement = ref('新用户注册即享8折优惠')
 
-// 轮播图自动切换
-onMounted(() => {
-  setInterval(() => {
-    currentBanner.value = (currentBanner.value + 1) % bannerList.value.length
-  }, 3000)
-})
+// 获取公告数据
+const {
+  data: noticeInfo,
+  loading: noticeLoading,
+  error: noticeError,
+} = useRequest(() => getNoticeInfo(), { immediate: true })
 
-// 快捷菜单点击
+// 处理轮播图点击
+function handleSlideClick(item: SlideItem) {
+  if (item.link) {
+    uni.navigateTo({
+      url: item.link,
+    })
+  }
+}
+
 function handleQuickMenu(item: any) {
   if (item.path === '/pages/me/me' || item.path === '/pages/product/list' || item.path === '/pages/pickup/list') {
     uni.switchTab({ url: item.path })
@@ -68,10 +60,6 @@ function handleQuickMenu(item: any) {
     uni.navigateTo({ url: item.path })
   }
 }
-
-onLoad(() => {
-  console.log('首页加载完成')
-})
 </script>
 
 <template>
@@ -94,20 +82,16 @@ onLoad(() => {
         class="h-full"
         @change="(e) => currentBanner = e.detail.current"
       >
-        <swiper-item v-for="(banner, index) in bannerList" :key="banner.id">
+        <swiper-item v-for="(banner, index) in slideList" :key="banner.id">
           <view class="relative h-full from-gray-100 to-gray-200 bg-gradient-to-r">
             <image :src="banner.image" class="h-full w-full object-cover" mode="aspectFill" />
-            <view class="absolute bottom-4 left-4 text-white">
-              <text class="block text-lg font-semibold">{{ banner.title }}</text>
-              <text class="text-sm opacity-90">{{ banner.subtitle }}</text>
-            </view>
           </view>
         </swiper-item>
       </swiper>
       <!-- 指示器 -->
       <view class="absolute bottom-4 right-4 flex space-x-1">
         <view
-          v-for="(_, index) in bannerList"
+          v-for="(_, index) in slideList"
           :key="index"
           class="h-2 w-2 rounded-full" :class="[currentBanner === index ? 'bg-white' : 'bg-white opacity-50']"
         />
@@ -118,7 +102,7 @@ onLoad(() => {
     <view class="mx-4 mt-4 border-l-4 border-blue-400 rounded-lg bg-blue-50 p-3">
       <view class="flex items-center">
         <uni-icons type="sound-filled" color="#2563eb" size="16" class="mr-2" />
-        <text class="text-sm text-blue-800">{{ announcement }}</text>
+        <text class="text-sm text-blue-800">{{ noticeInfo.desc }}</text>
       </view>
     </view>
 
