@@ -9,6 +9,7 @@ onShow(() => {
   console.log('App.ku.vue onShow', currRoute())
   const { path } = currRoute()
   isCurrentPageTabbar.value = isPageTabbar(path)
+  console.log(`🚀 - isPageTabbar(path):`, isPageTabbar(path), path)
 })
 
 const helloKuRoot = ref('Hello AppKuVue')

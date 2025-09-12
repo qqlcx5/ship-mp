@@ -22,7 +22,7 @@
     "url-old": "https://github.com/codercup/unibest/issues"
   },
   "engines": {
-    "node": ">=22",
+    "node": ">=20",
     "pnpm": ">=9"
   },
   "scripts": {
@@ -90,7 +90,9 @@
     "openapi-ts-request": "openapi-ts",
     "prepare": "git init && husky && node ./scripts/create-base-files.js",
     "lint": "eslint",
-    "lint:fix": "eslint --fix"
+    "lint:fix": "eslint --fix",
+    "docs:generate": "node docs/_scripts/generate-docs.cjs",
+    "docs:validate": "node docs/_scripts/generate-docs.cjs"
   },
   "dependencies": {
     "@alova/adapter-uniapp": "^2.0.14",
