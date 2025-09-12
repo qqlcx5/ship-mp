@@ -17,27 +17,6 @@ const tokenStore = useTokenStore()
 // 使用storeToRefs解构userInfo
 const { userInfo } = storeToRefs(userStore)
 
-// 菜单项点击事件
-const handleMenuClick = (type: string) => {
-  switch (type) {
-    case 'orders':
-      uni.navigateTo({ url: '/pages/orders/list' })
-      break
-    case 'address':
-      uni.navigateTo({ url: '/pages/address/list' })
-      break
-    case 'wallet':
-      uni.showToast({ title: '钱包功能待实现', icon: 'none' })
-      break
-    case 'service':
-      uni.showToast({ title: '客服中心功能待实现', icon: 'none' })
-      break
-    case 'settings':
-      uni.showToast({ title: '设置功能待实现', icon: 'none' })
-      break
-  }
-}
-
 // #ifndef MP-WEIXIN
 // 上传头像
 const { run: uploadAvatar } = useUpload<IUploadSuccessInfo>(
@@ -122,133 +101,114 @@ function handleLogout() {
 </script>
 
 <template>
-  <view class="bg-gray-50 min-h-screen">
-    <!-- 头部用户信息 -->
-    <view class="p-4 bg-gradient-to-r from-gray-50 to-white bg-white">
-      <view class="flex items-center space-x-4">
+  <view class="profile-container">
+    <!-- 用户信息区域 -->
+    <view class="user-info-section">
+      <!-- #ifdef MP-WEIXIN -->
+      <button class="avatar-button" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
+        <image :src="userInfo.avatar" mode="scaleToFill" class="h-full w-full" />
+      </button>
+      <!-- #endif -->
+      <!-- #ifndef MP-WEIXIN -->
+      <view class="avatar-wrapper" @click="uploadAvatar">
+        <image :src="userInfo.avatar" mode="scaleToFill" class="h-full w-full" />
+      </view>
+      <!-- #endif -->
+      <view class="user-details">
         <!-- #ifdef MP-WEIXIN -->
-        <button class="avatar-button" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
-          <image :src="userInfo.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face'" mode="aspectFill" class="w-16 h-16 rounded-full" />
-        </button>
+        <input
+          v-model="userInfo.username"
+          type="nickname"
+          class="weui-input"
+          placeholder="请输入昵称"
+        >
         <!-- #endif -->
         <!-- #ifndef MP-WEIXIN -->
-        <view @click="uploadAvatar">
-          <image :src="userInfo.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face'" mode="aspectFill" class="w-16 h-16 rounded-full" />
+        <view class="username">
+          {{ userInfo.username }}
         </view>
         <!-- #endif -->
-        
-        <view class="flex-1">
-          <!-- #ifdef MP-WEIXIN -->
-          <input
-            v-model="userInfo.username"
-            type="nickname"
-            class="text-lg font-semibold text-gray-800 bg-transparent border-none p-0"
-            placeholder="请输入昵称"
-          />
-          <!-- #endif -->
-          <!-- #ifndef MP-WEIXIN -->
-          <text class="text-lg font-semibold text-gray-800 block">{{ userInfo.username || '张三' }}</text>
-          <!-- #endif -->
-          <text class="text-sm text-gray-500">会员等级：金牌会员</text>
+        <view class="user-id">
+          ID: {{ userInfo.userId }}
         </view>
       </view>
     </view>
 
-    <!-- 功能菜单 -->
-    <view class="mt-4 bg-white">
-      <view 
-        class="px-4 py-3 border-b border-gray-100 flex items-center justify-between active:bg-gray-50"
-        @click="handleMenuClick('orders')"
-      >
-        <view class="flex items-center">
-          <uni-icons type="list" size="20" color="#6b7280" class="mr-3" />
-          <text class="text-gray-800">我的订单</text>
-        </view>
-        <uni-icons type="right" size="14" color="#9ca3af" />
-      </view>
-      
-      <view 
-        class="px-4 py-3 border-b border-gray-100 flex items-center justify-between active:bg-gray-50"
-        @click="handleMenuClick('address')"
-      >
-        <view class="flex items-center">
-          <uni-icons type="location" size="20" color="#6b7280" class="mr-3" />
-          <text class="text-gray-800">收货地址</text>
-        </view>
-        <uni-icons type="right" size="14" color="#9ca3af" />
-      </view>
-      
-      <!-- 可选菜单项 -->
-      <!-- <view 
-        class="px-4 py-3 border-b border-gray-100 flex items-center justify-between active:bg-gray-50"
-        @click="handleMenuClick('wallet')"
-      >
-        <view class="flex items-center">
-          <uni-icons type="wallet" size="20" color="#6b7280" class="mr-3" />
-          <text class="text-gray-800">我的钱包</text>
-        </view>
-        <uni-icons type="right" size="14" color="#9ca3af" />
-      </view>
-      
-      <view 
-        class="px-4 py-3 border-b border-gray-100 flex items-center justify-between active:bg-gray-50"
-        @click="handleMenuClick('service')"
-      >
-        <view class="flex items-center">
-          <uni-icons type="headphones" size="20" color="#6b7280" class="mr-3" />
-          <text class="text-gray-800">客服中心</text>
-        </view>
-        <uni-icons type="right" size="14" color="#9ca3af" />
-      </view>
-      
-      <view 
-        class="px-4 py-3 border-b border-gray-100 flex items-center justify-between active:bg-gray-50"
-        @click="handleMenuClick('settings')"
-      >
-        <view class="flex items-center">
-          <uni-icons type="gear" size="20" color="#6b7280" class="mr-3" />
-          <text class="text-gray-800">设置</text>
-        </view>
-        <uni-icons type="right" size="14" color="#9ca3af" />
-      </view> -->
+    <view class="mt-3 break-all px-3">
+      {{ JSON.stringify(userInfo, null, 2) }}
     </view>
 
-    <!-- 登录/退出按钮 -->
-    <view class="mt-8 px-4">
-      <button 
-        v-if="tokenStore.hasLogin" 
-        class="w-full py-3 bg-red-500 text-white rounded-lg font-medium"
-        @click="handleLogout"
-      >
-        退出登录
-      </button>
-      <button 
-        v-else 
-        class="w-full py-3 bg-blue-500 text-white rounded-lg font-medium"
-        @click="handleLogin"
-      >
-        登录
-      </button>
-    </view>
-    
-    <!-- 调试信息 -->
-    <!-- <view class="mt-3 px-4">
-      <view class="text-xs text-gray-500 break-all">
-        {{ JSON.stringify(userInfo, null, 2) }}
+    <view class="mt-20 px-3">
+      <view class="m-auto w-160px text-center">
+        <button v-if="tokenStore.hasLogin" type="warn" class="w-full" @click="handleLogout">
+          退出登录
+        </button>
+        <button v-else type="primary" class="w-full" @click="handleLogin">
+          登录
+        </button>
       </view>
-    </view> -->
+    </view>
   </view>
 </template>
 
 <style lang="scss" scoped>
-.avatar-button {
-  padding: 0;
-  border: none;
-  background: none;
-  border-radius: 50%;
+/* 基础样式 */
+.profile-container {
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  // background-color: #f7f8fa;
+}
+/* 用户信息区域 */
+.user-info-section {
+  display: flex;
+  align-items: center;
+  padding: 40rpx;
+  margin: 30rpx 30rpx 20rpx;
+  background-color: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
 }
 
-.active\:bg-gray-50:active {
-  background-color: #f9fafb;
+.avatar-wrapper {
+  width: 160rpx;
+  height: 160rpx;
+  margin-right: 40rpx;
+  overflow: hidden;
+  border: 4rpx solid #f5f5f5;
+  border-radius: 50%;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+.avatar-button {
+  height: 160rpx;
+  width: 160rpx;
+  padding: 0;
+  margin-right: 40rpx;
+  overflow: hidden;
+  border: 4rpx solid #f5f5f5;
+  border-radius: 50%;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+.user-details {
+  flex: 1;
+}
+
+.username {
+  margin-bottom: 12rpx;
+  font-size: 38rpx;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: 0.5rpx;
+}
+
+.user-id {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.user-created {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #999;
 }
 </style>

@@ -186,8 +186,5 @@ export default ({ command, mode }) => {
       // 开发环境不用压缩
       minify: mode === 'development' ? false : 'esbuild',
     },
-    optimizeDeps: {
-      exclude: ['sard-uniapp'],
-    },
   })
 }
