@@ -2,6 +2,18 @@
 alwaysApply: true
 ---
 
+准则
+
+请求通过下面方式调用
+<script setup>
+import { getFooAPI, IFooItem } from '@/api/foo'
+const { loading, error, data, run } = useRequest<IFooItem>(() => getFooAPI('菲鸽'))
+</script>
+
+unocss 等同于 tailwindcss，禁止写 style 上写样式
+
+禁止调整样式，只需要联调功能即可。
+
 # unibest 项目概览
 
 这是一个基于 uniapp + Vue3 + TypeScript + Vite5 + UnoCSS 的跨平台开发框架。
