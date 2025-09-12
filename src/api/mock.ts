@@ -76,13 +76,13 @@ export const mockProducts: Product[] = [
     images: [
       'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop',
       'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=400&h=300&fit=crop'
+      'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=400&h=300&fit=crop',
     ],
     category: 'digital',
     sales: 1234,
     specs: [
-      { name: '颜色', options: ['白色', '黑色', '粉色'], selected: '白色' }
-    ]
+      { name: '颜色', options: ['白色', '黑色', '粉色'], selected: '白色' },
+    ],
   },
   {
     id: 2,
@@ -91,7 +91,7 @@ export const mockProducts: Product[] = [
     price: 599.00,
     image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&h=150&fit=crop',
     category: 'clothing',
-    sales: 856
+    sales: 856,
   },
   {
     id: 3,
@@ -100,7 +100,7 @@ export const mockProducts: Product[] = [
     price: 1299.00,
     image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=150&h=150&fit=crop',
     category: 'digital',
-    sales: 432
+    sales: 432,
   },
   {
     id: 4,
@@ -109,8 +109,8 @@ export const mockProducts: Product[] = [
     price: 89.00,
     image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=150&h=150&fit=crop',
     category: 'home',
-    sales: 678
-  }
+    sales: 678,
+  },
 ]
 
 export const mockOrders: Order[] = [
@@ -126,11 +126,11 @@ export const mockOrders: Order[] = [
         image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=60&h=60&fit=crop',
         spec: '颜色：白色',
         price: 299.00,
-        quantity: 1
-      }
+        quantity: 1,
+      },
     ],
     totalAmount: 299.00,
-    createTime: '2024-08-29 10:30:00'
+    createTime: '2024-08-29 10:30:00',
   },
   {
     id: '202408280002',
@@ -144,12 +144,12 @@ export const mockOrders: Order[] = [
         image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=60&h=60&fit=crop',
         spec: '尺码：42',
         price: 599.00,
-        quantity: 1
-      }
+        quantity: 1,
+      },
     ],
     totalAmount: 599.00,
-    createTime: '2024-08-28 14:20:00'
-  }
+    createTime: '2024-08-28 14:20:00',
+  },
 ]
 
 export const mockAddresses: Address[] = [
@@ -158,22 +158,22 @@ export const mockAddresses: Address[] = [
     name: '张三',
     phone: '138****8888',
     address: '北京市朝阳区望京街道科技园区A座1001室',
-    isDefault: true
+    isDefault: true,
   },
   {
     id: 2,
     name: '李四',
     phone: '139****9999',
     address: '上海市浦东新区陆家嘴金融中心B座2002室',
-    isDefault: false
+    isDefault: false,
   },
   {
     id: 3,
     name: '王五',
     phone: '137****7777',
     address: '广州市天河区珠江新城CBD中心大厦C座3003室',
-    isDefault: false
-  }
+    isDefault: false,
+  },
 ]
 
 export const mockPickups: Pickup[] = [
@@ -190,21 +190,21 @@ export const mockPickups: Pickup[] = [
     items: [
       {
         name: '商品名称a',
-        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150&h=150&fit=crop'
+        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150&h=150&fit=crop',
       },
       {
         name: '商品名称b',
-        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150&h=150&fit=crop'
-      }
+        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150&h=150&fit=crop',
+      },
     ],
     documents: [
       {
         name: '取件凭证.pdf',
         size: '245 KB',
-        url: '#'
-      }
+        url: '#',
+      },
     ],
-    expireTime: '2024-09-05 23:59:59'
+    expireTime: '2024-09-05 23:59:59',
   },
   {
     id: 2,
@@ -215,8 +215,8 @@ export const mockPickups: Pickup[] = [
     statusColor: '#10b981',
     pickupCode: 'PK002',
     location: '快递柜B-05',
-    createTime: '2024-08-28 14:20:00'
-  }
+    createTime: '2024-08-28 14:20:00',
+  },
 ]
 
 // Mock API 函数
@@ -231,7 +231,7 @@ export const mockApi = {
         }
         if (keyword) {
           result = result.filter(p =>
-            p.name.includes(keyword) || p.description.includes(keyword)
+            p.name.includes(keyword) || p.description.includes(keyword),
           )
         }
         resolve(result)
@@ -290,5 +290,5 @@ export const mockApi = {
         resolve(pickup || null)
       }, 300)
     })
-  }
+  },
 }
