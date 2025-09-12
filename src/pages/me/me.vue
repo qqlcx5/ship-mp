@@ -1,10 +1,7 @@
 <script lang="ts" setup>
-import type { IUploadSuccessInfo } from '@/api/types/login'
 import { storeToRefs } from 'pinia'
+import { useUserStore, useTokenStore } from '@/store'
 import { LOGIN_PAGE } from '@/router/config'
-import { useUserStore } from '@/store'
-import { useTokenStore } from '@/store/token'
-import { useUpload } from '@/utils/uploadFile'
 
 definePage({
   style: {
@@ -14,28 +11,17 @@ definePage({
 
 const userStore = useUserStore()
 const tokenStore = useTokenStore()
-// 使用storeToRefs解构userInfo
 const { userInfo } = storeToRefs(userStore)
 
-// #ifndef MP-WEIXIN
-// 上传头像
-const { run: uploadAvatar } = useUpload<IUploadSuccessInfo>(
-  import.meta.env.VITE_UPLOAD_BASEURL,
-  {},
-  {
-    onSuccess: (res) => {
-      console.log('h5头像上传成功', res)
-      useUserStore().setUserAvatar(res.url)
-    },
-  },
-)
-// #endif
+// 功能菜单
+const menuItems = ref([
+  { icon: 'list', title: '我的订单', path: '/pages/order/list' },
+  { icon: 'location', title: '收货地址', path: '/pages/address/list' }
+])
 
 // 微信小程序下登录
 async function handleLogin() {
   // #ifdef MP-WEIXIN
-
-  // 微信登录
   await tokenStore.wxLogin()
   // #endif
   // #ifndef MP-WEIXIN
@@ -45,33 +31,6 @@ async function handleLogin() {
   // #endif
 }
 
-// #ifdef MP-WEIXIN
-
-// 微信小程序下选择头像事件
-function onChooseAvatar(e: any) {
-  console.log('选择头像', e.detail)
-  const { avatarUrl } = e.detail
-  const { run } = useUpload<IUploadSuccessInfo>(
-    import.meta.env.VITE_UPLOAD_BASEURL,
-    {},
-    {
-      onSuccess: (res) => {
-        console.log('wx头像上传成功', res)
-        useUserStore().setUserAvatar(res.url)
-      },
-    },
-    avatarUrl,
-  )
-  run()
-}
-// #endif
-// #ifdef MP-WEIXIN
-// 微信小程序下设置用户名
-function getUserInfo(e: any) {
-  console.log(e.detail)
-}
-// #endif
-
 // 退出登录
 function handleLogout() {
   uni.showModal({
@@ -79,136 +38,73 @@ function handleLogout() {
     content: '确定要退出登录吗？',
     success: (res) => {
       if (res.confirm) {
-        // 清空用户信息
         useTokenStore().logout()
-        // 执行退出登录逻辑
         uni.showToast({
           title: '退出登录成功',
           icon: 'success',
         })
-        // #ifdef MP-WEIXIN
-        // 微信小程序，去首页
-        // uni.reLaunch({ url: '/pages/index/index' })
-        // #endif
-        // #ifndef MP-WEIXIN
-        // 非微信小程序，去登录页
-        // uni.navigateTo({ url: LOGIN_PAGE })
-        // #endif
       }
     },
   })
 }
+
+function handleMenuItem(item: any) {
+  uni.navigateTo({ url: item.path })
+}
 </script>
 
 <template>
-  <view class="profile-container">
-    <!-- 用户信息区域 -->
-    <view class="user-info-section">
-      <!-- #ifdef MP-WEIXIN -->
-      <button class="avatar-button" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
-        <image :src="userInfo.avatar" mode="scaleToFill" class="h-full w-full" />
-      </button>
-      <!-- #endif -->
-      <!-- #ifndef MP-WEIXIN -->
-      <view class="avatar-wrapper" @click="uploadAvatar">
-        <image :src="userInfo.avatar" mode="scaleToFill" class="h-full w-full" />
-      </view>
-      <!-- #endif -->
-      <view class="user-details">
-        <!-- #ifdef MP-WEIXIN -->
-        <input
-          v-model="userInfo.username"
-          type="nickname"
-          class="weui-input"
-          placeholder="请输入昵称"
-        >
-        <!-- #endif -->
-        <!-- #ifndef MP-WEIXIN -->
-        <view class="username">
-          {{ userInfo.username }}
+  <view class="min-h-screen bg-gray-50">
+    <!-- 头部用户信息 -->
+    <view class="p-4 bg-gradient-to-r from-gray-50 to-white">
+      <view v-if="tokenStore.hasLogin" class="flex items-center space-x-4">
+        <image
+          :src="userInfo.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face'"
+          class="w-16 h-16 rounded-full"
+          mode="aspectFill"
+        />
+        <view>
+          <text class="text-lg font-semibold text-gray-800 block">{{ userInfo.nickname || userInfo.username || '用户' }}</text>
+          <text class="text-sm text-gray-500">会员等级：金牌会员</text>
         </view>
-        <!-- #endif -->
-        <view class="user-id">
-          ID: {{ userInfo.userId }}
+      </view>
+      <view v-else class="flex items-center space-x-4">
+        <image
+          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face"
+          class="w-16 h-16 rounded-full"
+          mode="aspectFill"
+        />
+        <view>
+          <text class="text-lg font-semibold text-gray-800 block">未登录</text>
+          <text class="text-sm text-gray-500">请先登录</text>
         </view>
       </view>
     </view>
 
-    <view class="mt-3 break-all px-3">
-      {{ JSON.stringify(userInfo, null, 2) }}
+    <!-- 功能菜单 -->
+    <view class="mt-4">
+      <view
+        v-for="item in menuItems"
+        :key="item.title"
+        class="px-4 py-3 bg-white border-b border-gray-100 flex items-center justify-between"
+        @click="handleMenuItem(item)"
+      >
+        <view class="flex items-center">
+          <uni-icons :type="item.icon" color="#6b7280" size="18" class="mr-3" />
+          <text class="text-gray-800">{{ item.title }}</text>
+        </view>
+        <uni-icons type="right" color="#9ca3af" size="14" />
+      </view>
     </view>
 
-    <view class="mt-20 px-3">
-      <view class="m-auto w-160px text-center">
-        <button v-if="tokenStore.hasLogin" type="warn" class="w-full" @click="handleLogout">
-          退出登录
-        </button>
-        <button v-else type="primary" class="w-full" @click="handleLogin">
-          登录
-        </button>
-      </view>
+    <!-- 登录/退出登录按钮 -->
+    <view class="p-4 mt-8">
+      <wd-button v-if="tokenStore.hasLogin" type="error" block @click="handleLogout">
+        退出登录
+      </wd-button>
+      <wd-button v-else type="primary" block @click="handleLogin">
+        登录
+      </wd-button>
     </view>
   </view>
 </template>
-
-<style lang="scss" scoped>
-/* 基础样式 */
-.profile-container {
-  overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  // background-color: #f7f8fa;
-}
-/* 用户信息区域 */
-.user-info-section {
-  display: flex;
-  align-items: center;
-  padding: 40rpx;
-  margin: 30rpx 30rpx 20rpx;
-  background-color: #fff;
-  border-radius: 24rpx;
-  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-}
-
-.avatar-wrapper {
-  width: 160rpx;
-  height: 160rpx;
-  margin-right: 40rpx;
-  overflow: hidden;
-  border: 4rpx solid #f5f5f5;
-  border-radius: 50%;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
-}
-.avatar-button {
-  height: 160rpx;
-  width: 160rpx;
-  padding: 0;
-  margin-right: 40rpx;
-  overflow: hidden;
-  border: 4rpx solid #f5f5f5;
-  border-radius: 50%;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
-}
-.user-details {
-  flex: 1;
-}
-
-.username {
-  margin-bottom: 12rpx;
-  font-size: 38rpx;
-  font-weight: 600;
-  color: #333;
-  letter-spacing: 0.5rpx;
-}
-
-.user-id {
-  font-size: 28rpx;
-  color: #666;
-}
-
-.user-created {
-  margin-top: 8rpx;
-  font-size: 24rpx;
-  color: #999;
-}
-</style>

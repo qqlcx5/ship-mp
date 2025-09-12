@@ -17,85 +17,124 @@ definePage({
 
 const themeStore = useThemeStore()
 
-const description = ref(
-  'unibest 是一个集成了多种工具和技术的 uniapp 开发模板，由 uniapp + Vue3 + Ts + Vite5 + UnoCss + VSCode 构建，模板具有代码提示、自动格式化、统一配置、代码片段等功能，并内置了许多常用的基本组件和基本功能，让你编写 uniapp 拥有 best 体验。',
-)
-console.log('index/index 首页打印了')
+// 轮播图数据
+const bannerList = ref([
+  {
+    id: 1,
+    title: '精选好物',
+    subtitle: '发现生活之美',
+    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=200&fit=crop',
+  },
+  {
+    id: 2,
+    title: '限时特惠',
+    subtitle: '品质生活，优惠价格',
+    image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400&h=200&fit=crop',
+  },
+  {
+    id: 3,
+    title: '新品上市',
+    subtitle: '潮流前沿，抢先体验',
+    image: 'https://images.unsplash.com/photo-1534723328310-e82dad3ee43f?w=400&h=200&fit=crop',
+  },
+])
+
+const currentBanner = ref(0)
+
+// 快捷功能菜单
+const quickMenus = ref([
+  { icon: 'shop', title: '商品', path: '/pages/product/list' },
+  { icon: 'calendar', title: '取件', path: '/pages/pickup/list' },
+  { icon: 'list', title: '订单', path: '/pages/order/list' },
+  { icon: 'contact', title: '我的', path: '/pages/me/me' },
+])
+
+// 公告信息
+const announcement = ref('新用户注册即享8折优惠')
+
+// 轮播图自动切换
+onMounted(() => {
+  setInterval(() => {
+    currentBanner.value = (currentBanner.value + 1) % bannerList.value.length
+  }, 3000)
+})
+
+// 快捷菜单点击
+function handleQuickMenu(item: any) {
+  if (item.path === '/pages/me/me' || item.path === '/pages/product/list' || item.path === '/pages/pickup/list') {
+    uni.switchTab({ url: item.path })
+  }
+  else {
+    uni.navigateTo({ url: item.path })
+  }
+}
 
 onLoad(() => {
-  console.log('测试 uni API 自动引入: onLoad')
+  console.log('首页加载完成')
 })
 </script>
 
 <template>
-  <view class="bg-white px-4 pt-2" :style="{ marginTop: `${safeAreaInsets?.top}px` }">
-    <view class="mt-10">
-      <image src="/static/logo.svg" alt="" class="mx-auto block h-28 w-28" />
-    </view>
-    <view class="mt-4 text-center text-4xl text-[#d14328]">
-      unibest
-    </view>
-    <view class="mb-8 mt-2 text-center text-2xl">
-      最好用的 uniapp 开发模板
+  <view class="min-h-screen bg-gray-50">
+    <!-- 顶部导航 -->
+    <view class="flex items-center justify-between bg-white px-4 py-3" :style="{ paddingTop: `${safeAreaInsets?.top + 12}px` }">
+      <view class="text-xl text-gray-800 font-bold">
+        MINIMAL
+      </view>
     </view>
 
-    <view class="m-auto mb-2 max-w-100 text-justify indent text-4">
-      {{ description }}
-    </view>
-    <view class="mt-4 text-center">
-      作者：
-      <text class="text-green-500">
-        菲鸽
-      </text>
-    </view>
-    <view class="mt-4 text-center">
-      官网地址：
-      <text class="text-green-500">
-        https://unibest.tech
-      </text>
+    <!-- 轮播图 -->
+    <view class="relative mx-4 mt-4 h-48 overflow-hidden rounded-lg">
+      <swiper
+        :current="currentBanner"
+        autoplay
+        :interval="3000"
+        :duration="300"
+        circular
+        class="h-full"
+        @change="(e) => currentBanner = e.detail.current"
+      >
+        <swiper-item v-for="(banner, index) in bannerList" :key="banner.id">
+          <view class="relative h-full from-gray-100 to-gray-200 bg-gradient-to-r">
+            <image :src="banner.image" class="h-full w-full object-cover" mode="aspectFill" />
+            <view class="absolute bottom-4 left-4 text-white">
+              <text class="block text-lg font-semibold">{{ banner.title }}</text>
+              <text class="text-sm opacity-90">{{ banner.subtitle }}</text>
+            </view>
+          </view>
+        </swiper-item>
+      </swiper>
+      <!-- 指示器 -->
+      <view class="absolute bottom-4 right-4 flex space-x-1">
+        <view
+          v-for="(_, index) in bannerList"
+          :key="index"
+          class="h-2 w-2 rounded-full" :class="[currentBanner === index ? 'bg-white' : 'bg-white opacity-50']"
+        />
+      </view>
     </view>
 
-    <!-- #ifdef H5 -->
-    <view class="mt-4 text-center">
-      <a href="https://unibest.tech/base/3-plugin" target="_blank" class="text-green-500">
-        新手请看必看章节1：
-      </a>
+    <!-- 公告栏 -->
+    <view class="mx-4 mt-4 border-l-4 border-blue-400 rounded-lg bg-blue-50 p-3">
+      <view class="flex items-center">
+        <uni-icons type="sound-filled" color="#2563eb" size="16" class="mr-2" />
+        <text class="text-sm text-blue-800">{{ announcement }}</text>
+      </view>
     </view>
-    <!-- #endif -->
-    <!-- #ifdef MP-WEIXIN -->
-    <view class="mt-4 text-center">
-      新手请看必看章节1：
-      <text class="text-green-500">
-        https://unibest.tech/base/3-plugin
-      </text>
-    </view>
-    <!-- #endif -->
-    <!-- #ifdef H5 -->
-    <view class="mt-4 text-center">
-      <a href="https://unibest.tech/base/14-faq" target="_blank" class="text-green-500">
-        新手请看必看章节2：
-      </a>
-    </view>
-    <!-- #endif -->
-    <!-- #ifdef MP-WEIXIN -->
-    <view class="mt-4 text-center">
-      新手请看必看章节2：
-      <text class="text-green-500">
-        https://unibest.tech/base/14-faq
-      </text>
-    </view>
-    <!-- #endif -->
 
-    <view class="mt-4 text-center">
-      <wd-button type="primary" class="ml-2" @click="themeStore.setThemeVars({ colorTheme: 'red' })">
-        设置主题变量
-      </wd-button>
+    <!-- 快捷功能 -->
+    <view class="grid grid-cols-4 mt-4 gap-4 p-4">
+      <view
+        v-for="menu in quickMenus"
+        :key="menu.title"
+        class="text-center"
+        @click="handleQuickMenu(menu)"
+      >
+        <view class="mx-auto mb-2 h-12 w-12 flex items-center justify-center rounded-full bg-gray-100">
+          <uni-icons :type="menu.icon" color="#6b7280" size="20" />
+        </view>
+        <text class="text-xs text-gray-700">{{ menu.title }}</text>
+      </view>
     </view>
-    <view class="mt-4 text-center">
-      UI组件官网：<text class="text-green-500">
-        https://wot-design-uni.cn
-      </text>
-    </view>
-    <view class="h-6" />
   </view>
 </template>
