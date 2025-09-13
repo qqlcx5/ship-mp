@@ -1,7 +1,6 @@
 ---
-alwaysApply: true
+alwaysApply: false
 ---
-
 准则
 
 请求通过下面方式调用
@@ -12,7 +11,7 @@ const { loading, error, data, run } = useRequest<IFooItem>(() => getFooAPI('菲�
 
 unocss 等同于 tailwindcss，禁止写 style 上写样式
 
-禁止调整样式，只需要联调功能即可。
+禁止调整样式，只需要联调功能即可
 
 # unibest 项目概览
 
