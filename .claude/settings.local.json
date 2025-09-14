@@ -23,6 +23,7 @@
       "Bash(uniq:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "acceptEdits"
   }
 }
