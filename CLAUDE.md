@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
   - 所有交互使用中文回答
   - 每个任务必须创建 todo 列表
   - 深入理解需求本质，识别根本问题
