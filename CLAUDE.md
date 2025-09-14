@@ -1,105 +1,58 @@
 # CLAUDE.md
 
-- **必须做的事**：
-  - 所有交互回答都使用中文
-  - 深入理解需求本质，而不仅仅是表面问题。
-  - 搜索所有相关代码（基于我提供的上下文）。
-  - 识别问题的真正根因。
-  - 发现潜在的架构性问题或设计缺陷。
-  - 如果信息不足，必须主动向我提问以收集必要信息。
-  - 清晰地评估每个方案的优缺点（例如：实现复杂度、性能影响、可维护性、扩展性等）。
-  - 每个任务必须触发 to-do-list
-- **融入的原则**：
-  - **系统性思维**：从整体架构和长远影响出发看问题。
-  - **第一性原理**：回归功能本质，挑战现有假设。
-  - **DRY 原则**：发现任何形式的重复代码或逻辑，必须明确指出。
-  - **长远考虑**：始终评估方案可能带来的技术债务和长期维护成本。
-- **绝对禁止**:
-  - 在没有完成分析前，修改任何代码。
-  - 急于给出任何解决方案。
-  - 跳过理解和分析步骤。
-- **必须做的事**：
-  - 严格按照选定的方案实现所有代码变更。
-  - 不用考虑是否存在 tailwind 等库，始终使用 tailwind 写 class样式
-  执行相关代码功能变更
+  - 所有交互使用中文回答
+  - 每个任务必须创建 todo 列表
+  - 深入理解需求本质，识别根本问题
+  - 发现并指出任何重复代码或逻辑（DRY原则）
+  - 评估方案的技术债务和长期维护成本
+  - 信息不足时主动提问收集必要信息
+  - **禁止**：在完成分析前修改代码；急于给出解决方案；跳过理解分析步骤
 
-### 每次回复前的强制自我检查
+  ## 项目概览
+  基于 uniapp + Vue3 + TypeScript + Vite5 + UnoCSS 的跨平台应用框架，支持 H5、小程序、APP 平台开发。
 
-在生成任何回复之前，你必须在内心回答以下问题：
+  ## 开发命令
+  - `pnpm dev` - H5开发服务器
+  - `pnpm dev:mp` - 微信小程序开发
+  - `pnpm dev:app` - 移动应用开发
+  - `pnpm build` / `pnpm build:h5` / `pnpm build:mp` / `pnpm build:app` - 构建
+  - `pnpm lint` / `pnpm lint:fix` - 代码检查
+  - `pnpm type-check` - TypeScript类型检查
 
-1. 我的行为是否严格符合当前阶段的“必须做的事”和“绝对禁止”？
+  ## 核心架构
+  ### 配置文件关系
+  - `pages.config.ts` → 自动生成 `src/pages.json`
+  - `manifest.config.ts` → 自动生成 `src/manifest.json`
+  - `uno.config.ts` - UnoCSS配置（使用类似TailwindCSS的原子化CSS）
 
-请确认你已完全理解以上规则，并在后续所有交互中严格遵守。
+  ### 目录结构
+  - `src/pages/` - 页面组件
+  - `src/pages-sub/` - 分包页面
+  - `src/components/` - 可复用组件
+  - `src/api/` - API接口定义
+  - `src/http/` - HTTP请求封装
+  - `src/store/` - Pinia状态管理
+  - `src/hooks/` - Vue组合函数
+  - `src/utils/` - 工具函数
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+  ### HTTP & 状态管理
+  - 基于 uni.request 的HTTP封装，支持自动token刷新
+  - 使用 Pinia 进行状态管理，支持持久化存储
+  - 集成 alova.js 作为HTTP客户端备选方案
 
-## Project Overview
+  ### 开发规范
+  - 使用 `<script setup>` 语法和组合式API
+  - 样式：**仅使用 UnoCSS 工具类**，禁止写 style 标签中的自定义样式
+  - 组件库：优先使用 wot-design-uni 组件
+  - 平台差异：使用条件编译 `#ifdef H5` / `#ifdef MP-WEIXIN` / `#ifdef APP-PLUS`
 
-This is a cross-platform application framework based on uniapp + Vue3 + TypeScript + Vite5 + UnoCSS. It supports development for H5, mini-programs, and APP platforms without requiring HBuilderX.
+  ### 路由 & 导航
+  - 约定式路由：文件名决定路由路径
+  - 路由拦截器处理身份验证
+  - Tabbar配置支持原生/自定义策略
 
-## Common Development Commands
-
-- `pnpm dev` - Run development server for H5 platform
-- `pnpm dev:mp` - Run development server for WeChat mini-program
-- `pnpm dev:app` - Run development server for mobile app
-- `pnpm build` - Build production version
-- `pnpm build:h5` - Build H5 production version
-- `pnpm build:mp` - Build WeChat mini-program production version
-- `pnpm build:app` - Build mobile app production version
-- `pnpm lint` - Run ESLint
-- `pnpm lint:fix` - Run ESLint with auto-fix
-- `pnpm type-check` - Run TypeScript type checking
-
-## Code Architecture
-
-### Core Configuration Files
-- `package.json` - Project dependencies and scripts
-- `vite.config.ts` - Vite build configuration
-- `pages.config.ts` - Page routing configuration
-- `manifest.config.ts` - Application manifest configuration
-- `uno.config.ts` - UnoCSS configuration
-- `tsconfig.json` - TypeScript configuration
-- `eslint.config.mjs` - ESLint configuration
-
-### Directory Structure
-- `src/pages/` - Page components
-- `src/pages-sub/` - Sub-package pages
-- `src/components/` - Reusable components
-- `src/api/` - API interface definitions
-- `src/http/` - HTTP request encapsulation
-- `src/store/` - State management (Pinia)
-- `src/tabbar/` - Bottom navigation bar configuration
-- `src/router/` - Routing configuration and interceptors
-- `src/hooks/` - Custom Vue composition functions
-- `src/utils/` - Utility functions
-- `src/style/` - Global styles
-- `src/static/` - Static assets (images, icons)
-
-### HTTP Layer
-The project uses a custom HTTP wrapper around uni.request with the following features:
-- Automatic token refresh handling
-- Request/response interceptors
-- Error handling and toast notifications
-- Support for GET, POST, PUT, DELETE methods
-- Integration with both native HTTP and alova.js
-
-### State Management
-Uses Pinia for state management with persistent storage support:
-- `src/store/token.ts` - Token management
-- `src/store/user.ts` - User information
-
-### Routing
-- Uses convention-based routing where file names determine routes
-- Route interceptors for authentication handling
-- Tabbar configuration with multiple strategies (native/custom)
-
-### Styling
-- Uses UnoCSS (equivalent to TailwindCSS) for atomic CSS
-- Prohibits writing custom styles in style tags
-- Uses utility classes exclusively for styling
-
-### Component Development
-- Uses `<script setup>` syntax with Composition API
-- Follows uni-app component specifications
-- Supports conditional compilation for platform differences
-- Uses wot-design-uni component library
+  ## 重要提醒
+  - 始终遵循现有代码风格和模式
+  - 检查依赖库是否已在项目中使用（查看 package.json）
+  - 遵循安全最佳实践，不要暴露敏感信息
+  - 使用相对路径引用内部资源
