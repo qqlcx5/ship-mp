@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { getSlide } from '@/api/home'
+import type { NoticeInfo, SlideItem } from '@/api/types/common'
+import { getNoticeInfo, getSlideList } from '@/api/home'
 import { useThemeStore } from '@/store'
 import { safeAreaInsets } from '@/utils/systemInfo'
 
@@ -17,10 +18,12 @@ definePage({
 })
 
 const themeStore = useThemeStore()
-
-// 轮播图数据
-const bannerList = ref([])
-
+// 获取轮播图数据
+const {
+  data: slideList,
+  loading: slideLoading,
+  error: slideError,
+} = useRequest(() => getSlideList(), { immediate: true })
 const currentBanner = ref(0)
 
 // 快捷功能菜单
@@ -34,7 +37,22 @@ const quickMenus = ref([
 // 公告信息
 const announcement = ref('新用户注册即享8折优惠')
 
-// 快捷菜单点击
+// 获取公告数据
+const {
+  data: noticeInfo,
+  loading: noticeLoading,
+  error: noticeError,
+} = useRequest(() => getNoticeInfo(), { immediate: true })
+
+// 处理轮播图点击
+function handleSlideClick(item: SlideItem) {
+  if (item.link) {
+    uni.navigateTo({
+      url: item.link,
+    })
+  }
+}
+
 function handleQuickMenu(item: any) {
   if (item.path === '/pages/me/me' || item.path === '/pages/product/list' || item.path === '/pages/pickup/list') {
     uni.switchTab({ url: item.path })
@@ -43,20 +61,6 @@ function handleQuickMenu(item: any) {
     uni.navigateTo({ url: item.path })
   }
 }
-
-function getBannerList() {
-  const { loading, error, data, run } = useRequest<any>(() => getSlide(), {
-    immediate: true,
-  })
-  // console.log(`🚀 - getBannerList - data:`, data, typeof data, JSON.stringify(data))
-
-  // console.log(`🚀 - getBannerList - bannerList.value:`, bannerList.value, data.value)
-  // bannerList.value = (data)?.map((item: any) => item.image) as any
-}
-
-onLoad(() => {
-  getBannerList()
-})
 </script>
 
 <template>
@@ -69,23 +73,37 @@ onLoad(() => {
     </view>
 
     <!-- 轮播图 -->
-
     <view class="relative mx-4 mt-4 h-48 overflow-hidden rounded-lg">
-      <wd-swiper
-        v-model:current="currentBanner"
-        :list="bannerList"
+      <swiper
+        :current="currentBanner"
         autoplay
-        value-key="image"
-        :indicator="true"
-        indicator-position="bottom-right"
-      />
+        :interval="3000"
+        :duration="300"
+        circular
+        class="h-full"
+        @change="(e) => currentBanner = e.detail.current"
+      >
+        <swiper-item v-for="(banner, index) in slideList" :key="index">
+          <view class="relative h-full from-gray-100 to-gray-200 bg-gradient-to-r">
+            <image :src="banner.image" class="h-full w-full object-cover" mode="aspectFill" />
+          </view>
+        </swiper-item>
+      </swiper>
+      <!-- 指示器 -->
+      <view class="absolute bottom-4 right-4 flex space-x-1">
+        <view
+          v-for="(_, index) in slideList"
+          :key="index"
+          class="h-2 w-2 rounded-full" :class="[currentBanner === index ? 'bg-white' : 'bg-white opacity-50']"
+        />
+      </view>
     </view>
 
     <!-- 公告栏 -->
     <view class="mx-4 mt-4 border-l-4 border-blue-400 rounded-lg bg-blue-50 p-3">
       <view class="flex items-center">
         <uni-icons type="sound-filled" color="#2563eb" size="16" class="mr-2" />
-        <text class="text-sm text-blue-800">{{ announcement }}</text>
+        <text class="text-sm text-blue-800">{{ noticeInfo.desc }}</text>
       </view>
     </view>
 
