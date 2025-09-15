@@ -1,56 +1,61 @@
 <script lang="ts" setup>
+import type { IPickitem, IPickitemCategory } from '@/api/types/pickitem'
+import { getPickitemCategoriesAPI, getPickitemListAPI } from '@/api/pickitem'
+import useRequest from '@/hooks/useRequest'
+
 definePage({
   style: {
-    navigationBarTitleText: '我的取件',
+    navigationBarTitleText: '取件列表',
   },
 })
 
-// 取件状态筛选
-const statusTabs = ref([
-  { label: '全部', value: 'all' },
-  { label: '待取件', value: 'pending' },
-  { label: '已取件', value: 'completed' }
-])
+// 当前选中的分类ID
+const currentCategoryId = ref<number>(0)
 
-const currentStatus = ref('all')
+// 获取取件分类列表
+const { loading: categoryLoading, data: categoryData, run: loadCategories } = useRequest<IPickitemCategory[]>(() => getPickitemCategoriesAPI())
 
-// 模拟取件数据
-const pickupList = ref([
-  {
-    id: 1,
-    name: '商品名称A',
-    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150&h=150&fit=crop',
-    status: 'pending',
-    statusText: '待取件',
-    statusColor: '#f59e0b',
-    pickupCode: 'PK001',
-    location: '快递柜A-01',
-    createTime: '2024-08-29 10:30:00'
-  },
-  {
-    id: 2,
-    name: '商品名称B',
-    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150&h=150&fit=crop',
-    status: 'completed',
-    statusText: '已取件',
-    statusColor: '#10b981',
-    pickupCode: 'PK002',
-    location: '快递柜B-05',
-    createTime: '2024-08-28 14:20:00'
+// 获取取件列表
+const { loading: pickupLoading, data: pickupData, run: loadPickups } = useRequest<{
+  list: IPickitem[]
+  total: number
+}>(() => getPickitemListAPI({ cate_id: currentCategoryId.value }))
+
+// 分类选项（包含全部选项）
+const categoryTabs = computed(() => {
+  const categories = [{ id: 0, name: '全部' }]
+  if (categoryData.value) {
+    categories.push(...categoryData.value.filter(cat => cat.status === 1)) // 只显示启用的分类
   }
-])
-
-// 筛选后的取件列表
-const filteredPickups = computed(() => {
-  if (currentStatus.value === 'all') {
-    return pickupList.value
-  }
-  return pickupList.value.filter(pickup => pickup.status === currentStatus.value)
+  return categories
 })
 
-// 切换状态筛选
-function switchStatus(status: string) {
-  currentStatus.value = status
+// 取件列表
+const pickupList = computed(() => {
+  return pickupData.value?.list || []
+})
+
+// 切换分类
+function switchCategory(categoryId: number) {
+  currentCategoryId.value = categoryId
+  if (categoryId === 0) {
+    // 如果选择全部，获取第一个分类的数据
+    const firstCategory = categoryData.value?.find(cat => cat.status === 1)
+    if (firstCategory) {
+      loadPickups()
+    }
+  }
+  else {
+    loadPickups()
+  }
+}
+
+// 格式化时间
+function formatTime(timeStr: string | number) {
+  if (typeof timeStr === 'number') {
+    return new Date(timeStr * 1000).toLocaleString()
+  }
+  return timeStr
 }
 
 // 查看取件详情
@@ -58,80 +63,80 @@ function viewDetail(id: number) {
   uni.navigateTo({ url: `/pages/pickup/detail?id=${id}` })
 }
 
-// 取件操作
-function handlePickup(id: number) {
-  uni.showModal({
-    title: '确认取件',
-    content: '确定已完成取件吗？',
-    success: (res) => {
-      if (res.confirm) {
-        const pickup = pickupList.value.find(item => item.id === id)
-        if (pickup) {
-          pickup.status = 'completed'
-          pickup.statusText = '已取件'
-          pickup.statusColor = '#10b981'
-        }
-        uni.showToast({ title: '取件成功', icon: 'success' })
+// 页面加载时获取数据
+onLoad(() => {
+  loadCategories()
+  // 延迟获取取件列表，等分类加载完成后再获取第一个分类的数据
+  nextTick(() => {
+    setTimeout(() => {
+      const firstCategory = categoryData.value?.find(cat => cat.status === 1)
+      if (firstCategory) {
+        currentCategoryId.value = firstCategory.id
+        loadPickups()
       }
-    }
+    }, 100)
   })
-}
+})
 </script>
 
 <template>
   <view class="min-h-screen bg-gray-50">
-    <!-- 状态筛选 -->
-    <view class="flex space-x-4 px-4 py-3 bg-white border-b border-gray-100">
+    <!-- 分类筛选 -->
+    <view class="flex overflow-x-auto border-b border-gray-100 bg-white px-4 py-3 space-x-4">
       <view
-        v-for="tab in statusTabs"
-        :key="tab.value"
-        :class="[
-          'px-3 py-1 text-sm rounded-full',
-          currentStatus === tab.value
+        v-for="tab in categoryTabs"
+        :key="tab.id"
+        class="whitespace-nowrap rounded-full px-3 py-1 text-sm" :class="[
+          currentCategoryId === tab.id
             ? 'bg-blue-500 text-white'
-            : 'bg-gray-100 text-gray-600'
+            : 'bg-gray-100 text-gray-600',
         ]"
-        @click="switchStatus(tab.value)"
+        @click="switchCategory(tab.id)"
       >
-        {{ tab.label }}
+        {{ tab.name }}
       </view>
     </view>
 
+    <!-- 加载状态 -->
+    <view v-if="pickupLoading" class="flex items-center justify-center py-20">
+      <wd-loading />
+      <text class="ml-2 text-gray-500">加载中...</text>
+    </view>
+
     <!-- 取件列表 -->
-    <view class="space-y-4 p-4">
-      <view v-if="filteredPickups.length === 0" class="text-center py-20">
-        <uni-icons type="car" color="#d1d5db" size="48" />
-        <text class="block mt-4 text-gray-500">暂无取件</text>
+    <view v-else class="p-4 space-y-4">
+      <view v-if="pickupList.length === 0" class="py-20 text-center">
+        <uni-icons type="cart" color="#d1d5db" size="48" />
+        <text class="mt-4 block text-gray-500">暂无取件</text>
       </view>
 
       <view
-        v-for="pickup in filteredPickups"
+        v-for="pickup in pickupList"
         :key="pickup.id"
-        class="bg-white border border-gray-200 rounded-lg p-4"
+        class="border border-gray-200 rounded-lg bg-white p-4"
         @click="viewDetail(pickup.id)"
       >
-        <view class="flex justify-between items-start">
+        <view class="flex items-start justify-between">
           <!-- 左侧信息 -->
           <view class="flex-1">
-            <view class="flex justify-between items-center mb-2">
-              <text class="font-medium text-gray-800">{{ pickup.name }}</text>
-              <text class="text-sm" :style="{ color: pickup.statusColor }">{{ pickup.statusText }}</text>
+            <view class="mb-2 flex items-center justify-between">
+              <text class="text-gray-800 font-medium">{{ pickup.name }}</text>
+              <text v-if="pickup.status === 1" class="text-sm text-green-600">启用</text>
+              <text v-else class="text-sm text-red-600">禁用</text>
             </view>
 
-            <text class="text-sm text-gray-600 block">取件码：{{ pickup.pickupCode }}</text>
-            <text class="text-sm text-gray-600 block">位置：{{ pickup.location }}</text>
-            <text class="text-xs text-gray-500 block mt-1">{{ pickup.createTime }}</text>
+            <text class="block text-sm text-gray-600">整理人：{{ pickup.collator }}</text>
+            <text class="block text-sm text-gray-600">浏览量：{{ pickup.view_num }}</text>
+            <text class="mt-1 block text-xs text-gray-500">{{ formatTime(pickup.add_time) }}</text>
 
-            <!-- 操作按钮 -->
-            <view v-if="pickup.status === 'pending'" class="mt-3">
-              <wd-button size="small" type="primary" @click.stop="handlePickup(pickup.id)">
-                确认取件
-              </wd-button>
+            <!-- 附件信息 -->
+            <view v-if="pickup.desc_file_name" class="mt-2">
+              <text class="text-xs text-blue-600">附件：{{ pickup.desc_file_name }}</text>
             </view>
           </view>
 
           <!-- 右侧商品图片 -->
-          <image :src="pickup.image" class="w-20 h-20 rounded-lg ml-4" mode="aspectFill" />
+          <image :src="pickup.image" class="ml-4 h-20 w-20 rounded-lg" mode="aspectFill" />
         </view>
       </view>
     </view>

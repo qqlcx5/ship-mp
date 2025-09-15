@@ -54,7 +54,7 @@ export interface IProductListParams {
 
 // 商品列表响应
 export interface IProductListResponse {
-  code: number
+  status: number
   msg: string
   data: {
     list: IProduct[]
@@ -66,7 +66,16 @@ export interface IProductListResponse {
 
 // 商品分类响应
 export interface ICategoryResponse {
-  code: number
+  status: number
   msg: string
   data: ICategory[]
+}
+
+// 商品详情响应
+export interface IProductDetailResponse {
+  status: number
+  msg: string
+  data: {
+    storeInfo: IProduct
+  }
 }

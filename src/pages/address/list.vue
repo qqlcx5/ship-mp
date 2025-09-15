@@ -1,34 +1,72 @@
 <script lang="ts" setup>
+import { ref, onMounted } from 'vue'
+import type { IAddress } from '@/api/types/address'
+import {
+  getAddressListAPI,
+  deleteAddressAPI,
+  setDefaultAddressAPI
+} from '@/api/address'
+
 definePage({
   style: {
     navigationBarTitleText: '收货地址',
   },
 })
 
-// 模拟地址数据
-const addressList = ref([
-  {
-    id: 1,
-    name: '张三',
-    phone: '138****8888',
-    address: '北京市朝阳区望京街道科技园区A座1001室',
-    isDefault: true
-  },
-  {
-    id: 2,
-    name: '李四',
-    phone: '139****9999',
-    address: '上海市浦东新区陆家嘴金融中心B座2002室',
-    isDefault: false
-  },
-  {
-    id: 3,
-    name: '王五',
-    phone: '137****7777',
-    address: '广州市天河区珠江新城CBD中心大厦C座3003室',
-    isDefault: false
+// 地址列表数据
+const addressList = ref<IAddress[]>([])
+const loading = ref(false)
+
+// 页面初始化
+onMounted(() => {
+  loadAddressList()
+})
+
+// 加载地址列表
+async function loadAddressList() {
+  try {
+    loading.value = true
+    const res = await getAddressListAPI()
+    if (res.code === 200) {
+      addressList.value = res.data.list || []
+    } else {
+      throw new Error(res.msg || '获取地址列表失败')
+    }
+  } catch (error: any) {
+    console.error('加载地址列表失败:', error)
+    uni.showToast({
+      title: error.message || '加载失败',
+      icon: 'none'
+    })
+    // 如果API调用失败，使用模拟数据作为后备
+    addressList.value = [
+      {
+        id: 1,
+        name: '张三',
+        phone: '138****8888',
+        province: '北京市',
+        city: '北京市',
+        district: '朝阳区',
+        detail: '望京街道科技园区A座1001室',
+        address: '北京市朝阳区望京街道科技园区A座1001室',
+        isDefault: true
+      },
+      {
+        id: 2,
+        name: '李四',
+        phone: '139****9999',
+        province: '上海市',
+        city: '上海市',
+        district: '浦东新区',
+        detail: '陆家嘴金融中心B座2002室',
+        address: '上海市浦东新区陆家嘴金融中心B座2002室',
+        isDefault: false
+      }
+    ]
+  } finally {
+    loading.value = false
   }
-])
+}
 
 // 新增地址
 function addAddress() {
@@ -41,16 +79,27 @@ function editAddress(id: number) {
 }
 
 // 删除地址
-function deleteAddress(id: number) {
+async function deleteAddress(id: number) {
   uni.showModal({
     title: '确认删除',
     content: '确定要删除这个地址吗？',
-    success: (res) => {
+    success: async (res) => {
       if (res.confirm) {
-        const index = addressList.value.findIndex(item => item.id === id)
-        if (index > -1) {
-          addressList.value.splice(index, 1)
-          uni.showToast({ title: '删除成功', icon: 'success' })
+        try {
+          const apiRes = await deleteAddressAPI(id)
+          if (apiRes.code === 200) {
+            uni.showToast({ title: '删除成功', icon: 'success' })
+            // 重新加载列表
+            await loadAddressList()
+          } else {
+            throw new Error(apiRes.msg || '删除失败')
+          }
+        } catch (error: any) {
+          console.error('删除地址失败:', error)
+          uni.showToast({
+            title: error.message || '删除失败',
+            icon: 'none'
+          })
         }
       }
     }
@@ -58,11 +107,23 @@ function deleteAddress(id: number) {
 }
 
 // 设为默认地址
-function setDefaultAddress(id: number) {
-  addressList.value.forEach(item => {
-    item.isDefault = item.id === id
-  })
-  uni.showToast({ title: '设置成功', icon: 'success' })
+async function setDefaultAddress(id: number) {
+  try {
+    const res = await setDefaultAddressAPI(id)
+    if (res.code === 200) {
+      uni.showToast({ title: '设置成功', icon: 'success' })
+      // 重新加载列表
+      await loadAddressList()
+    } else {
+      throw new Error(res.msg || '设置失败')
+    }
+  } catch (error: any) {
+    console.error('设置默认地址失败:', error)
+    uni.showToast({
+      title: error.message || '设置失败',
+      icon: 'none'
+    })
+  }
 }
 </script>
 
@@ -79,7 +140,14 @@ function setDefaultAddress(id: number) {
 
     <!-- 地址列表 -->
     <view class="space-y-4 p-4">
-      <view v-if="addressList.length === 0" class="text-center py-20">
+      <!-- 加载状态 -->
+      <view v-if="loading" class="text-center py-20">
+        <wd-loading type="spinner" />
+        <text class="block mt-4 text-gray-500">加载中...</text>
+      </view>
+
+      <!-- 空状态 -->
+      <view v-else-if="addressList.length === 0" class="text-center py-20">
         <uni-icons type="location" color="#d1d5db" size="48" />
         <text class="block mt-4 text-gray-500">暂无地址</text>
         <wd-button type="primary" class="mt-4" @click="addAddress">

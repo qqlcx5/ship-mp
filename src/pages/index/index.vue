@@ -103,7 +103,7 @@ function handleQuickMenu(item: any) {
     <view class="mx-4 mt-4 border-l-4 border-blue-400 rounded-lg bg-blue-50 p-3">
       <view class="flex items-center">
         <uni-icons type="sound-filled" color="#2563eb" size="16" class="mr-2" />
-        <text class="text-sm text-blue-800">{{ noticeInfo.desc }}</text>
+        <text class="text-sm text-blue-800">{{ noticeInfo?.desc }}</text>
       </view>
     </view>
 

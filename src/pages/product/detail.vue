@@ -1,66 +1,76 @@
 <script lang="ts" setup>
+import type { IProduct } from '@/api/types/product'
+import { getProductDetailAPI } from '@/api/product'
+import useRequest from '@/hooks/useRequest'
+
 definePage({
   style: {
     navigationBarTitleText: '商品详情',
   },
 })
 
-const productId = ref('')
+const productId = ref<number>(0)
+const currentImageIndex = ref(0)
+const quantity = ref(1)
 
-// 模拟商品详情数据
-const productDetail = ref({
-  id: 1,
-  name: '无线蓝牙耳机',
-  description: '降噪技术，高品质音响效果，续航48小时',
-  price: 299.00,
-  originalPrice: 399.00,
-  sales: 1234,
-  images: [
-    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=400&h=300&fit=crop'
-  ],
-  specs: [
-    { name: '颜色', options: ['白色', '黑色', '粉色'], selected: '白色' }
-  ],
-  quantity: 1
+// 获取商品详情
+const { loading, data: productData, run: loadProductDetail } = useRequest<{ storeInfo: IProduct }>(() =>
+  getProductDetailAPI(productId.value),
+)
+
+// 商品详情
+const productDetail = computed(() => {
+  return productData.value?.storeInfo
 })
 
-const currentImageIndex = ref(0)
+// 商品图片列表（如果只有一张图片，则只显示一张）
+const productImages = computed(() => {
+  if (!productDetail.value?.image)
+    return []
+  return [productDetail.value.image]
+})
+
+// 格式化价格显示
+function formatPrice(price?: number) {
+  if (!price)
+    return '0.00'
+  return (price / 100).toFixed(2) // 假设后端返回的是分为单位
+}
 
 onLoad((options) => {
   if (options?.id) {
-    productId.value = options.id
-    // 这里可以根据ID获取商品详情
+    productId.value = Number(options.id)
+    loadProductDetail()
   }
 })
 
-// 切换规格选择
-function selectSpec(specIndex: number, option: string) {
-  productDetail.value.specs[specIndex].selected = option
-}
-
 // 调整数量
 function adjustQuantity(delta: number) {
-  const newQuantity = productDetail.value.quantity + delta
+  const newQuantity = quantity.value + delta
   if (newQuantity >= 1) {
-    productDetail.value.quantity = newQuantity
+    quantity.value = newQuantity
   }
 }
 
 // 添加到购物车
 function addToCart() {
+  if (!productDetail.value)
+    return
+
   uni.showToast({
-    title: '已添加到购物车',
-    icon: 'success'
+    title: `已添加${productDetail.value.name}到购物车`,
+    icon: 'success',
   })
 }
 
 // 立即购买
 function buyNow() {
+  if (!productDetail.value)
+    return
+
   uni.showToast({
     title: '立即购买',
-    icon: 'none'
+    icon: 'none',
   })
 }
 
@@ -68,7 +78,7 @@ function buyNow() {
 function shareProduct() {
   uni.showToast({
     title: '分享商品',
-    icon: 'none'
+    icon: 'none',
   })
 }
 
@@ -76,104 +86,142 @@ function shareProduct() {
 function favoriteProduct() {
   uni.showToast({
     title: '已收藏',
-    icon: 'success'
+    icon: 'success',
+  })
+}
+
+// 下载附件
+function downloadFile() {
+  if (!productDetail.value?.desc_file_url)
+    return
+
+  uni.downloadFile({
+    url: productDetail.value.desc_file_url,
+    success: (res) => {
+      if (res.statusCode === 200) {
+        uni.showToast({
+          title: '下载成功',
+          icon: 'success',
+        })
+      }
+    },
+    fail: () => {
+      uni.showToast({
+        title: '下载失败',
+        icon: 'error',
+      })
+    },
   })
 }
 </script>
 
 <template>
   <view class="min-h-screen bg-white">
-    <!-- 头部导航 -->
-    <view class="flex items-center justify-between p-4 border-b border-gray-100">
-      <uni-icons type="left" color="#6b7280" size="18" @click="uni.navigateBack()" />
-      <view class="flex space-x-4">
-        <uni-icons type="heart" color="#6b7280" size="18" @click="favoriteProduct" />
-        <uni-icons type="redo" color="#6b7280" size="18" @click="shareProduct" />
-      </view>
+    <!-- 加载状态 -->
+    <view v-if="loading" class="flex items-center justify-center py-20">
+      <wd-loading />
+      <text class="ml-2 text-gray-500">加载中...</text>
     </view>
 
-    <!-- 商品图片轮播 -->
-    <view class="relative">
-      <swiper
-        :current="currentImageIndex"
-        class="h-64"
-        @change="(e) => currentImageIndex = e.detail.current"
-      >
-        <swiper-item v-for="(image, index) in productDetail.images" :key="index">
-          <image :src="image" class="w-full h-full object-cover" mode="aspectFill" />
-        </swiper-item>
-      </swiper>
-      <view class="absolute bottom-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-        {{ currentImageIndex + 1 }}/{{ productDetail.images.length }}
-      </view>
-    </view>
-
-    <!-- 商品信息 -->
-    <view class="p-4">
-      <view class="mb-4">
-        <text class="text-xl font-semibold text-gray-800 block mb-2">{{ productDetail.name }}</text>
-        <text class="text-gray-600 text-sm">{{ productDetail.description }}</text>
-      </view>
-
-      <view class="flex items-center justify-between mb-4">
-        <view class="flex items-baseline">
-          <text class="text-2xl font-bold text-red-500">¥{{ productDetail.price.toFixed(0) }}</text>
-          <text v-if="productDetail.originalPrice" class="text-sm text-gray-400 line-through ml-2">
-            ¥{{ productDetail.originalPrice.toFixed(0) }}
-          </text>
+    <!-- 商品详情内容 -->
+    <view v-else-if="productDetail">
+      <!-- 头部导航 -->
+      <view class="flex items-center justify-between border-b border-gray-100 p-4">
+        <uni-icons type="left" color="#6b7280" size="18" @click="() => uni.navigateBack()" />
+        <view class="flex space-x-4">
+          <uni-icons type="heart" color="#6b7280" size="18" @click="favoriteProduct" />
+          <uni-icons type="redo" color="#6b7280" size="18" @click="shareProduct" />
         </view>
-        <text class="text-sm text-gray-500">已售 {{ productDetail.sales }}+</text>
       </view>
 
-      <!-- 规格选择 -->
-      <view v-for="(spec, specIndex) in productDetail.specs" :key="spec.name" class="mb-4">
-        <text class="text-sm font-medium text-gray-800 block mb-2">选择{{ spec.name }}</text>
-        <view class="flex space-x-2">
-          <wd-button
-            v-for="option in spec.options"
-            :key="option"
-            size="small"
-            :type="spec.selected === option ? 'primary' : 'default'"
-            @click="selectSpec(specIndex, option)"
-          >
-            {{ option }}
+      <!-- 商品图片轮播 -->
+      <view class="relative">
+        <swiper
+          v-if="productImages.length > 1"
+          :current="currentImageIndex"
+          class="h-64"
+          @change="(e) => currentImageIndex = e.detail.current"
+        >
+          <swiper-item v-for="(image, index) in productImages" :key="index">
+            <image :src="image" class="h-full w-full object-cover" mode="aspectFill" />
+          </swiper-item>
+        </swiper>
+        <image
+          v-else-if="productImages.length === 1"
+          :src="productImages[0]"
+          class="h-64 w-full object-cover"
+          mode="aspectFill"
+        />
+        <view v-if="productImages.length > 1" class="absolute bottom-4 right-4 rounded bg-black bg-opacity-50 px-2 py-1 text-xs text-white">
+          {{ currentImageIndex + 1 }}/{{ productImages.length }}
+        </view>
+      </view>
+
+      <!-- 商品信息 -->
+      <view class="p-4">
+        <view class="mb-4">
+          <text class="mb-2 block text-xl text-gray-800 font-semibold">{{ productDetail.name }}</text>
+          <text class="text-sm text-gray-600">整理人：{{ productDetail.collator }}</text>
+        </view>
+
+        <view class="mb-4 flex items-center justify-between">
+          <view class="flex items-baseline">
+            <text class="text-2xl text-red-500 font-bold">¥{{ formatPrice(productDetail.price) }}</text>
+          </view>
+          <text class="text-sm text-gray-500">浏览 {{ productDetail.view_num }}+</text>
+        </view>
+
+        <!-- 附件下载 -->
+        <view v-if="productDetail.desc_file_url" class="mb-4 rounded-lg bg-gray-50 p-3">
+          <text class="mb-2 block text-sm text-gray-800 font-medium">相关附件</text>
+          <view class="flex items-center justify-between">
+            <text class="text-sm text-blue-600">{{ productDetail.desc_file_name }}</text>
+            <wd-button size="small" type="primary" @click="downloadFile">
+              下载
+            </wd-button>
+          </view>
+        </view>
+
+        <!-- 数量选择 -->
+        <view class="mb-6">
+          <text class="mb-2 block text-sm text-gray-800 font-medium">数量</text>
+          <view class="flex items-center space-x-3">
+            <wd-button
+              size="small"
+              type="default"
+              :disabled="quantity <= 1"
+              @click="adjustQuantity(-1)"
+            >
+              <uni-icons type="minus" size="12" />
+            </wd-button>
+            <text class="px-4 text-lg font-medium">{{ quantity }}</text>
+            <wd-button size="small" type="default" @click="adjustQuantity(1)">
+              <uni-icons type="plus" size="12" />
+            </wd-button>
+          </view>
+        </view>
+      </view>
+
+      <!-- 底部操作栏 -->
+      <view class="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-4">
+        <view class="flex space-x-3">
+          <wd-button type="default" class="flex-1" @click="addToCart">
+            加入购物车
+          </wd-button>
+          <wd-button type="primary" class="flex-1" @click="buyNow">
+            立即购买
           </wd-button>
         </view>
       </view>
 
-      <!-- 数量选择 -->
-      <view class="mb-6">
-        <text class="text-sm font-medium text-gray-800 block mb-2">数量</text>
-        <view class="flex items-center space-x-3">
-          <wd-button
-            size="small"
-            type="default"
-            :disabled="productDetail.quantity <= 1"
-            @click="adjustQuantity(-1)"
-          >
-            <uni-icons type="minus" size="12" />
-          </wd-button>
-          <text class="text-lg font-medium px-4">{{ productDetail.quantity }}</text>
-          <wd-button size="small" type="default" @click="adjustQuantity(1)">
-            <uni-icons type="plus" size="12" />
-          </wd-button>
-        </view>
-      </view>
+      <!-- 底部占位 -->
+      <view class="h-20" />
     </view>
 
-    <!-- 底部操作栏 -->
-    <view class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-      <view class="flex space-x-3">
-        <wd-button type="default" class="flex-1" @click="addToCart">
-          加入购物车
-        </wd-button>
-        <wd-button type="primary" class="flex-1" @click="buyNow">
-          立即购买
-        </wd-button>
-      </view>
+    <!-- 商品不存在提示 -->
+    <view v-else class="flex flex-col items-center justify-center py-20">
+      <uni-icons type="shop" color="#d1d5db" size="48" />
+      <text class="mt-4 text-gray-500">商品不存在</text>
     </view>
-
-    <!-- 底部占位 -->
-    <view class="h-20"></view>
   </view>
 </template>

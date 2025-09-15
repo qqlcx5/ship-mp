@@ -17,7 +17,7 @@ export interface IPickitem {
   id: number
   name: string
   sort: number
-  add_time: number
+  add_time: string | number // 可能是时间戳或字符串格式
   is_del: number
   status: number
   collator: string
@@ -45,29 +45,24 @@ export interface IPickitemListParams {
 
 // 取件详情响应
 export interface IPickitemDetailResponse {
-  code: number
+  status: number
   msg: string
-  data: {
-    info: IPickitem
-    groups: Record<string, IPickitem[]>
-  }
+  data: IPickitem
 }
 
 // 取件分类响应
 export interface IPickitemCategoryResponse {
-  code: number
+  status: number
   msg: string
   data: IPickitemCategory[]
 }
 
 // 取件列表响应
 export interface IPickitemListResponse {
-  code: number
+  status: number
   msg: string
   data: {
     list: IPickitem[]
     total: number
-    page: number
-    limit: number
   }
 }

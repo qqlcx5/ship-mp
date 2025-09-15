@@ -2,6 +2,7 @@ import type {
   ICategory,
   ICategoryResponse,
   IProduct,
+  IProductDetailResponse,
   IProductListParams,
   IProductListResponse,
 } from './types/product'
@@ -57,4 +58,11 @@ export function searchProductsAPI(keyword: string, params: Omit<IProductListPara
     ...params,
     keyword,
   })
+}
+
+/**
+ * 获取商品详情
+ */
+export function getProductDetailAPI(id: number) {
+  return http.get<IProductDetailResponse>(`/product/detail/${id}`)
 }
