@@ -89,10 +89,10 @@ const displayText = computed(() => {
 })
 
 // 初始化数据
-const { loading: cityLoading, data: cityData, run: loadCityList } = useRequest(() => getCityListAPI())
+const { loading: cityLoading, data: cityData, run: loadCityList } = useRequest(getCityListAPI)
 
-const newRegionData = computed(() => {
-  return cityData.value || []
+const newRegionData = computed<RegionItem[]>(() => {
+  return (cityData.value as unknown as RegionItem[]) || []
 })
 
 function initPickerData() {
@@ -195,19 +195,40 @@ function handleChange(e: any) {
 
 // 从外部值设置选择器状态
 function setValueFromProps() {
-  if (!props.modelValue)
+  if (!props.modelValue || !newRegionData.value.length)
     return
 
   const { province, city, district } = props.modelValue
   if (!province || !city || !district)
     return
 
-  // 查找对应的索引
-  const provinceIndex = pickerRange.value[0]?.findIndex(p => p.n === province) ?? 0
-  const cityIndex = pickerRange.value[1]?.findIndex(c => c.n === city) ?? 0
-  const districtIndex = pickerRange.value[2]?.findIndex(d => d.n === district) ?? 0
+  // 查找省份索引
+  const provinceIndex = newRegionData.value.findIndex(p => p.n === province)
+  if (provinceIndex === -1)
+    return
 
+  // 更新城市列表
+  const cities = newRegionData.value[provinceIndex].c || []
+  pickerRange.value[1] = cities
+
+  // 查找城市索引
+  const cityIndex = cities.findIndex(c => c.n === city)
+  if (cityIndex === -1)
+    return
+
+  // 更新区县列表
+  const districts = cities[cityIndex].c || []
+  pickerRange.value[2] = districts
+
+  // 查找区县索引
+  const districtIndex = districts.findIndex(d => d.n === district)
+  if (districtIndex === -1)
+    return
+
+  // 设置选择器的值
   pickerValue.value = [provinceIndex, cityIndex, districtIndex]
+
+  // 更新选中的数据
   selectedData.value = {
     province,
     city,
