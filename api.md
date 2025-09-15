@@ -111,3 +111,28 @@ https://www.anahaimu.store/api/product/detail/5（商品详情 只考虑单sku �
     }
   }
 }
+
+
+伪造请求头
+可用下面的token
+请求头加
+authori-zation: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6Ind3dy5hbmFoYWltdS5zdG9yZSIsImF1ZCI6Ind3dy5hbmFoYWltdS5zdG9yZSIsImlhdCI6MTc1NzczMzU5MCwibmJmIjoxNzU3NzMzNTkwLCJleHAiOjE3NjAzMjU1OTAsImp0aSI6eyJpZCI6MywidHlwZSI6ImFwaSJ9fQ.aZSOW5E8Y5oG5EeyefBPJ89YolCSTfPeVjbf2uAyU_I
+
+地址列表（需要登录）
+https://www.anahaimu.store/api/address/list?page=1&limit=20
+
+地址省市区
+https://www.anahaimu.store/api/city_list
+
+地址新增、编辑
+https://www.anahaimu.store/api/address/edit
+新增
+
+编辑
+
+地址删除
+https://www.anahaimu.store/api/address/del
+
+
+地址设置默认
+https://www.anahaimu.store/api/address/default/set
