@@ -4,8 +4,9 @@
 
 // 商品分类接口
 export interface ICategory {
-  id: number
+  id: number | string
   name: string
+  cate_name: string
   sort: number
   add_time: number
   is_del: number
@@ -20,8 +21,8 @@ export interface ICategory {
 
 // 商品接口
 export interface IProduct {
-  id: number
-  name: string
+  id: number | string
+  store_name: string
   sort: number
   add_time: number
   is_del: number

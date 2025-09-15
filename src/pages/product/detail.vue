@@ -58,7 +58,7 @@ function addToCart() {
     return
 
   uni.showToast({
-    title: `已添加${productDetail.value.name}到购物车`,
+    title: `已添加${productDetail.value.store_name}到购物车`,
     icon: 'success',
   })
 }
@@ -126,13 +126,13 @@ function downloadFile() {
     <!-- 商品详情内容 -->
     <view v-else-if="productDetail">
       <!-- 头部导航 -->
-      <view class="flex items-center justify-between border-b border-gray-100 p-4">
+      <!-- <view class="flex items-center justify-between border-b border-gray-100 p-4">
         <uni-icons type="left" color="#6b7280" size="18" @click="() => uni.navigateBack()" />
         <view class="flex space-x-4">
           <uni-icons type="heart" color="#6b7280" size="18" @click="favoriteProduct" />
           <uni-icons type="redo" color="#6b7280" size="18" @click="shareProduct" />
         </view>
-      </view>
+      </view> -->
 
       <!-- 商品图片轮播 -->
       <view class="relative">
@@ -160,18 +160,17 @@ function downloadFile() {
       <!-- 商品信息 -->
       <view class="p-4">
         <view class="mb-4">
-          <text class="mb-2 block text-xl text-gray-800 font-semibold">{{ productDetail.name }}</text>
-          <text class="text-sm text-gray-600">整理人：{{ productDetail.collator }}</text>
+          <text class="mb-2 block text-xl text-gray-800 font-semibold">{{ productDetail.store_name }}</text>
+          <!-- <text class="text-sm text-gray-600">整理人：{{ productDetail.collator }}</text> -->
         </view>
 
         <view class="mb-4 flex items-center justify-between">
           <view class="flex items-baseline">
             <text class="text-2xl text-red-500 font-bold">¥{{ formatPrice(productDetail.price) }}</text>
           </view>
-          <text class="text-sm text-gray-500">浏览 {{ productDetail.view_num }}+</text>
+          <text class="text-sm text-gray-500">销售 {{ productDetail.sales }}+</text>
         </view>
 
-        <!-- 附件下载 -->
         <view v-if="productDetail.desc_file_url" class="mb-4 rounded-lg bg-gray-50 p-3">
           <text class="mb-2 block text-sm text-gray-800 font-medium">相关附件</text>
           <view class="flex items-center justify-between">
@@ -185,18 +184,20 @@ function downloadFile() {
         <!-- 数量选择 -->
         <view class="mb-6">
           <text class="mb-2 block text-sm text-gray-800 font-medium">数量</text>
-          <view class="flex items-center space-x-3">
+          <view class="flex items-center">
             <wd-button
               size="small"
               type="default"
               :disabled="quantity <= 1"
               @click="adjustQuantity(-1)"
             >
-              <uni-icons type="minus" size="12" />
+              <uni-icons type="minus" size="24" />
             </wd-button>
-            <text class="px-4 text-lg font-medium">{{ quantity }}</text>
+            <view class="text-md px-2">
+              {{ quantity }}
+            </view>
             <wd-button size="small" type="default" @click="adjustQuantity(1)">
-              <uni-icons type="plus" size="12" />
+              <uni-icons type="plus" size="24" />
             </wd-button>
           </view>
         </view>

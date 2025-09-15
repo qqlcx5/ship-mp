@@ -42,7 +42,7 @@ const { loading: productLoading, data: productData, run: loadProducts } = useReq
 
 // 分类选项（包含全部选项）
 const categoryTabs = computed(() => {
-  const categories = [{ id: 0, name: '全部' }]
+  const categories = [{ id: 0, cate_name: '全部' }]
   if (categoryData.value) {
     categories.push(...categoryData.value)
   }
@@ -51,7 +51,7 @@ const categoryTabs = computed(() => {
 
 // 商品列表
 const productList = computed(() => {
-  return productData.value?.list || []
+  return productData.value || []
 })
 
 // 切换分类
@@ -77,7 +77,7 @@ function viewProduct(id: number) {
 // 添加到购物车
 function addToCart(product: IProduct) {
   uni.showToast({
-    title: `已添加${product.name}到购物车`,
+    title: `已添加${product.store_name}到购物车`,
     icon: 'success',
     duration: 1500,
   })
@@ -87,7 +87,7 @@ function addToCart(product: IProduct) {
 function formatPrice(price?: number) {
   if (!price)
     return '0'
-  return (price / 100).toFixed(2) // 假设后端返回的是分为单位
+  return (price)
 }
 
 // 页面加载时获取数据
@@ -114,19 +114,23 @@ onLoad(() => {
     </view>
 
     <!-- 分类选项 -->
-    <view class="flex border-b border-gray-100 bg-white px-4 py-3 space-x-2">
-      <view
-        v-for="tab in categoryTabs"
-        :key="tab.id"
-        class="rounded-full px-3 py-1 text-sm" :class="[
-          currentCategoryId === tab.id
-            ? 'bg-blue-500 text-white'
-            : 'bg-gray-100 text-gray-600',
-        ]"
-        @click="switchCategory(tab.id)"
-      >
-        {{ tab.name }}
-      </view>
+    <view class="border-b border-gray-100 bg-white px-4 py-3">
+      <scroll-view scroll-x>
+        <view class="flex items-center space-x-2">
+          <view
+            v-for="tab in categoryTabs"
+            :key="tab.id"
+            class="whitespace-nowrap rounded-full px-3 py-1 text-sm" :class="[
+              currentCategoryId === tab.id
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-100 text-gray-600',
+            ]"
+            @click="switchCategory(tab.id)"
+          >
+            {{ tab.cate_name }}
+          </view>
+        </view>
+      </scroll-view>
     </view>
 
     <!-- 加载状态 -->
@@ -150,20 +154,20 @@ onLoad(() => {
       >
         <image :src="product.image" class="h-32 w-full object-cover" mode="aspectFill" />
         <view class="p-3">
-          <text class="mb-1 block text-sm text-gray-800 font-medium">{{ product.name }}</text>
+          <text class="mb-1 block truncate text-sm text-gray-800 font-medium">{{ product.store_name }}</text>
           <text class="mb-2 block text-xs text-gray-500">{{ product.collator }}</text>
 
           <view class="mb-2 flex items-center justify-between">
             <view>
               <text class="text-red-500 font-semibold">¥{{ formatPrice(product.price) }}</text>
             </view>
-            <text class="text-xs text-gray-500">浏览{{ product.view_num }}+</text>
+            <text class="text-xs text-gray-500">销售{{ product.sales }}+</text>
           </view>
 
           <view class="flex items-center justify-between">
             <view />
             <wd-button size="small" type="primary" @click.stop="addToCart(product)">
-              <uni-icons type="plus" color="white" size="12" />
+              <uni-icons type="plus" color="white" size="20" />
             </wd-button>
           </view>
         </view>

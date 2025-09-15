@@ -21,14 +21,6 @@ const pickupDetail = computed(() => {
   return pickupData.value
 })
 
-// 格式化时间
-function formatTime(timeStr: string | number) {
-  if (typeof timeStr === 'number') {
-    return new Date(timeStr * 1000).toLocaleString()
-  }
-  return timeStr
-}
-
 onLoad((options) => {
   if (options?.id) {
     pickupId.value = Number(options.id)
@@ -61,15 +53,15 @@ function downloadFile() {
 }
 
 // 分享取件信息
-function sharePickupInfo() {
-  if (!pickupDetail.value)
-    return
+// function sharePickupInfo() {
+//   if (!pickupDetail.value)
+//     return
 
-  uni.showToast({
-    title: `分享${pickupDetail.value.name}`,
-    icon: 'none',
-  })
-}
+//   uni.showToast({
+//     title: `分享${pickupDetail.value.name}`,
+//     icon: 'none',
+//   })
+// }
 </script>
 
 <template>
@@ -86,7 +78,7 @@ function sharePickupInfo() {
       <view class="mx-4 mt-4 border border-blue-200 rounded-lg bg-blue-50 p-4">
         <view class="flex items-center">
           <view class="mr-3 h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
-            <uni-icons type="cart" color="#2563eb" size="20" />
+            <uni-icons type="person" color="#2563eb" size="28" />
           </view>
           <view>
             <text class="block text-blue-800 font-semibold">{{ pickupDetail.name }}</text>
@@ -108,8 +100,8 @@ function sharePickupInfo() {
             <text class="text-gray-800">{{ pickupDetail.view_num }}</text>
           </view>
           <view class="flex justify-between">
-            <text class="text-gray-600">添加时间：</text>
-            <text class="text-gray-800">{{ formatTime(pickupDetail.add_time) }}</text>
+            <text class="text-gray-600">时间：</text>
+            <text class="text-gray-800">{{ pickupDetail.add_time }}</text>
           </view>
           <view class="flex justify-between">
             <text class="text-gray-600">状态：</text>
@@ -148,11 +140,11 @@ function sharePickupInfo() {
       </view>
 
       <!-- 操作按钮 -->
-      <view class="mt-8 p-4 space-y-3">
+      <!-- <view class="mt-8 p-4 space-y-3">
         <wd-button type="primary" block @click="sharePickupInfo">
           分享取件信息
         </wd-button>
-      </view>
+      </view> -->
     </view>
 
     <!-- 取件不存在提示 -->

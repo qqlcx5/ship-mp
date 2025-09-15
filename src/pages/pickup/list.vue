@@ -25,7 +25,7 @@ const { loading: pickupLoading, data: pickupData, run: loadPickups } = useReques
 const categoryTabs = computed(() => {
   const categories = [{ id: 0, name: '全部' }]
   if (categoryData.value) {
-    categories.push(...categoryData.value.filter(cat => cat.status === 1)) // 只显示启用的分类
+    categories.push(...categoryData.value) // 只显示启用的分类
   }
   return categories
 })
@@ -38,16 +38,7 @@ const pickupList = computed(() => {
 // 切换分类
 function switchCategory(categoryId: number) {
   currentCategoryId.value = categoryId
-  if (categoryId === 0) {
-    // 如果选择全部，获取第一个分类的数据
-    const firstCategory = categoryData.value?.find(cat => cat.status === 1)
-    if (firstCategory) {
-      loadPickups()
-    }
-  }
-  else {
-    loadPickups()
-  }
+  loadPickups()
 }
 
 // 格式化时间
@@ -82,19 +73,23 @@ onLoad(() => {
 <template>
   <view class="min-h-screen bg-gray-50">
     <!-- 分类筛选 -->
-    <view class="flex overflow-x-auto border-b border-gray-100 bg-white px-4 py-3 space-x-4">
-      <view
-        v-for="tab in categoryTabs"
-        :key="tab.id"
-        class="whitespace-nowrap rounded-full px-3 py-1 text-sm" :class="[
-          currentCategoryId === tab.id
-            ? 'bg-blue-500 text-white'
-            : 'bg-gray-100 text-gray-600',
-        ]"
-        @click="switchCategory(tab.id)"
-      >
-        {{ tab.name }}
-      </view>
+    <view class="border-b border-gray-100 bg-white px-4 py-3">
+      <scroll-view scroll-x>
+        <view class="flex items-center space-x-2">
+          <view
+            v-for="tab in categoryTabs"
+            :key="tab.id"
+            class="whitespace-nowrap rounded-full px-3 py-1 text-sm" :class="[
+              currentCategoryId === tab.id
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-100 text-gray-600',
+            ]"
+            @click="switchCategory(tab.id)"
+          >
+            {{ tab.name }}
+          </view>
+        </view>
+      </scroll-view>
     </view>
 
     <!-- 加载状态 -->
@@ -127,11 +122,11 @@ onLoad(() => {
 
             <text class="block text-sm text-gray-600">整理人：{{ pickup.collator }}</text>
             <text class="block text-sm text-gray-600">浏览量：{{ pickup.view_num }}</text>
-            <text class="mt-1 block text-xs text-gray-500">{{ formatTime(pickup.add_time) }}</text>
+            <text class="block text-sm text-gray-500">时间：{{ pickup.add_time }}</text>
 
             <!-- 附件信息 -->
-            <view v-if="pickup.desc_file_name" class="mt-2">
-              <text class="text-xs text-blue-600">附件：{{ pickup.desc_file_name }}</text>
+            <view v-if="pickup.desc_file_name" class="mt-1">
+              <text class="text-sm text-blue-600">附件：{{ pickup.desc_file_name }}</text>
             </view>
           </view>
 
