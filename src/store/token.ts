@@ -262,6 +262,28 @@ export const useTokenStore = defineStore(
       return getValidToken.value
     }
 
+    /**
+     * 设置固定token（用于测试）
+     */
+    const setFixedToken = () => {
+      const fixedToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6Ind3dy5hbmFoYWltdS5zdG9yZSIsImF1ZCI6Ind3dy5hbmFoYWltdS5zdG9yZSIsImlhdCI6MTc1NzczMzU5MCwibmJmIjoxNzU3NzMzNTkwLCJleHAiOjE3NjAzMjU1OTAsImp0aSI6eyJpZCI6MywidHlwZSI6ImFwaSJ9fQ.aZSOW5E8Y5oG5EeyefBPJ89YolCSTfPeVjbf2uAyU_I'
+
+      if (isDoubleTokenMode) {
+        setTokenInfo({
+          accessToken: fixedToken,
+          accessExpiresIn: 86400 * 30, // 30天
+          refreshToken: fixedToken,
+          refreshExpiresIn: 86400 * 30,
+        })
+      }
+      else {
+        setTokenInfo({
+          token: fixedToken,
+          expiresIn: 86400 * 30, // 30天
+        })
+      }
+    }
+
     return {
       // 核心API方法
       login,
@@ -279,6 +301,7 @@ export const useTokenStore = defineStore(
       // 调试或特殊场景可能需要直接访问的信息
       tokenInfo,
       setTokenInfo,
+      setFixedToken,
     }
   },
   {

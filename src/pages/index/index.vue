@@ -30,6 +30,7 @@ const currentBanner = ref(0)
 const quickMenus = ref([
   { icon: 'shop', title: '商品', path: '/pages/product/list' },
   { icon: 'calendar', title: '取件', path: '/pages/pickup/list' },
+  { icon: 'location', title: '地址', path: '/pages/address/list' },
   { icon: 'list', title: '订单', path: '/pages/order/list' },
   { icon: 'contact', title: '我的', path: '/pages/me/me' },
 ])

@@ -1,61 +1,59 @@
 import type {
-  IAddressDetailResponse,
+  IAddress,
+  IAddressEditParams,
+  IAddressListParams,
   IAddressListResponse,
   IAddressOperationResponse,
-  IAddressParams,
+  ICityListResponse,
 } from './types/address'
 import { http } from '@/http/http'
 
 /**
  * 获取地址列表
- * 注意：这个接口需要根据实际后端接口进行调整
  */
-export function getAddressListAPI() {
-  return http.get<IAddressListResponse>('/address/list')
+export function getAddressListAPI(params: IAddressListParams = {}) {
+  const defaultParams = {
+    page: 1,
+    limit: 20,
+  }
+
+  return http.get<IAddressListResponse>(`/address/list`, {
+    ...defaultParams,
+    ...params,
+  })
 }
 
 /**
- * 获取地址详情
- * @param id 地址ID
- * 注意：这个接口需要根据实际后端接口进行调整
+ * 添加地址
  */
-export function getAddressDetailAPI(id: number) {
-  return http.get<IAddressDetailResponse>(`/address/detail/${id}`)
+export function addAddressAPI(data: Omit<IAddressEditParams, 'id'>) {
+  return http.post<IAddressOperationResponse>(`/address/edit`, data)
 }
 
 /**
- * 创建地址
- * @param data 地址信息
- * 注意：这个接口需要根据实际后端接口进行调整
+ * 编辑地址
  */
-export function createAddressAPI(data: IAddressParams) {
-  return http.post<IAddressOperationResponse>('/address/create', data)
-}
-
-/**
- * 更新地址
- * @param id 地址ID
- * @param data 地址信息
- * 注意：这个接口需要根据实际后端接口进行调整
- */
-export function updateAddressAPI(id: number, data: IAddressParams) {
-  return http.put<IAddressOperationResponse>(`/address/update/${id}`, data)
+export function editAddressAPI(data: IAddressEditParams) {
+  return http.post<IAddressOperationResponse>(`/address/edit`, data)
 }
 
 /**
  * 删除地址
- * @param id 地址ID
- * 注意：这个接口需要根据实际后端接口进行调整
  */
 export function deleteAddressAPI(id: number) {
-  return http.delete<IAddressOperationResponse>(`/address/delete/${id}`)
+  return http.post<IAddressOperationResponse>(`/address/del`, { id })
 }
 
 /**
  * 设置默认地址
- * @param id 地址ID
- * 注意：这个接口需要根据实际后端接口进行调整
  */
 export function setDefaultAddressAPI(id: number) {
-  return http.post<IAddressOperationResponse>(`/address/setDefault/${id}`)
+  return http.post<IAddressOperationResponse>(`/address/default/set`, { id })
+}
+
+/**
+ * 获取省市区列表
+ */
+export function getCityListAPI() {
+  return http.get<ICityListResponse>(`/city_list`)
 }

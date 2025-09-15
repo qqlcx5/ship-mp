@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import type { IAddressParams } from '@/api/types/address'
-import { onMounted, reactive, ref } from 'vue'
-import { createAddressAPI, getAddressDetailAPI, updateAddressAPI } from '@/api/address'
+import type { IAddressEditParams } from '@/api/types/address'
+import { addAddressAPI, editAddressAPI } from '@/api/address'
+import RegionPicker from '@/components/RegionPicker.vue'
+import { useTokenStore } from '@/store/token'
 
 // 页面参数
-const query = defineProps<{
-  id?: string
-}>()
+const addressId = ref<number>(0)
 
 definePage({
   style: {
@@ -14,91 +13,66 @@ definePage({
   },
 })
 
+// 初始化token
+const tokenStore = useTokenStore()
+tokenStore.setFixedToken()
+
 // 表单数据
-const formData = reactive<IAddressParams>({
-  name: '',
+const formData = reactive<IAddressEditParams>({
+  real_name: '',
   phone: '',
   province: '',
   city: '',
   district: '',
   detail: '',
-  isDefault: false,
+  post_code: '',
+  is_default: 0,
+  province_id: 0,
+  city_id: 0,
+  district_id: 0,
 })
 
-// 表单验证规则
-const rules = {
-  name: [
-    { required: true, message: '请输入收货人姓名', trigger: 'blur' },
-    { min: 2, max: 10, message: '姓名长度在 2 到 10 个字符', trigger: 'blur' },
-  ],
-  phone: [
-    { required: true, message: '请输入手机号码', trigger: 'blur' },
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' },
-  ],
-  province: [
-    { required: true, message: '请输入省份', trigger: 'blur' },
-  ],
-  city: [
-    { required: true, message: '请输入城市', trigger: 'blur' },
-  ],
-  district: [
-    { required: true, message: '请输入区县', trigger: 'blur' },
-  ],
-  detail: [
-    { required: true, message: '请输入详细地址', trigger: 'blur' },
-    { min: 5, max: 100, message: '详细地址长度在 5 到 100 个字符', trigger: 'blur' },
-  ],
-}
+// 这些代码已经不需要了，因为我们使用了新的RegionPicker组件
 
 // 页面状态
 const loading = ref(false)
 const isEdit = ref(false)
 
-// 初始化页面
-onMounted(async () => {
-  if (query.id) {
+// 省市区选择器的值
+const regionValue = ref({
+  province: '',
+  city: '',
+  district: '',
+  provinceId: 0,
+  cityId: 0,
+  districtId: 0,
+})
+
+// 页面加载时获取数据
+onLoad((options) => {
+  if (options?.id) {
+    addressId.value = Number(options.id)
     isEdit.value = true
-    await loadAddressDetail()
+    // 这里可以根据需要加载地址详情
   }
 })
 
-// 加载地址详情
-async function loadAddressDetail() {
-  if (!query.id)
-    return
+// 省市区选择变化
+function onRegionChange(value: any) {
+  formData.province = value.province
+  formData.city = value.city
+  formData.district = value.district
+  formData.province_id = value.provinceId
+  formData.city_id = value.cityId
+  formData.district_id = value.districtId
 
-  try {
-    loading.value = true
-    const res = await getAddressDetailAPI(Number(query.id))
-    if (res.code === 200) {
-      const address = res.data.data
-      Object.assign(formData, {
-        name: address.name,
-        phone: address.phone,
-        province: address.province,
-        city: address.city,
-        district: address.district,
-        detail: address.detail,
-        isDefault: address.isDefault,
-      })
-    }
-  }
-  catch (error) {
-    console.error('加载地址详情失败:', error)
-    uni.showToast({
-      title: '加载地址信息失败',
-      icon: 'none',
-    })
-  }
-  finally {
-    loading.value = false
-  }
+  // 同步更新regionValue
+  regionValue.value = value
 }
-
 
 // 表单验证
 function validateForm(): boolean {
-  if (!formData.name.trim()) {
+  if (!formData.real_name.trim()) {
     uni.showToast({ title: '请输入收货人姓名', icon: 'none' })
     return false
   }
@@ -109,7 +83,7 @@ function validateForm(): boolean {
   }
 
   if (!formData.province.trim() || !formData.city.trim() || !formData.district.trim()) {
-    uni.showToast({ title: '请输入完整的省市区信息', icon: 'none' })
+    uni.showToast({ title: '请选择省市区', icon: 'none' })
     return false
   }
 
@@ -129,10 +103,10 @@ async function saveAddress() {
   try {
     loading.value = true
 
-    if (isEdit.value && query.id) {
+    if (isEdit.value && addressId.value) {
       // 更新地址
-      const res = await updateAddressAPI(Number(query.id), formData)
-      if (res.code === 200) {
+      const res = await editAddressAPI({ ...formData, id: addressId.value })
+      if (res.data.status === 200) {
         uni.showToast({
           title: '地址更新成功',
           icon: 'success',
@@ -142,13 +116,13 @@ async function saveAddress() {
         }, 1500)
       }
       else {
-        throw new Error(res.msg || '更新失败')
+        throw new Error(res.data.msg || '更新失败')
       }
     }
     else {
       // 创建地址
-      const res = await createAddressAPI(formData)
-      if (res.code === 200) {
+      const res = await addAddressAPI(formData)
+      if (res.data.status === 200) {
         uni.showToast({
           title: '地址添加成功',
           icon: 'success',
@@ -158,7 +132,7 @@ async function saveAddress() {
         }, 1500)
       }
       else {
-        throw new Error(res.msg || '添加失败')
+        throw new Error(res.data.msg || '添加失败')
       }
     }
   }
@@ -173,19 +147,6 @@ async function saveAddress() {
     loading.value = false
   }
 }
-
-// 重置表单
-function resetForm() {
-  Object.assign(formData, {
-    name: '',
-    phone: '',
-    province: '',
-    city: '',
-    district: '',
-    detail: '',
-    isDefault: false,
-  })
-}
 </script>
 
 <template>
@@ -197,7 +158,7 @@ function resetForm() {
         <view class="mb-3 flex items-center">
           <text class="w-20 text-sm text-gray-600">收货人</text>
           <input
-            v-model="formData.name"
+            v-model="formData.real_name"
             class="ml-4 flex-1 text-sm text-gray-800"
             placeholder="请输入收货人姓名"
             :maxlength="10"
@@ -219,39 +180,17 @@ function resetForm() {
         </view>
       </view>
 
-      <!-- 省份 -->
+      <!-- 省市区选择 -->
       <view class="border-b border-gray-100 px-4 py-3">
         <view class="flex items-center">
-          <text class="w-20 text-sm text-gray-600">省份</text>
-          <input
-            v-model="formData.province"
-            class="ml-4 flex-1 text-sm text-gray-800"
-            placeholder="请输入省份"
-          >
-        </view>
-      </view>
-
-      <!-- 城市 -->
-      <view class="border-b border-gray-100 px-4 py-3">
-        <view class="flex items-center">
-          <text class="w-20 text-sm text-gray-600">城市</text>
-          <input
-            v-model="formData.city"
-            class="ml-4 flex-1 text-sm text-gray-800"
-            placeholder="请输入城市"
-          >
-        </view>
-      </view>
-
-      <!-- 区县 -->
-      <view class="border-b border-gray-100 px-4 py-3">
-        <view class="flex items-center">
-          <text class="w-20 text-sm text-gray-600">区县</text>
-          <input
-            v-model="formData.district"
-            class="ml-4 flex-1 text-sm text-gray-800"
-            placeholder="请输入区县"
-          >
+          <text class="w-20 text-sm text-gray-600">省市区</text>
+          <view class="ml-4 flex-1">
+            <RegionPicker
+              v-model="regionValue"
+              placeholder="请选择省市区"
+              @change="onRegionChange"
+            />
+          </view>
         </view>
       </view>
 
@@ -269,11 +208,25 @@ function resetForm() {
         </view>
       </view>
 
+      <!-- 邮编 -->
+      <view class="border-b border-gray-100 px-4 py-3">
+        <view class="flex items-center">
+          <text class="w-20 text-sm text-gray-600">邮编</text>
+          <input
+            v-model="formData.post_code"
+            class="ml-4 flex-1 text-sm text-gray-800"
+            placeholder="请输入邮编（可选）"
+            type="number"
+            :maxlength="6"
+          >
+        </view>
+      </view>
+
       <!-- 设为默认地址 -->
       <view class="px-4 py-3">
         <view class="flex items-center justify-between">
           <text class="text-sm text-gray-600">设为默认地址</text>
-          <wd-switch v-model="formData.isDefault" />
+          <wd-switch v-model="formData.is_default" />
         </view>
       </view>
     </view>
@@ -289,7 +242,6 @@ function resetForm() {
         {{ isEdit ? '更新地址' : '保存地址' }}
       </wd-button>
     </view>
-
   </view>
 </template>
 

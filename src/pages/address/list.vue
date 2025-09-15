@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
-import type { IAddress } from '@/api/types/address'
+// import type { IAddress } from '@/api/types/address' // 已移除未使用的导入
 import {
-  getAddressListAPI,
   deleteAddressAPI,
-  setDefaultAddressAPI
+  getAddressListAPI,
+  setDefaultAddressAPI,
 } from '@/api/address'
+import useRequest from '@/hooks/useRequest'
+import { useTokenStore } from '@/store/token'
 
 definePage({
   style: {
@@ -13,60 +14,22 @@ definePage({
   },
 })
 
-// 地址列表数据
-const addressList = ref<IAddress[]>([])
-const loading = ref(false)
+// 初始化token
+const tokenStore = useTokenStore()
+tokenStore.setFixedToken()
 
-// 页面初始化
-onMounted(() => {
-  loadAddressList()
+// 获取地址列表
+const { loading, data: addressData, run: loadAddressList } = useRequest(() => getAddressListAPI())
+
+// 地址列表
+const addressList = computed(() => {
+  return addressData.value?.data?.list || []
 })
 
-// 加载地址列表
-async function loadAddressList() {
-  try {
-    loading.value = true
-    const res = await getAddressListAPI()
-    if (res.code === 200) {
-      addressList.value = res.data.list || []
-    } else {
-      throw new Error(res.msg || '获取地址列表失败')
-    }
-  } catch (error: any) {
-    console.error('加载地址列表失败:', error)
-    uni.showToast({
-      title: error.message || '加载失败',
-      icon: 'none'
-    })
-    // 如果API调用失败，使用模拟数据作为后备
-    addressList.value = [
-      {
-        id: 1,
-        name: '张三',
-        phone: '138****8888',
-        province: '北京市',
-        city: '北京市',
-        district: '朝阳区',
-        detail: '望京街道科技园区A座1001室',
-        address: '北京市朝阳区望京街道科技园区A座1001室',
-        isDefault: true
-      },
-      {
-        id: 2,
-        name: '李四',
-        phone: '139****9999',
-        province: '上海市',
-        city: '上海市',
-        district: '浦东新区',
-        detail: '陆家嘴金融中心B座2002室',
-        address: '上海市浦东新区陆家嘴金融中心B座2002室',
-        isDefault: false
-      }
-    ]
-  } finally {
-    loading.value = false
-  }
-}
+// 页面加载时获取数据
+onLoad(() => {
+  loadAddressList()
+})
 
 // 新增地址
 function addAddress() {
@@ -87,22 +50,24 @@ async function deleteAddress(id: number) {
       if (res.confirm) {
         try {
           const apiRes = await deleteAddressAPI(id)
-          if (apiRes.code === 200) {
+          if (apiRes.data.status === 200) {
             uni.showToast({ title: '删除成功', icon: 'success' })
             // 重新加载列表
             await loadAddressList()
-          } else {
-            throw new Error(apiRes.msg || '删除失败')
           }
-        } catch (error: any) {
+          else {
+            throw new Error(apiRes.data.msg || '删除失败')
+          }
+        }
+        catch (error: any) {
           console.error('删除地址失败:', error)
           uni.showToast({
             title: error.message || '删除失败',
-            icon: 'none'
+            icon: 'none',
           })
         }
       }
-    }
+    },
   })
 }
 
@@ -110,18 +75,20 @@ async function deleteAddress(id: number) {
 async function setDefaultAddress(id: number) {
   try {
     const res = await setDefaultAddressAPI(id)
-    if (res.code === 200) {
+    if (res.data.status === 200) {
       uni.showToast({ title: '设置成功', icon: 'success' })
       // 重新加载列表
       await loadAddressList()
-    } else {
-      throw new Error(res.msg || '设置失败')
     }
-  } catch (error: any) {
+    else {
+      throw new Error(res.data.msg || '设置失败')
+    }
+  }
+  catch (error: any) {
     console.error('设置默认地址失败:', error)
     uni.showToast({
       title: error.message || '设置失败',
-      icon: 'none'
+      icon: 'none',
     })
   }
 }
@@ -130,8 +97,8 @@ async function setDefaultAddress(id: number) {
 <template>
   <view class="min-h-screen bg-gray-50">
     <!-- 头部操作栏 -->
-    <view class="flex items-center justify-between p-4 bg-white border-b border-gray-100">
-      <text class="text-lg font-semibold text-gray-800">收货地址</text>
+    <view class="flex items-center justify-between border-b border-gray-100 bg-white p-4">
+      <text class="text-lg text-gray-800 font-semibold">收货地址</text>
       <wd-button size="small" type="primary" @click="addAddress">
         <uni-icons type="plus" color="white" size="14" class="mr-1" />
         新增
@@ -139,17 +106,17 @@ async function setDefaultAddress(id: number) {
     </view>
 
     <!-- 地址列表 -->
-    <view class="space-y-4 p-4">
+    <view class="p-4 space-y-4">
       <!-- 加载状态 -->
-      <view v-if="loading" class="text-center py-20">
-        <wd-loading type="spinner" />
-        <text class="block mt-4 text-gray-500">加载中...</text>
+      <view v-if="loading" class="py-20 text-center">
+        <wd-loading />
+        <text class="mt-4 block text-gray-500">加载中...</text>
       </view>
 
       <!-- 空状态 -->
-      <view v-else-if="addressList.length === 0" class="text-center py-20">
+      <view v-else-if="addressList.length === 0" class="py-20 text-center">
         <uni-icons type="location" color="#d1d5db" size="48" />
-        <text class="block mt-4 text-gray-500">暂无地址</text>
+        <text class="mt-4 block text-gray-500">暂无地址</text>
         <wd-button type="primary" class="mt-4" @click="addAddress">
           添加地址
         </wd-button>
@@ -158,33 +125,35 @@ async function setDefaultAddress(id: number) {
       <view
         v-for="address in addressList"
         :key="address.id"
-        class="bg-white border border-gray-200 rounded-lg p-4 relative"
+        class="relative border border-gray-200 rounded-lg bg-white p-4"
       >
         <!-- 默认标签 -->
-        <view v-if="address.isDefault" class="absolute top-4 right-4">
-          <text class="text-xs bg-red-500 text-white px-2 py-1 rounded">默认</text>
+        <view v-if="address.is_default === 1" class="absolute right-4 top-4">
+          <text class="rounded bg-red-500 px-2 py-1 text-xs text-white">默认</text>
         </view>
 
         <!-- 地址信息 -->
-        <view :class="address.isDefault ? 'pr-12' : ''">
-          <view class="flex items-center mb-2">
-            <text class="font-medium text-gray-800 mr-2">{{ address.name }}</text>
+        <view :class="address.is_default === 1 ? 'pr-12' : ''">
+          <view class="mb-2 flex items-center">
+            <text class="mr-2 text-gray-800 font-medium">{{ address.real_name }}</text>
             <text class="text-sm text-gray-600">{{ address.phone }}</text>
           </view>
-          <text class="text-sm text-gray-600 leading-relaxed">{{ address.address }}</text>
+          <text class="text-sm text-gray-600 leading-relaxed">
+            {{ address.province }}{{ address.city }}{{ address.district }}{{ address.detail }}
+          </text>
         </view>
 
         <!-- 操作按钮 -->
-        <view class="flex justify-between items-center mt-4">
+        <view class="mt-4 flex items-center justify-between">
           <wd-button
-            v-if="!address.isDefault"
+            v-if="address.is_default !== 1"
             size="small"
             type="default"
             @click="setDefaultAddress(address.id)"
           >
             设为默认
           </wd-button>
-          <view v-else></view>
+          <view v-else />
 
           <view class="space-x-2">
             <wd-button size="small" type="primary" @click="editAddress(address.id)">

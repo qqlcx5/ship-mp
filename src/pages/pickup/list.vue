@@ -57,16 +57,7 @@ function viewDetail(id: number) {
 // 页面加载时获取数据
 onLoad(() => {
   loadCategories()
-  // 延迟获取取件列表，等分类加载完成后再获取第一个分类的数据
-  nextTick(() => {
-    setTimeout(() => {
-      const firstCategory = categoryData.value?.find(cat => cat.status === 1)
-      if (firstCategory) {
-        currentCategoryId.value = firstCategory.id
-        loadPickups()
-      }
-    }, 100)
-  })
+  loadPickups()
 })
 </script>
 
