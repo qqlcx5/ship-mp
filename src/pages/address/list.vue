@@ -23,7 +23,7 @@ const { loading, data: addressData, run: loadAddressList } = useRequest(() => ge
 
 // 地址列表
 const addressList = computed(() => {
-  return addressData.value?.data?.list || []
+  return addressData.value || []
 })
 
 // 页面加载时获取数据
@@ -50,13 +50,13 @@ async function deleteAddress(id: number) {
       if (res.confirm) {
         try {
           const apiRes = await deleteAddressAPI(id)
-          if (apiRes.data.status === 200) {
+          if (apiRes.status === 200) {
             uni.showToast({ title: '删除成功', icon: 'success' })
             // 重新加载列表
             await loadAddressList()
           }
           else {
-            throw new Error(apiRes.data.msg || '删除失败')
+            throw new Error(apiRes.msg || '删除失败')
           }
         }
         catch (error: any) {
@@ -75,13 +75,10 @@ async function deleteAddress(id: number) {
 async function setDefaultAddress(id: number) {
   try {
     const res = await setDefaultAddressAPI(id)
-    if (res.data.status === 200) {
+    addressData.value = []
+    if (res.status === 200) {
       uni.showToast({ title: '设置成功', icon: 'success' })
-      // 重新加载列表
       await loadAddressList()
-    }
-    else {
-      throw new Error(res.data.msg || '设置失败')
     }
   }
   catch (error: any) {
@@ -100,7 +97,6 @@ async function setDefaultAddress(id: number) {
     <view class="flex items-center justify-between border-b border-gray-100 bg-white p-4">
       <text class="text-lg text-gray-800 font-semibold">收货地址</text>
       <wd-button size="small" type="primary" @click="addAddress">
-        <uni-icons type="plus" color="white" size="14" class="mr-1" />
         新增
       </wd-button>
     </view>
@@ -129,7 +125,9 @@ async function setDefaultAddress(id: number) {
       >
         <!-- 默认标签 -->
         <view v-if="address.is_default === 1" class="absolute right-4 top-4">
-          <text class="rounded bg-red-500 px-2 py-1 text-xs text-white">默认</text>
+          <wd-button size="small" type="success">
+            默认
+          </wd-button>
         </view>
 
         <!-- 地址信息 -->
@@ -148,7 +146,7 @@ async function setDefaultAddress(id: number) {
           <wd-button
             v-if="address.is_default !== 1"
             size="small"
-            type="default"
+            type="info"
             @click="setDefaultAddress(address.id)"
           >
             设为默认

@@ -102,45 +102,11 @@ async function saveAddress() {
 
   try {
     loading.value = true
-
-    if (isEdit.value && addressId.value) {
-      // 更新地址
-      const res = await editAddressAPI({ ...formData, id: addressId.value })
-      if (res.data.status === 200) {
-        uni.showToast({
-          title: '地址更新成功',
-          icon: 'success',
-        })
-        setTimeout(() => {
-          uni.navigateBack()
-        }, 1500)
-      }
-      else {
-        throw new Error(res.data.msg || '更新失败')
-      }
-    }
-    else {
-      // 创建地址
-      const res = await addAddressAPI(formData)
-      if (res.data.status === 200) {
-        uni.showToast({
-          title: '地址添加成功',
-          icon: 'success',
-        })
-        setTimeout(() => {
-          uni.navigateBack()
-        }, 1500)
-      }
-      else {
-        throw new Error(res.data.msg || '添加失败')
-      }
-    }
-  }
-  catch (error: any) {
-    console.error('保存地址失败:', error)
+    const params = { ...formData, address: formData, id: addressId.value }
+    const res = isEdit.value && addressId.value ? await editAddressAPI(params) : await addAddressAPI(params)
     uni.showToast({
-      title: error.message || '保存失败',
-      icon: 'none',
+      title: isEdit.value && addressId.value ? '地址更新成功' : '地址添加成功',
+      icon: 'success',
     })
   }
   finally {
@@ -244,9 +210,3 @@ async function saveAddress() {
     </view>
   </view>
 </template>
-
-<style scoped>
-.min-h-20 {
-  min-height: 80rpx;
-}
-</style>
