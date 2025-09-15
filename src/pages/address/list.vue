@@ -27,7 +27,7 @@ const addressList = computed(() => {
 })
 
 // 页面加载时获取数据
-onLoad(() => {
+onShow(() => {
   loadAddressList()
 })
 

@@ -48,12 +48,49 @@ const regionValue = ref({
   districtId: 0,
 })
 
+// 模拟获取地址详情 API
+async function getAddressDetailAPI(id: number) {
+  // 模拟网络请求延迟
+  await new Promise(resolve => setTimeout(resolve, 200))
+  // 模拟返回的数据
+  return {
+    code: 200,
+    message: 'Success',
+    data: {
+      id: 4,
+      real_name: '12121',
+      phone: '18750941012',
+      province: '北京市',
+      city: '北京市',
+      district: '东城区',
+      detail: '232',
+      is_default: 1,
+      city_id: 2,
+    },
+  }
+}
+
 // 页面加载时获取数据
-onLoad((options) => {
+onLoad(async (options) => {
   if (options?.id) {
     addressId.value = Number(options.id)
     isEdit.value = true
-    // 这里可以根据需要加载地址详情
+    // 根据ID加载地址详情
+    const res = await getAddressDetailAPI(addressId.value)
+    if (res.code === 200) {
+      const addressDetail = res.data
+      // 使用 Object.assign 更新表单数据
+      Object.assign(formData, addressDetail)
+      // 更新省市区选择器的值
+      regionValue.value = {
+        province: addressDetail.province,
+        city: addressDetail.city,
+        district: addressDetail.district,
+        provinceId: 0, // 模拟数据中没有 province_id，暂时设为0
+        cityId: addressDetail.city_id,
+        districtId: 0, // 模拟数据中没有 district_id，暂时设为0
+      }
+    }
   }
 })
 
@@ -108,6 +145,7 @@ async function saveAddress() {
       title: isEdit.value && addressId.value ? '地址更新成功' : '地址添加成功',
       icon: 'success',
     })
+    uni.navigateBack()
   }
   finally {
     loading.value = false
