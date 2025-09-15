@@ -1,6 +1,7 @@
 ---
-alwaysApply: false
+alwaysApply: true
 ---
+
 - **必须做的事**：
   - 所有交互回答都使用中文
   - 深入理解需求本质，而不仅仅是表面问题。
