@@ -28,7 +28,17 @@ export interface IUserInfoRes {
   username: string
   nickname: string
   avatar?: string
+  phone?: string // Add phone number to user info
   [key: string]: any // 允许其他扩展字段
+}
+
+/**
+ * 绑定手机号
+ */
+export interface IBindPhone {
+  encryptedData: string
+  iv: string
+  code?: string
 }
 
 // 认证存储数据结构

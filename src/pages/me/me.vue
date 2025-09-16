@@ -31,6 +31,23 @@ async function handleLogin() {
   // #endif
 }
 
+// 获取用户手机号
+function handleGetPhoneNumber(e: any) {
+  if (e.detail.errMsg === 'getPhoneNumber:fail user deny') {
+    uni.showToast({
+      title: '用户拒绝授权',
+      icon: 'none',
+    })
+  }
+  else if (e.detail.errMsg === 'getPhoneNumber:ok') {
+    console.log('微信登录-手机号: ', e.detail)
+    tokenStore.wxLogin({
+      encryptedData: e.detail.encryptedData,
+      iv: e.detail.iv,
+    })
+  }
+}
+
 // 退出登录
 function handleLogout() {
   uni.showModal({
@@ -99,12 +116,15 @@ function handleMenuItem(item: any) {
 
     <!-- 登录/退出登录按钮 -->
     <view class="mt-8 p-4">
-      <wd-button v-if="tokenStore.hasLogin" type="error" block @click="handleLogout">
+      <button v-if="tokenStore.hasLogin" type="error" block @click="handleLogout">
         退出登录
-      </wd-button>
-      <wd-button v-else type="primary" block @click="handleLogin">
+      </button>
+      <button
+        v-else type="primary" open-type="getPhoneNumber"
+        @getphonenumber="handleGetPhoneNumber"
+      >
         登录
-      </wd-button>
+      </button>
     </view>
   </view>
 </template>

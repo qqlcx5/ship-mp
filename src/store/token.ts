@@ -6,7 +6,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue' // 修复：导入 computed
 import {
   login as _login,
-  logout as _logout,
+  // logout as _logout,
   refreshToken as _refreshToken,
   wxLogin as _wxLogin,
   getWxCode,
@@ -131,13 +131,14 @@ export const useTokenStore = defineStore(
      * （各有利弊，看业务场景和系统复杂度），这里使用2个接口返回的来模拟
      * @returns 登录结果
      */
-    const wxLogin = async () => {
+    const wxLogin = async (loginForm) => {
+      console.log('微信登录-form: ', loginForm)
       try {
         // 获取微信小程序登录的code
-        const code = await getWxCode()
-        console.log('微信登录-code: ', code)
-        const res = await _wxLogin(code)
-        console.log('微信登录-res: ', res)
+        const resd = await getWxCode()
+        console.log('微信登录-code: ', resd)
+        const res = await _wxLogin({ ...loginForm, code: resd.code })
+        console.log('_wxLogin_wxLogin---', res)
         await _postLogin(res)
         uni.showToast({
           title: '登录成功',

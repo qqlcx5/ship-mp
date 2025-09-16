@@ -1,4 +1,4 @@
-import type { IAuthLoginRes, ICaptcha, IDoubleTokenRes, IUpdateInfo, IUpdatePassword, IUserInfoRes } from './types/login'
+import type { IAuthLoginRes, IBindPhone, ICaptcha, IDoubleTokenRes, IUpdateInfo, IUpdatePassword, IUserInfoRes } from './types/login'
 import { http } from '@/http/http'
 
 /**
@@ -80,6 +80,14 @@ export function getWxCode() {
  * @param params 微信登录参数，包含code
  * @returns Promise 包含登录结果
  */
-export function wxLogin(data: { code: string }) {
+export function wxOpenId(data: { code: string }) {
   return http.get<IAuthLoginRes>(`/v2/routine/auth_type?code=${data.code}`)
+}
+
+/**
+ * 绑定手机号
+ * @param data 包含encryptedData和iv以及code
+ */
+export function wxLogin(data: IBindPhone) {
+  return http.post<IAuthLoginRes>('/v2/routine/auth_binding_phone', data)
 }
