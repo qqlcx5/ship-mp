@@ -86,7 +86,7 @@ async function doLogin() {
 </script>
 
 <template>
-  <view class="login mt-10 flex items-center justify-center from-gray-50 to-white bg-gradient-to-b">
+  <view class="login flex items-center justify-center from-gray-50 to-white bg-gradient-to-b pt-[20vh]">
     <!-- 卡片 -->
     <view class="max-w-md w-3/5 rounded-2xl bg-white p-8 shadow-lg">
       <!-- 头像占位 -->
