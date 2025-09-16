@@ -160,7 +160,7 @@ async function setDefaultAddress(id: number) {
             <wd-button size="small" type="primary" @click="editAddress(address.id)">
               编辑
             </wd-button>
-            <wd-button size="small" type="error" @click="deleteAddress(address.id)">
+            <wd-button size="small" type="error" class="ml-2" @click="deleteAddress(address.id)">
               删除
             </wd-button>
           </view>

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { IAddressEditParams } from '@/api/types/address'
-import { addAddressAPI, editAddressAPI } from '@/api/address'
+import { addAddressAPI, editAddressAPI, getAddressDetailAPI } from '@/api/address'
 import RegionPicker from '@/components/RegionPicker.vue'
 
 // 页面参数
@@ -8,7 +8,7 @@ const addressId = ref<number>(0)
 
 definePage({
   style: {
-    navigationBarTitleText: '编辑地址',
+    navigationBarTitleText: '新增地址',
   },
 })
 
@@ -43,48 +43,23 @@ const regionValue = ref({
   districtId: 0,
 })
 
-// 模拟获取地址详情 API
-async function getAddressDetailAPI(id: number) {
-  // 模拟网络请求延迟
-  await new Promise(resolve => setTimeout(resolve, 200))
-  // 模拟返回的数据
-  return {
-    code: 200,
-    message: 'Success',
-    data: {
-      id: 10,
-      real_name: '标题1111',
-      phone: '17346326132',
-      province: '内蒙古自治区',
-      city: '呼和浩特市',
-      district: '市辖区',
-      detail: '发广告发广告发广告发广告',
-      is_default: 0,
-      city_id: 99538,
-    },
-  }
-}
-
 // 页面加载时获取数据
 onLoad(async (options) => {
   if (options?.id) {
     addressId.value = Number(options.id)
     isEdit.value = true
-    // 根据ID加载地址详情
-    const res = await getAddressDetailAPI(addressId.value)
-    if (res.code === 200) {
-      const addressDetail = res.data
-      // 使用 Object.assign 更新表单数据
-      Object.assign(formData, addressDetail)
-      // 更新省市区选择器的值
-      regionValue.value = {
-        province: addressDetail.province,
-        city: addressDetail.city,
-        district: addressDetail.district,
-        provinceId: 0, // 模拟数据中没有 province_id，暂时设为0
-        cityId: addressDetail.city_id,
-        districtId: 0, // 模拟数据中没有 district_id，暂时设为0
-      }
+    const data = await getAddressDetailAPI(addressId.value)
+    const addressDetail = data
+    // 使用 Object.assign 更新表单数据
+    Object.assign(formData, addressDetail)
+    // 更新省市区选择器的值
+    regionValue.value = {
+      province: addressDetail.province,
+      city: addressDetail.city,
+      district: addressDetail.district,
+      provinceId: 0, // 模拟数据中没有 province_id，暂时设为0
+      cityId: addressDetail.city_id,
+      districtId: 0, // 模拟数据中没有 district_id，暂时设为0
     }
   }
 })

@@ -1,5 +1,4 @@
 import type {
-  IAddress,
   IAddressEditParams,
   IAddressListParams,
   IAddressListResponse,
@@ -35,6 +34,9 @@ export function addAddressAPI(data: Omit<IAddressEditParams, 'id'>) {
  */
 export function editAddressAPI(data: IAddressEditParams) {
   return http.post<IAddressOperationResponse>(`/address/edit`, data)
+}
+export function getAddressDetailAPI(id: number) {
+  return http.get<IAddressOperationResponse>(`/address/detail/${id}`)
 }
 
 /**

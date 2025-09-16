@@ -81,5 +81,5 @@ export function getWxCode() {
  * @returns Promise 包含登录结果
  */
 export function wxLogin(data: { code: string }) {
-  return http.post<IAuthLoginRes>('/auth/wxLogin', data)
+  return http.get<IAuthLoginRes>(`/v2/routine/auth_type?code=${data.code}`)
 }

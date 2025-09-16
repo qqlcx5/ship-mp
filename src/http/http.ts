@@ -28,9 +28,9 @@ export function http<T>(options: CustomRequestOptions) {
           res.statusCode = 401
         if (res.statusCode >= 200 && res.statusCode < 300) {
           // 2.1  处理业务逻辑错误
-          const { code = 0, message, data } = res.data as IResponse<T>
+          const { code = 0, msg, data = null } = res.data as IResponse<T>
           if (code !== ResultEnum.Success0 && code !== ResultEnum.Success200) {
-            throw new Error(`请求错误[${code}]：${message}`)
+            throw new Error(`请求错误[${code}]：${msg}`)
           }
           return resolve(data as T)
         }
