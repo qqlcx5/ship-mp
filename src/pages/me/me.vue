@@ -38,7 +38,7 @@ function handleLogout() {
     content: '确定要退出登录吗？',
     success: (res) => {
       if (res.confirm) {
-        // useTokenStore().logout()
+        useTokenStore().logout()
         uni.showToast({
           title: '退出登录成功',
           icon: 'success',

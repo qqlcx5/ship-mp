@@ -6,11 +6,19 @@ import {
   setDefaultAddressAPI,
 } from '@/api/address'
 import useRequest from '@/hooks/useRequest'
+import { useTokenStore } from '@/store/token'
 
 definePage({
   style: {
     navigationBarTitleText: '收货地址',
   },
+})
+
+// 初始化token
+const tokenStore = useTokenStore()
+tokenStore.setTokenInfo({
+  token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6Ind3dy5hbmFoYWltdS5zdG9yZSIsImF1ZCI6Ind3dy5hbmFoYWltdS5zdG9yZSIsImlhdCI6MTc1NzczMzU5MCwibmJmIjoxNzU3NzMzNTkwLCJleHAiOjE3NjAzMjU1OTAsImp0aSI6eyJpZCI6MywidHlwZSI6ImFwaSJ9fQ.aZSOW5E8Y5oG5EeyefBPJ89YolCSTfPeVjbf2uAyU_I',
+  expiresIn: 86400 * 30, // 30天
 })
 
 // 获取地址列表
