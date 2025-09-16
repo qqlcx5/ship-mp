@@ -1,0 +1,46 @@
+---
+description: "路由系统相关规则和参考"
+globs: "**/router/**,**/pages/**"
+---
+
+# 路由系统规范
+
+## 路由实现参考
+项目路由系统实现参考：[router.txt](mdc:codes/router.txt)
+
+## 路由特性
+- 支持登录鉴权的页面跳转
+- 自动处理登录弹窗和重定向
+- Promise 封装的 uni-app 导航 API
+- 全局 Router 插件注入
+
+## 使用方式
+```vue
+<script setup>
+import { useRouter } from '@/router'
+const router = useRouter()
+
+// 页面跳转
+await router.navigateTo({ url: '/pages/user/profile' })
+
+// Tab 切换
+await router.switchTab({ url: '/pages/index/index' })
+
+// 重定向到首页
+await router.redirectTo({ url: '/pages/index/index' })
+
+
+// 返回上一页
+await router.back()
+</script>
+```
+
+## 约定式路由
+- 文件名决定路由路径
+- 页面配置在 `route-block` 中设置
+- 自动生成到 [pages.json](mdc:src/pages.json)
+
+## 路由拦截
+- 基于 `authPages` 数组配置需要登录的页面
+- 自动弹出登录框处理未登录状态
+- 支持登录后自动跳转到目标页面
