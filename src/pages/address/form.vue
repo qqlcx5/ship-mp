@@ -2,7 +2,6 @@
 import type { IAddressEditParams } from '@/api/types/address'
 import { addAddressAPI, editAddressAPI } from '@/api/address'
 import RegionPicker from '@/components/RegionPicker.vue'
-import { useTokenStore } from '@/store/token'
 
 // 页面参数
 const addressId = ref<number>(0)
@@ -12,10 +11,6 @@ definePage({
     navigationBarTitleText: '编辑地址',
   },
 })
-
-// 初始化token
-const tokenStore = useTokenStore()
-tokenStore.setFixedToken()
 
 // 表单数据
 const formData = reactive<IAddressEditParams>({

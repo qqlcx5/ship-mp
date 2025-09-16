@@ -6,17 +6,12 @@ import {
   setDefaultAddressAPI,
 } from '@/api/address'
 import useRequest from '@/hooks/useRequest'
-import { useTokenStore } from '@/store/token'
 
 definePage({
   style: {
     navigationBarTitleText: '收货地址',
   },
 })
-
-// 初始化token
-const tokenStore = useTokenStore()
-tokenStore.setFixedToken()
 
 // 获取地址列表
 const { loading, data: addressData, run: loadAddressList } = useRequest(() => getAddressListAPI())

@@ -22,6 +22,10 @@ export function http<T>(options: CustomRequestOptions) {
       // 响应成功
       success: async (res) => {
         // 状态码 2xx，参考 axios 的设计
+        // 拦截处理登录过期状态码
+        // @ts-expect-error 忽略类型错误
+        if (res?.data?.status === 110002)
+          res.statusCode = 401
         if (res.statusCode >= 200 && res.statusCode < 300) {
           // 2.1  处理业务逻辑错误
           const { code = 0, message, data } = res.data as IResponse<T>
@@ -35,7 +39,7 @@ export function http<T>(options: CustomRequestOptions) {
           const tokenStore = useTokenStore()
           if (!isDoubleTokenMode) {
             // 未启用双token策略，清理用户信息，跳转到登录页
-            tokenStore.logout()
+            // tokenStore.logout()
             uni.navigateTo({ url: LOGIN_PAGE })
             return reject(res)
           }
