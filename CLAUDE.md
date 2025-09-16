@@ -2,8 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
   - **必须做的事**：
-  - 在写完整个代码之前，不要问任何澄清问题，从头到尾写完代码
   - 所有交互使用中文回答
+  - 在写完整个代码前，不要问任何澄清问题，从头到尾写完代码
   - 每个任务必须创建 todo 列表
   - 深入理解需求本质，识别根本问题
   - 发现并指出任何重复代码或逻辑（DRY原则）

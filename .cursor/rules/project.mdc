@@ -62,5 +62,42 @@ const { loading, error, data, run } = useRequest<IFooItem>(() => getFooAPI('参�
 </script>
 ```
 
-### 组件库
-优先使用 wot-design-uni 组件库 和 z-paging
+### 组件库优先级
+1. uni-app 内置组件
+4. z-paging 分页组件
+2. wot-design-uni 组件库
+
+## UnoCSS 示例
+```vue
+<template>
+  <!-- 布局 -->
+  <view class="flex flex-col items-center justify-center">
+    <!-- 间距 -->
+    <view class="p-4 m-2 px-6 py-3">
+      <!-- 尺寸 -->
+      <view class="w-full h-20 max-w-sm">
+        <!-- 颜色 -->
+        <view class="bg-blue-500 text-white">
+          <!-- 圆角和阴影 -->
+          <view class="rounded-lg shadow-md">
+            内容
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+```
+
+## 响应式设计
+```vue
+<template>
+  <!-- 响应式布局 -->
+  <view class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <!-- 响应式文字大小 -->
+    <view class="text-sm md:text-base lg:text-lg">
+      响应式文本
+    </view>
+  </view>
+</template>
+```

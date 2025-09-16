@@ -1,0 +1,74 @@
+---
+globs: **/store/**
+description: Pinia 状态管理规范
+---
+
+# Pinia 状态管理规范
+
+## Store 文件组织
+- Store 文件放在 [src/store/](mdc:src/store/) 目录下
+- 使用 `defineStore` 定义 store
+- 支持持久化存储
+
+## Store 定义规范
+```typescript
+// src/store/user.ts
+export const useUserStore = defineStore('user', () => {
+  // 状态
+  const userInfo = ref<IUserInfo | null>(null)
+  const token = ref<string>('')
+
+  // 计算属性
+  const isLoggedIn = computed(() => !!token.value)
+
+  // 方法
+  const setUserInfo = (info: IUserInfo) => {
+    userInfo.value = info
+  }
+
+  const setToken = (newToken: string) => {
+    token.value = newToken
+  }
+
+  const logout = () => {
+    userInfo.value = null
+    token.value = ''
+  }
+
+  return {
+    // 只读状态
+    userInfo: readonly(userInfo),
+    token: readonly(token),
+    isLoggedIn,
+    // 方法
+    setUserInfo,
+    setToken,
+    logout
+  }
+}, {
+  persist: true // 持久化存储
+})
+```
+
+## Store 使用规范
+在组件中使用：
+```vue
+<script setup lang="ts">
+import { useUserStore } from '@/store/user'
+
+const userStore = useUserStore()
+
+// 响应式访问
+const { userInfo, isLoggedIn } = storeToRefs(userStore)
+
+// 方法调用
+const handleLogin = () => {
+  userStore.setToken('new-token')
+}
+</script>
+```
+
+## 主题和配置 Store
+- [src/store/theme.ts](mdc:src/store/theme.ts) - 主题配置
+- [src/store/token.ts](mdc:src/store/token.ts) - Token管理
+- [src/store/index.ts](mdc:src/store/index.ts) - 统一导出
