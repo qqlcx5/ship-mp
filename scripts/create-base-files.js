@@ -8,8 +8,8 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const manifest = {
-  name: 'minimal',
-  description: 'minimal 电商',
+  name: 'unibest',
+  description: 'unibest - 最好的 uniapp 开发模板',
   versionName: '1.0.0',
   versionCode: '100',
 }
@@ -19,7 +19,7 @@ const pages = {
     {
       path: 'pages/index/index',
       style: {
-        navigationBarTitleText: 'minimal',
+        navigationBarTitleText: 'uni-app',
       },
     },
   ],
