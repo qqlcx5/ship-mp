@@ -12,6 +12,9 @@ import { isDoubleTokenRes, isSingleTokenRes } from '@/api/types/login'
 import { isDoubleTokenMode } from '@/utils'
 import { useUserStore } from './user'
 
+const APPID = 'wxe1d9438586f2179a'
+const SECRET = '1234567890abcdef1234567890abcdef1234567890'
+
 // 初始化状态
 const tokenInfoState = isDoubleTokenMode
   ? {

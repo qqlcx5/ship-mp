@@ -86,14 +86,29 @@ async function doLogin() {
 </script>
 
 <template>
-  <view class="login">
-    <!-- 本页面是非MP的登录页，主要用于 h5 和 APP -->
-    <view class="text-center">
-      登录页
+  <view class="login mt-10 flex items-center justify-center from-gray-50 to-white bg-gradient-to-b">
+    <!-- 卡片 -->
+    <view class="max-w-md w-3/5 rounded-2xl bg-white p-8 shadow-lg">
+      <!-- 头像占位 -->
+      <view class="mx-auto mb-6 h-18 w-18 flex items-center justify-center rounded-full from-blue-400 to-indigo-500 bg-gradient-to-r">
+        <text class="i-carbon-user text-3xl text-white" />
+      </view>
+
+      <view class="mb-2 text-center text-lg text-gray-700 font-semibold">
+        欢迎回来
+      </view>
+      <view class="mb-8 text-center text-sm text-gray-400">
+        登录后可同步您的数据
+      </view>
+
+      <!-- 登录按钮 -->
+      <button
+        class="h-12 w-full rounded-full from-blue-500 to-indigo-600 bg-gradient-to-r text-white font-medium shadow-md transition-transform active:scale-95"
+        @click="doLogin"
+      >
+        一键登录
+      </button>
     </view>
-    <button class="mt-4 w-40 text-center" @click="doLogin">
-      点击模拟登录
-    </button>
   </view>
 </template>
 

@@ -1,7 +1,7 @@
 import type {
-  ICategory,
+  // ICategory,
+  // IProduct,
   ICategoryResponse,
-  IProduct,
   IProductDetailResponse,
   IProductListParams,
   IProductListResponse,

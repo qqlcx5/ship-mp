@@ -154,12 +154,12 @@ onLoad(() => {
       >
         <image :src="product.image" class="h-32 w-full object-cover" mode="aspectFill" />
         <view class="p-3">
-          <text class="mb-1 block truncate text-sm text-gray-800 font-medium">{{ product.store_name }}</text>
+          <text class="mb-1 block truncate text-sm text-gray-800 font-medium">{{ product.store_name || '' }}</text>
           <text class="mb-2 block text-xs text-gray-500">{{ product.collator }}</text>
 
           <view class="mb-2 flex items-center justify-between">
             <view>
-              <text class="text-red-500 font-semibold">¥{{ formatPrice(product.price) }}</text>
+              <text class="text-red-500 font-semibold">¥{{ product.price || 0 }}</text>
             </view>
             <text class="text-xs text-gray-500">销售{{ product.sales }}+</text>
           </view>
