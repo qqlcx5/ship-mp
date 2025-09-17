@@ -21,7 +21,7 @@ const { loading, data: productData, run: loadProductDetail } = useRequest<IProdu
 
 // 商品详情
 const productDetail = computed(() => {
-  return productData.value?.data?.storeInfo
+  return productData.value?.storeInfo
 })
 
 // 商品图片列表（如果只有一张图片，则只显示一张）
@@ -214,34 +214,30 @@ function downloadFile() {
         </view>
 
         <!-- 数量选择 -->
-        <view class="mb-6">
-          <text class="mb-2 block text-sm text-gray-800 font-medium">数量</text>
+        <view class="flex items-center">
+          <view class="mr-2 block text-lg text-gray-800 font-medium">
+            数量
+          </view>
           <view class="flex items-center">
             <wd-button
+              icon="decrease"
               size="small"
               type="default"
               :disabled="quantity <= 1"
               @click="adjustQuantity(-1)"
-            >
-              <uni-icons type="minus" size="24" />
-            </wd-button>
+            />
             <view class="text-md px-2">
               {{ quantity }}
             </view>
-            <wd-button size="small" type="default" @click="adjustQuantity(1)">
-              <uni-icons type="plus" size="24" />
-            </wd-button>
+            <wd-button icon="add" size="small" type="default" @click="adjustQuantity(1)" />
           </view>
         </view>
       </view>
 
       <!-- 底部操作栏 -->
       <view class="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-4">
-        <view class="flex space-x-3">
-          <wd-button type="default" class="flex-1" @click="addToCart">
-            加入购物车
-          </wd-button>
-          <wd-button type="primary" class="flex-1" @click="buyNow">
+        <view class="flex">
+          <wd-button custom-class="flex-1" size="medium" type="primary" @click="buyNow">
             立即购买
           </wd-button>
         </view>
