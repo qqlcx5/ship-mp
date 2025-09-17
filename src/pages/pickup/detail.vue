@@ -21,6 +21,19 @@ const pickupDetail = computed(() => {
   return pickupData.value
 })
 
+// 折叠状态管理
+const expandedCategories = ref<Record<string, boolean>>({})
+
+// 切换分类展开/折叠状态
+function toggleCategory(category: string) {
+  expandedCategories.value[category] = !expandedCategories.value[category]
+}
+
+// 检查分类是否展开
+function isCategoryExpanded(category: string) {
+  return expandedCategories.value[category] !== false
+}
+
 onLoad((options) => {
   if (options?.id) {
     pickupId.value = Number(options.id)
@@ -34,6 +47,7 @@ function downloadFile() {
     return
 
   uni.downloadFile({
+    // url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
     url: pickupDetail.value.desc_file_url,
     success: (res) => {
       if (res.statusCode === 200) {
@@ -83,6 +97,45 @@ function downloadFile() {
           <view>
             <text class="block text-blue-800 font-semibold">{{ pickupDetail.name }}</text>
             <text class="text-sm text-blue-600">整理人：{{ pickupDetail.collator }}</text>
+          </view>
+        </view>
+      </view>
+      <!-- 项目列表 -->
+      <view v-if="pickupDetail.item_list && Object.keys(pickupDetail.item_list).length > 0" class="mx-4 mt-4 border border-gray-200 rounded-lg bg-white p-4">
+        <text class="mb-4 block text-lg text-gray-800 font-semibold">项目列表</text>
+        <view class="space-y-4">
+          <view v-for="(items, category) in pickupDetail.item_list" :key="category" class="border border-gray-100 rounded-lg from-blue-50 to-indigo-50 bg-gradient-to-r p-4 shadow-sm">
+            <!-- 分类标题 - 可点击折叠/展开 -->
+            <view class="flex cursor-pointer items-center justify-between" @click="toggleCategory(category)">
+              <view class="flex items-center">
+                <view class="mr-2 h-2 w-2 rounded-full bg-blue-500" />
+                <text class="text-base text-gray-800 font-bold">分类 {{ category }}</text>
+              </view>
+              <uni-icons
+                :type="isCategoryExpanded(category) ? 'up' : 'down'"
+                color="#6366f1"
+                size="16"
+                class="transition-transform duration-200"
+              />
+            </view>
+
+            <!-- 可折叠的内容区域 -->
+            <view v-show="isCategoryExpanded(category)" class="mt-3 transition-all duration-300">
+              <view v-for="(item, index) in items" :key="index" class="ml-2 border-l-2 border-blue-200 py-2 pl-4">
+                <view v-for="(values, key) in item" :key="key" class="mb-3 last:mb-0">
+                  <view class="mb-2 flex items-center">
+                    <uni-icons type="flag" color="#6366f1" size="14" class="mr-2" />
+                    <text class="text-sm text-gray-700 font-semibold">{{ key }}</text>
+                  </view>
+                  <view class="ml-6 flex flex-wrap gap-2">
+                    <view v-for="(value, i) in values" :key="i" class="border border-gray-200 rounded-lg bg-white px-3 py-1.5 text-xs text-gray-600 shadow-sm transition-shadow hover:shadow-md">
+                      <uni-icons type="checkmarkempty" color="#10b981" size="10" class="mr-1" />
+                      {{ value }}
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </view>
           </view>
         </view>
       </view>
