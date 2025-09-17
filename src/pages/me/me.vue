@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
-import { LOGIN_PAGE } from '@/router/config'
 import { useTokenStore, useUserStore } from '@/store'
 
 definePage({
@@ -64,7 +63,7 @@ function handleMenuItem(item: any) {
     <view class="from-gray-50 to-white bg-gradient-to-r p-4">
       <view v-if="tokenStore.hasLogin" class="flex items-center space-x-4">
         <image
-          :src="userInfo.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face'"
+          :src="userInfo.avatar || 'https://images.unsplash.com/photo-1757373406236-f03e14c3e5c5?w=80&h=80&fit=crop&crop=face'"
           class="h-16 w-16 rounded-full"
           mode="aspectFill"
         />
@@ -75,13 +74,12 @@ function handleMenuItem(item: any) {
       </view>
       <view v-else class="flex items-center space-x-4">
         <image
-          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face"
+          src="https://images.unsplash.com/photo-1757373406236-f03e14c3e5c5?w=80&h=80&fit=crop&crop=face"
           class="h-16 w-16 rounded-full"
           mode="aspectFill"
         />
-        <view>
-          <text class="block text-lg text-gray-800 font-semibold">未登录</text>
-          <text class="text-sm text-gray-500">请先登录</text>
+        <view class="text-lg text-gray-500">
+          请先登录
         </view>
       </view>
     </view>

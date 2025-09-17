@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-// import type { IAddress } from '@/api/types/address' // 已移除未使用的导入
+import type { IAddressListResponse } from '@/api/types/address'
 import {
   deleteAddressAPI,
   getAddressListAPI,
@@ -22,7 +22,7 @@ tokenStore.setTokenInfo({
 })
 
 // 获取地址列表
-const { loading, data: addressData, run: loadAddressList } = useRequest(() => getAddressListAPI())
+const { loading, data: addressData, run: loadAddressList } = useRequest<IAddressListResponse, []>(() => getAddressListAPI())
 
 // 地址列表
 const addressList = computed(() => {
@@ -51,24 +51,9 @@ async function deleteAddress(id: number) {
     content: '确定要删除这个地址吗？',
     success: async (res) => {
       if (res.confirm) {
-        try {
-          const apiRes = await deleteAddressAPI(id)
-          if (apiRes.status === 200) {
-            uni.showToast({ title: '删除成功', icon: 'success' })
-            // 重新加载列表
-            await loadAddressList()
-          }
-          else {
-            throw new Error(apiRes.msg || '删除失败')
-          }
-        }
-        catch (error: any) {
-          console.error('删除地址失败:', error)
-          uni.showToast({
-            title: error.message || '删除失败',
-            icon: 'none',
-          })
-        }
+        await deleteAddressAPI(id)
+        uni.showToast({ title: '删除成功', icon: 'success' })
+        await loadAddressList()
       }
     },
   })
@@ -76,21 +61,9 @@ async function deleteAddress(id: number) {
 
 // 设为默认地址
 async function setDefaultAddress(id: number) {
-  try {
-    const res = await setDefaultAddressAPI(id)
-    addressData.value = []
-    if (res.status === 200) {
-      uni.showToast({ title: '设置成功', icon: 'success' })
-      await loadAddressList()
-    }
-  }
-  catch (error: any) {
-    console.error('设置默认地址失败:', error)
-    uni.showToast({
-      title: error.message || '设置失败',
-      icon: 'none',
-    })
-  }
+  await setDefaultAddressAPI(id)
+  uni.showToast({ title: '设置成功', icon: 'success' })
+  await loadAddressList()
 }
 </script>
 
@@ -139,7 +112,7 @@ async function setDefaultAddress(id: number) {
             <text class="mr-2 text-gray-800 font-medium">{{ address.real_name }}</text>
             <text class="text-sm text-gray-600">{{ address.phone }}</text>
           </view>
-          <text class="text-sm text-gray-600 leading-relaxed">
+          <text class="break-all text-sm text-gray-600 leading-relaxed">
             {{ address.province }}{{ address.city }}{{ address.district }}{{ address.detail }}
           </text>
         </view>
@@ -156,7 +129,7 @@ async function setDefaultAddress(id: number) {
           </wd-button>
           <view v-else />
 
-          <view class="space-x-2">
+          <view class="flex items-center gap-2">
             <wd-button size="small" type="primary" @click="editAddress(address.id)">
               编辑
             </wd-button>
