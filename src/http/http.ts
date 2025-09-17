@@ -27,8 +27,8 @@ export function http<T>(options: CustomRequestOptions) {
         if (res?.data?.status === 110002 || res?.status === 110002)
           res.statusCode = 401
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          const { code = 0, msg, data = null } = res.data as IResponse<T>
-          console.log('http 响应', code, msg, data, msg !== 'success')
+          const { code = 0, msg = 'success', data = null } = res.data as IResponse<T>
+          console.log('http 响应', code, msg, data, res, msg !== 'success')
 
           msg !== 'success' && uni.showToast({
             title: msg,

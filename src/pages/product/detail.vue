@@ -94,7 +94,12 @@ async function buyNow() {
     const cartResult = await addToCartAPI({
       cartNum: quantity.value,
       productId: productDetail.value.id,
+      new: 1,
+      uniqueld: '0',
+      virtual_type: 0,
     })
+    console.log('cartResult', cartResult)
+
     if (!cartResult?.cartId)
       return
     // 跳转到订单确认页面
