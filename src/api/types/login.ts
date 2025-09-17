@@ -5,6 +5,7 @@ export type AuthMode = 'single' | 'double'
 export interface ISingleTokenRes {
   token: string
   expiresIn: number // 有效期(秒)
+  expires_time?: number // 有效期(秒)
 }
 
 // 双Token响应类型
@@ -13,6 +14,7 @@ export interface IDoubleTokenRes {
   refreshToken: string
   accessExpiresIn: number // 访问令牌有效期(秒)
   refreshExpiresIn: number // 刷新令牌有效期(秒)
+  expires_time?: number // 有效期(秒)
 }
 
 /**

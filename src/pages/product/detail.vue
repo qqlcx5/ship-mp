@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import type { IProduct } from '@/api/types/product'
+import type { IProductDetailResponse } from '@/api/types/product'
+import { addToCart as addToCartAPI } from '@/api/cart'
 import { getProductDetailAPI } from '@/api/product'
 import useRequest from '@/hooks/useRequest'
 
@@ -14,13 +15,13 @@ const currentImageIndex = ref(0)
 const quantity = ref(1)
 
 // 获取商品详情
-const { loading, data: productData, run: loadProductDetail } = useRequest<{ storeInfo: IProduct }>(() =>
+const { loading, data: productData, run: loadProductDetail } = useRequest<IProductDetailResponse>(() =>
   getProductDetailAPI(productId.value),
 )
 
 // 商品详情
 const productDetail = computed(() => {
-  return productData.value?.storeInfo
+  return productData.value?.data?.storeInfo
 })
 
 // 商品图片列表（如果只有一张图片，则只显示一张）
@@ -52,26 +53,57 @@ function adjustQuantity(delta: number) {
   }
 }
 
+// 添加到购物车请求
+const { loading: addCartLoading, run: runAddToCart } = useRequest(() =>
+  addToCartAPI({
+    cartNum: quantity.value,
+    productId: productDetail.value!.id,
+  }),
+)
+
 // 添加到购物车
-function addToCart() {
+async function addToCart() {
   if (!productDetail.value)
     return
 
-  uni.showToast({
-    title: `已添加${productDetail.value.store_name}到购物车`,
-    icon: 'success',
-  })
+  try {
+    await runAddToCart()
+    uni.showToast({
+      title: `已添加${productDetail.value.store_name}到购物车`,
+      icon: 'success',
+    })
+  }
+  catch (error) {
+    uni.showToast({
+      title: '添加失败，请重试',
+      icon: 'error',
+    })
+  }
 }
 
 // 立即购买
-function buyNow() {
+async function buyNow() {
   if (!productDetail.value)
     return
 
-  uni.showToast({
-    title: '立即购买',
-    icon: 'none',
-  })
+  try {
+    // 先添加到购物车
+    const cartResult = await addToCartAPI({
+      cartNum: quantity.value,
+      productId: productDetail.value.id,
+    })
+
+    // 跳转到订单确认页面
+    uni.navigateTo({
+      url: `/pages/order/confirm?cartId=${cartResult.cartId}`,
+    })
+  }
+  catch (error) {
+    uni.showToast({
+      title: '购买失败，请重试',
+      icon: 'error',
+    })
+  }
 }
 
 // 分享商品

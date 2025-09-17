@@ -107,8 +107,6 @@ onLoad(() => {
           <view class="flex-1">
             <view class="mb-2 flex items-center justify-between">
               <text class="text-gray-800 font-medium">{{ pickup.name }}</text>
-              <text v-if="pickup.status === 1" class="text-sm text-green-600">启用</text>
-              <text v-else class="text-sm text-red-600">禁用</text>
             </view>
 
             <text class="block text-sm text-gray-600">整理人：{{ pickup.collator }}</text>

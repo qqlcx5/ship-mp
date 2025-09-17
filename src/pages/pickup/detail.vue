@@ -103,12 +103,6 @@ function downloadFile() {
             <text class="text-gray-600">时间：</text>
             <text class="text-gray-800">{{ pickupDetail.add_time }}</text>
           </view>
-          <view class="flex justify-between">
-            <text class="text-gray-600">状态：</text>
-            <text :class="pickupDetail.status === 1 ? 'text-green-500' : 'text-red-500'">
-              {{ pickupDetail.status === 1 ? '启用' : '禁用' }}
-            </text>
-          </view>
         </view>
       </view>
 

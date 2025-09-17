@@ -138,8 +138,8 @@ export const useTokenStore = defineStore(
         const resd = await getWxCode()
         console.log('微信登录-code: ', resd)
         const res = await _wxLogin({ ...loginForm, code: resd.code })
-        console.log('_wxLogin_wxLogin---', res)
-        await _postLogin(res)
+        console.log('微信登录-login', res)
+        await _postLogin({ ...res, expiresIn: res.expires_time })
         uni.showToast({
           title: '登录成功',
           icon: 'success',

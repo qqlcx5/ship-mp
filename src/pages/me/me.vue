@@ -19,18 +19,6 @@ const menuItems = ref([
   { icon: 'location', title: '收货地址', path: '/pages/address/list' },
 ])
 
-// 微信小程序下登录
-async function handleLogin() {
-  // #ifdef MP-WEIXIN
-  await tokenStore.wxLogin()
-  // #endif
-  // #ifndef MP-WEIXIN
-  uni.navigateTo({
-    url: `${LOGIN_PAGE}?redirect=${encodeURIComponent('/pages/me/me')}`,
-  })
-  // #endif
-}
-
 // 获取用户手机号
 function handleGetPhoneNumber(e: any) {
   if (e.detail.errMsg === 'getPhoneNumber:fail user deny') {
@@ -107,7 +95,7 @@ function handleMenuItem(item: any) {
         @click="handleMenuItem(item)"
       >
         <view class="flex items-center">
-          <uni-icons :type="item.icon" color="#6b7280" size="18" class="mr-3" />
+          <uni-icons :type="item.icon as any" color="#6b7280" size="18" class="mr-3" />
           <text class="text-gray-800">{{ item.title }}</text>
         </view>
         <uni-icons type="right" color="#9ca3af" size="14" />
@@ -116,7 +104,7 @@ function handleMenuItem(item: any) {
 
     <!-- 登录/退出登录按钮 -->
     <view class="mt-8 p-4">
-      <button v-if="tokenStore.hasLogin" type="error" block @click="handleLogout">
+      <button v-if="tokenStore.hasLogin" type="warn" block @click="handleLogout">
         退出登录
       </button>
       <button
