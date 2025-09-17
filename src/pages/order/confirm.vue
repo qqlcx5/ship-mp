@@ -13,7 +13,7 @@ const cartId = ref<string>('')
 
 // 获取订单确认信息
 const { loading: confirmLoading, data: orderData, run: loadOrderConfirm } = useRequest<IOrderConfirmData>(() =>
-  confirmOrder({ cartId: cartId.value }),
+  confirmOrder({ cartId: cartId.value, new: 1, shipping_type: 1, addressId: 0 }),
 )
 
 // 创建订单
@@ -36,7 +36,7 @@ onLoad((options) => {
 function formatPrice(price?: number) {
   if (!price)
     return '0.00'
-  return (price / 100).toFixed(2)
+  return (price).toFixed(2)
 }
 
 // 提交订单并支付

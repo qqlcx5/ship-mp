@@ -35,7 +35,7 @@ const productImages = computed(() => {
 function formatPrice(price?: number) {
   if (!price)
     return '0.00'
-  return (price / 100).toFixed(2) // 假设后端返回的是分为单位
+  return price
 }
 
 onLoad((options) => {
@@ -58,6 +58,9 @@ const { loading: addCartLoading, run: runAddToCart } = useRequest(() =>
   addToCartAPI({
     cartNum: quantity.value,
     productId: productDetail.value!.id,
+    new: 1,
+    uniqueld: '0',
+    virtual_type: 0,
   }),
 )
 
@@ -100,10 +103,7 @@ async function buyNow() {
     })
   }
   catch (error) {
-    uni.showToast({
-      title: '购买失败，请重试',
-      icon: 'error',
-    })
+    console.log('购买失败', error)
   }
 }
 

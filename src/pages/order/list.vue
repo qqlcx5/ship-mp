@@ -51,7 +51,7 @@ function getStatusColor(status: number) {
 function formatPrice(price?: number) {
   if (!price)
     return '0.00'
-  return (price / 100).toFixed(2)
+  return (price).toFixed(2)
 }
 
 onLoad((options) => {
