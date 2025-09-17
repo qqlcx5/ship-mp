@@ -92,7 +92,8 @@ async function buyNow() {
       cartNum: quantity.value,
       productId: productDetail.value.id,
     })
-
+    if (!cartResult?.cartId)
+      return
     // 跳转到订单确认页面
     uni.navigateTo({
       url: `/pages/order/confirm?cartId=${cartResult.cartId}`,

@@ -4,6 +4,11 @@ import type { ApiResponse } from './common'
 export interface IOrderConfirmParams {
   cartId: string
 }
+export interface IOrderCreateParams {
+  orderKey: string
+  products: IOrderProduct[]
+  [key: string]: unknown
+}
 
 // 订单商品信息
 export interface IOrderProduct {

@@ -27,8 +27,13 @@ export function http<T>(options: CustomRequestOptions) {
         if (res?.data?.status === 110002)
           res.statusCode = 401
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          console.log('res IResponse---------------', res)
           const { code = 0, msg, data = null } = res.data as IResponse<T>
+          console.log('http 响应', code, msg, data, msg !== 'success')
+
+          msg !== 'success' && uni.showToast({
+            title: msg,
+            icon: 'none',
+          })
           if (code !== ResultEnum.Success0 && code !== ResultEnum.Success200) {
             throw new Error(`请求错误[${code}]：${msg}`)
           }
