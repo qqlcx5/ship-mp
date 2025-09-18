@@ -31,6 +31,7 @@ export interface IProduct {
   view_num: number
   cate_id: number
   image: string
+  slider_image?: string[]
   desc_file_url: string
   desc_file_name: string
   price?: number

@@ -101,7 +101,7 @@ function handleQuickMenu(item: any) {
     </view>
 
     <!-- 公告栏 -->
-    <view class="mx-4 mt-4 border-l-4 border-blue-400 rounded-lg bg-blue-50 p-3">
+    <view v-if="noticeInfo?.desc" class="mx-4 mt-4 border-l-4 border-blue-400 rounded-lg bg-blue-50 p-3">
       <view class="flex items-center">
         <view class="i-carbon-volume-up-filled mr-2 text-[16px] text-[#2563eb]" />
         <text class="text-sm text-blue-800">{{ noticeInfo.desc }}</text>

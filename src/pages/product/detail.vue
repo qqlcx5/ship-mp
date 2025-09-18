@@ -26,9 +26,7 @@ const productDetail = computed(() => {
 
 // 商品图片列表（如果只有一张图片，则只显示一张）
 const productImages = computed(() => {
-  if (!productDetail.value?.image)
-    return []
-  return [productDetail.value.image]
+  return productDetail.value?.slider_image || []
 })
 
 // 格式化价格显示
