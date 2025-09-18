@@ -111,6 +111,166 @@ export interface IOrderListData {
 // 订单列表响应
 export type IOrderListResponse = ApiResponse<IOrderListData>
 
+// 订单详情参数
+export interface IOrderDetailParams {
+  id: string
+}
+
+// 订单详情商品信息
+export interface IOrderDetailProduct {
+  id: string
+  cart_num: number
+  productInfo: {
+    id: number
+    image: string
+    store_name: string
+    price: string
+  }
+  truePrice: number
+}
+
+// 订单详情数据
+export interface IOrderDetailData {
+  id: number
+  order_id: string
+  trade_no: string
+  uid: number
+  real_name: string
+  user_phone: string
+  user_address: string
+  cart_id: string[]
+  freight_price: string
+  total_num: number
+  total_price: string
+  total_postage: string
+  pay_price: string
+  pay_postage: string
+  deduction_price: string
+  coupon_id: number
+  coupon_price: string
+  paid: number
+  pay_time: number
+  pay_type: string
+  add_time: number
+  status: number
+  is_stock_up: number
+  refund_status: number
+  refund_type: number
+  refund_express: string
+  refund_express_name: string
+  refund_reason_wap_img: string
+  refund_reason_wap_explain: string
+  refund_reason_time: number
+  refund_reason_wap: string
+  refund_reason: string
+  refund_price: string
+  delivery_name: string
+  delivery_code: string
+  delivery_type: string
+  delivery_id: string
+  kuaidi_label: string
+  kuaidi_task_id: string
+  kuaidi_order_id: string
+  fictitious_content: string
+  delivery_uid: number
+  gain_integral: string
+  use_integral: string
+  back_integral: string
+  spread_uid: number
+  spread_two_uid: number
+  one_brokerage: string
+  two_brokerage: string
+  mark: string
+  is_del: number
+  is_cancel: number
+  unique: string
+  remark: string
+  mer_id: number
+  is_mer_check: number
+  combination_id: number
+  pink_id: number
+  cost: string
+  seckill_id: number
+  bargain_id: number
+  advance_id: number
+  verify_code: string
+  store_id: number
+  shipping_type: number
+  clerk_id: number
+  is_channel: number
+  is_remind: number
+  is_system_del: number
+  channel_type: string
+  province: string
+  express_dump: string
+  virtual_type: number
+  virtual_info: string
+  pay_uid: number
+  custom_form: any[]
+  staff_id: number
+  agent_id: number
+  division_id: number
+  staff_brokerage: string
+  agent_brokerage: string
+  division_brokerage: string
+  is_gift: number
+  gift_price: string
+  gift_uid: number
+  gift_mark: string
+  nickname: string
+  phone: string
+  avatar: string
+  split: any[]
+  invoice: any
+  add_time_y: string
+  add_time_h: string
+  system_store: boolean
+  code: string
+  mapKey: string
+  yue_pay_status: number
+  pay_weixin_open: boolean
+  ali_pay_status: boolean
+  friend_pay_status: number
+  cartInfo: IOrderDetailProduct[]
+  _status: {
+    _type: number
+    _title: string
+    _msg: string
+    _class: string
+    _payType: string
+    _deliveryType: string
+  }
+  _pay_time: string
+  _add_time: string
+  stop_time: number
+  status_pic: string
+  offlinePayStatus: number
+  order_log: {
+    create: string
+    pay: string
+    delivery: string
+    take: string
+    complete: string
+  }
+  gift_user_info: {
+    gift_uid: number
+    gift_nickname: string
+    gift_avatar: string
+  }
+  vip_true_price: string
+  levelPrice: string
+  memberPrice: number
+  postage_price: number
+  member_price: number
+  routine_contact_type: string
+  invoice_func: boolean
+  special_invoice: boolean
+  refund_cartInfo: IOrderDetailProduct[]
+}
+
+// 订单详情响应
+export type IOrderDetailResponse = ApiResponse<IOrderDetailData>
+
 // 订单状态枚举
 export enum OrderStatus {
   PENDING_PAYMENT = 0, // 待付款

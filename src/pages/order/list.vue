@@ -161,7 +161,7 @@ function handleOrderAction(action: string, orderId: string) {
 
         <!-- 订单操作 -->
         <view class="mt-3 flex justify-end gap-2">
-          <template v-if="order.status === 0">
+          <template v-if="order.offlinePayStatus === 0">
             <wd-button size="small" type="info" @click="handleOrderAction('cancel', order.id)">
               取消订单
             </wd-button>
@@ -169,16 +169,16 @@ function handleOrderAction(action: string, orderId: string) {
               立即支付
             </wd-button>
           </template>
-          <template v-else-if="order.status === 3">
-            <wd-button size="small" type="info" @click="handleOrderAction('detail', order.id)">
+          <template v-else-if="order.offlinePayStatus === 3">
+            <wd-button size="small" type="info" @click="handleOrderAction('detail', order.order_id)">
               查看详情
             </wd-button>
-            <wd-button size="small" @click="handleOrderAction('reorder', order.id)">
+            <wd-button size="small" @click="handleOrderAction('reorder', order.order_id)">
               再次购买
             </wd-button>
           </template>
           <template v-else>
-            <wd-button size="small" type="info" @click="handleOrderAction('detail', order.id)">
+            <wd-button size="small" type="info" @click="handleOrderAction('detail', order.order_id)">
               查看详情
             </wd-button>
           </template>

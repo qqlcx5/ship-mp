@@ -3,6 +3,7 @@ import type {
   IOrderConfirmParams,
   IOrderCreateData,
   IOrderCreateParams,
+  IOrderDetailData,
   IOrderListData,
   IOrderListParams,
   IOrderPayData,
@@ -37,4 +38,11 @@ export function payOrder(params: IOrderPayParams) {
 export function getOrderList(params: IOrderListParams) {
   const { type, page, limit } = params
   return http.get<IOrderListData>(`/order/list`, { type, page, limit })
+}
+
+/**
+ * 获取订单详情
+ */
+export function getOrderDetail(id: string) {
+  return http.get<IOrderDetailData>(`/order/detail/${id}`)
 }
