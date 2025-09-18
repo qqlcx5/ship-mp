@@ -48,7 +48,7 @@ function getStatusColor(status: number) {
 }
 
 // 格式化价格显示
-function formatPrice(price?: number) {
+function formatPrice(price?: number | string) {
   if (!price)
     return '0.00'
   return price
@@ -138,17 +138,17 @@ function handleOrderAction(action: string, orderId: string) {
         <!-- 订单头部 -->
         <view class="mb-3 flex items-start justify-between">
           <text class="text-sm text-gray-500">订单号：{{ order.order_id }}</text>
-          <text class="text-sm" :style="{ color: getStatusColor(order.status) }">{{ order.statusText }}</text>
+          <text class="text-sm" :style="{ color: getStatusColor(order.status) }">{{ order._status._title }}</text>
         </view>
 
         <!-- 商品列表 -->
         <view v-for="product in order.cartInfo " :key="product.id" class="mb-3 flex space-x-3">
           <image :src="product.productInfo.image" class="h-15 w-15 rounded-lg" mode="aspectFill" />
           <view class="flex-1">
-            <text class="block text-sm text-gray-800 font-medium">{{ product.productInfo.name }}</text>
+            <text class="block text-sm text-gray-800 font-medium">{{ product.productInfo.store_name }}</text>
             <view class="mt-2 flex items-center justify-between">
               <text class="text-sm text-red-500 font-semibold">¥{{ formatPrice(product.productInfo.price) }}</text>
-              <text class="text-xs text-gray-500">x{{ product.productInfo.quantity }}</text>
+              <text class="text-xs text-gray-500">x{{ product.cart_num }}</text>
             </view>
           </view>
         </view>

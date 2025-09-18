@@ -90,47 +90,6 @@ export interface IOrderListParams {
 
 // 订单列表项
 export interface IOrderListItem {
-  id: string
-  orderNo: string
-  status: number
-  statusText: string
-  totalAmount: number
-  products: IOrderProduct[]
-  created_at: string
-  updated_at: string
-}
-
-// 订单列表响应数据
-export interface IOrderListData {
-  list: IOrderListItem[]
-  total: number
-  page: number
-  limit: number
-}
-
-// 订单列表响应
-export type IOrderListResponse = ApiResponse<IOrderListData>
-
-// 订单详情参数
-export interface IOrderDetailParams {
-  id: string
-}
-
-// 订单详情商品信息
-export interface IOrderDetailProduct {
-  id: string
-  cart_num: number
-  productInfo: {
-    id: number
-    image: string
-    store_name: string
-    price: string
-  }
-  truePrice: number
-}
-
-// 订单详情数据
-export interface IOrderDetailData {
   id: number
   order_id: string
   trade_no: string
@@ -267,6 +226,38 @@ export interface IOrderDetailData {
   special_invoice: boolean
   refund_cartInfo: IOrderDetailProduct[]
 }
+
+// 订单列表响应数据
+export interface IOrderListData {
+  list: IOrderListItem[]
+  total: number
+  page: number
+  limit: number
+}
+
+// 订单列表响应
+export type IOrderListResponse = ApiResponse<IOrderListData>
+
+// 订单详情参数
+export interface IOrderDetailParams {
+  id: string
+}
+
+// 订单详情商品信息
+export interface IOrderDetailProduct {
+  id: string
+  cart_num: number
+  productInfo: {
+    id: number
+    image: string
+    store_name: string
+    price: string
+  }
+  truePrice: number
+}
+
+// 订单详情数据, 和列表项一致
+export interface IOrderDetailData extends IOrderListItem {}
 
 // 订单详情响应
 export type IOrderDetailResponse = ApiResponse<IOrderDetailData>
