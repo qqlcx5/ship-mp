@@ -68,18 +68,27 @@ async function handleSubmitOrder() {
     payLoading.value = true
     try {
       const payResult = await payOrder({ paytype: 'weixin', type: 0, uni: orderResult?.result?.orderId })
-      if (payResult?.status === 1) {
-        uni.showToast({
-          title: '支付成功',
-          icon: 'success',
-        })
-        // 跳转到订单列表
-        setTimeout(() => {
-          uni.redirectTo({
-            url: '/pages/order/list?type=0',
+      const payConfig = payResult.result.jsConfig
+      payConfig.timeStamp = payConfig.timestamp
+      uni.requestPayment(payConfig)
+        .then((res) => {
+          uni.showToast({
+            title: '支付成功',
+            icon: 'success',
           })
-        }, 1500)
-      }
+          // 跳转到订单列表
+          setTimeout(() => {
+            uni.redirectTo({
+              url: '/pages/order/list?type=0',
+            })
+          }, 1500)
+        })
+        .catch((err) => {
+          console.log('err', err)
+        })
+        .finally(() => {
+          payLoading.value = false
+        })
     }
     finally {
       payLoading.value = false
