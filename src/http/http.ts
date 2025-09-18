@@ -24,11 +24,16 @@ export function http<T>(options: CustomRequestOptions) {
         // 状态码 2xx，参考 axios 的设计
         // 拦截处理登录过期状态码
         // @ts-expect-error 忽略类型错误
-        if (res?.data?.status === 110002)
+        if (res?.data?.status === 110002 || res?.status === 110002)
           res.statusCode = 401
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          console.log('res IResponse---------------', res)
-          const { code = 0, msg, data = null } = res.data as IResponse<T>
+          const { code = 0, msg = 'success', data = null } = res.data as IResponse<T>
+          console.log('http 响应', code, msg, data, res, msg !== 'success')
+
+          msg !== 'success' && uni.showToast({
+            title: msg,
+            icon: 'none',
+          })
           if (code !== ResultEnum.Success0 && code !== ResultEnum.Success200) {
             throw new Error(`请求错误[${code}]：${msg}`)
           }

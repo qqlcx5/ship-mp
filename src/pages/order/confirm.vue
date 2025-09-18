@@ -13,12 +13,13 @@ const cartId = ref<string>('')
 
 // 获取订单确认信息
 const { loading: confirmLoading, data: orderData, run: loadOrderConfirm } = useRequest<IOrderConfirmData>(() =>
-  confirmOrder({ cartId: cartId.value }),
+  confirmOrder({ cartId: cartId.value, new: 1, shipping_type: 1, addressId: 0 }),
 )
 
 // 创建订单
+const orderParams = ref<any>()
 const { loading: createLoading, run: runCreateOrder } = useRequest<IOrderCreateData>(() =>
-  createOrder(cartId.value),
+  createOrder(orderData.value.orderKey, orderParams.value),
 )
 
 // 支付订单状态
@@ -35,20 +36,27 @@ onLoad((options) => {
 function formatPrice(price?: number) {
   if (!price)
     return '0.00'
-  return (price / 100).toFixed(2)
+  return (price).toFixed(2)
 }
 
 // 提交订单并支付
 async function handleSubmitOrder() {
   if (!cartId.value)
     return
-
   try {
+    console.log('orderData.value', orderData.value)
+
+    orderParams.value = {
+      addressId: orderData.value.addressInfo.id,
+      ...orderData.value.addressInfo,
+      new: 1,
+      shipping_type: 1,
+    }
     // 第一步：创建订单
     const orderResult = await runCreateOrder()
-
-    if (!orderResult?.orderId) {
-      throw new Error('创建订单失败')
+    console.log('orderResult', orderResult)
+    if (!orderResult?.result?.orderId) {
+      return
     }
 
     uni.showToast({
@@ -59,26 +67,18 @@ async function handleSubmitOrder() {
     // 第二步：支付订单
     payLoading.value = true
     try {
-      const payResult = await payOrder({ orderId: orderResult.orderId })
-
+      const payResult = await payOrder({ paytype: 'weixin', type: 0, uni: orderResult?.result?.orderId })
       if (payResult?.status === 1) {
         uni.showToast({
           title: '支付成功',
           icon: 'success',
         })
-
         // 跳转到订单列表
         setTimeout(() => {
           uni.redirectTo({
             url: '/pages/order/list?type=0',
           })
         }, 1500)
-      }
-      else {
-        uni.showToast({
-          title: '支付失败，请重试',
-          icon: 'error',
-        })
       }
     }
     finally {
@@ -87,10 +87,6 @@ async function handleSubmitOrder() {
   }
   catch (error) {
     console.error('提交订单失败:', error)
-    uni.showToast({
-      title: '提交失败，请重试',
-      icon: 'error',
-    })
   }
 }
 </script>
@@ -178,14 +174,14 @@ async function handleSubmitOrder() {
           <text class="text-sm text-gray-600">实付款：</text>
           <text class="text-xl text-red-500 font-bold">¥{{ formatPrice(orderData.finalAmount) }}</text>
         </view>
-        <button
+        <wd-button
           type="primary"
           :loading="createLoading || payLoading"
           :disabled="createLoading || payLoading"
           @click="handleSubmitOrder"
         >
           {{ createLoading ? '创建中...' : payLoading ? '支付中...' : '提交订单' }}
-        </button>
+        </wd-button>
       </view>
     </view>
   </view>

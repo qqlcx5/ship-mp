@@ -164,12 +164,11 @@ onLoad(() => {
             <text class="text-xs text-gray-500">销售{{ product.sales }}+</text>
           </view>
 
-          <view class="flex items-center justify-between">
-            <view />
-            <wd-button size="small" type="primary" @click.stop="addToCart(product)">
+          <!-- <view class="flex items-center justify-between">
+             <wd-button size="small" type="primary" @click.stop="addToCart(product)">
               <uni-icons type="plus" color="white" size="20" />
             </wd-button>
-          </view>
+          </view> -->
         </view>
       </view>
     </view>

@@ -2,6 +2,7 @@ import type {
   IOrderConfirmData,
   IOrderConfirmParams,
   IOrderCreateData,
+  IOrderCreateParams,
   IOrderListData,
   IOrderListParams,
   IOrderPayData,
@@ -19,8 +20,8 @@ export function confirmOrder(params: IOrderConfirmParams) {
 /**
  * 提交订单
  */
-export function createOrder(cartId: string) {
-  return http.post<IOrderCreateData>(`/order/create/${cartId}`)
+export function createOrder(cartId: string, params: IOrderCreateParams) {
+  return http.post<IOrderCreateData>(`/order/create/${cartId}`, params)
 }
 
 /**

@@ -54,6 +54,7 @@
 *   **Vue SFC 块顺序:** `<script>`, `<template>`, 然后 `<style>`。
 *   **ESLint 忽略:** `src/uni_modules/`, `dist`, `auto-import.d.ts`, `uni-pages.d.ts`, `src/pages.json`, `src/manifest.json`
 *   **UnoCSS 兼容性:** `presetLegacyCompat` 与 `commaStyleColorFunction: true` 一起使用，以获得更好的应用程序兼容性。动态图标必须添加到 `uno.config.ts` 的 `safelist` 中或在 Vue 页面中注释。
+**API 调用**：统一使用 `useRequest` hook 进行接口调用
 
 ## 关键模式
 

@@ -45,6 +45,7 @@ const httpInterceptor = {
     options.header = {
       ...options.header,
       'Content-Type': 'application/json; charset=utf-8',
+      'Form-type': 'routine',
       platform, // 可选，与 uniapp 定义的平台一致，告诉后台来源
     }
     // 3. 添加 token 请求头标识

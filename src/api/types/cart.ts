@@ -4,6 +4,9 @@ import type { ApiResponse } from './common'
 export interface ICartAddItemParams {
   cartNum: number
   productId: number | string
+  new: number
+  uniqueld: string
+  virtual_type: number
 }
 
 // 添加到购物车响应数据
