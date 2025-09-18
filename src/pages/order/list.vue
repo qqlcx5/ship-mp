@@ -137,7 +137,10 @@ function handleOrderAction(action: string, orderId: string) {
       >
         <!-- 订单头部 -->
         <view class="mb-3 flex items-start justify-between">
-          <text class="text-sm text-gray-500">订单号：{{ order.order_id }}</text>
+          <view class="flex-1">
+            <text class="text-sm text-gray-500">订单号：{{ order.order_id }}</text>
+            <text class="mt-1 block text-xs text-gray-400">创建时间：{{ order._add_time }}</text>
+          </view>
           <text class="text-sm" :style="{ color: getStatusColor(order.status) }">{{ order._status._title }}</text>
         </view>
 
@@ -162,10 +165,10 @@ function handleOrderAction(action: string, orderId: string) {
         <!-- 订单操作 -->
         <view class="mt-3 flex justify-end gap-2">
           <template v-if="order.offlinePayStatus === 0">
-            <wd-button size="small" type="info" @click="handleOrderAction('cancel', order.id)">
+            <wd-button size="small" type="info" @click="handleOrderAction('cancel', String(order.order_id))">
               取消订单
             </wd-button>
-            <wd-button size="small" class="rounded bg-blue-500 px-3 py-1 text-sm text-white" @click="handleOrderAction('pay', order.id)">
+            <wd-button size="small" class="rounded bg-blue-500 px-3 py-1 text-sm text-white" @click="handleOrderAction('pay', String(order.order_id))">
               立即支付
             </wd-button>
           </template>

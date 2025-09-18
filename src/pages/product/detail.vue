@@ -13,6 +13,18 @@ definePage({
 const productId = ref<number>(0)
 const currentImageIndex = ref(0)
 const quantity = ref(1)
+const selectedSku = ref<ISkuItem | null>(null)
+const selectedAttr = ref<Record<string, string>>({})
+
+// 监听 SKU 属性变化，更新选中的 SKU
+watch(selectedAttr, (newVal) => {
+  if (!productDetail.value?.sku) {
+    selectedSku.value = null
+    return
+  }
+  const skuKey = Object.values(newVal).join(',')
+  selectedSku.value = productDetail.value.sku.find(item => item.sku === skuKey) || null
+}, { deep: true })
 
 // 获取商品详情
 const { loading, data: productData, run: loadProductDetail } = useRequest<IProductDetailResponse>(() =>
@@ -30,11 +42,21 @@ const productImages = computed(() => {
 })
 
 // 格式化价格显示
-function formatPrice(price?: number) {
+function formatPrice(price?: number | string) {
   if (!price)
     return '0.00'
   return price
 }
+
+// 获取当前显示价格
+const displayPrice = computed(() => {
+  return selectedSku.value?.price || productDetail.value?.price || '0.00'
+})
+
+// 获取当前库存
+const displayStock = computed(() => {
+  return selectedSku.value?.stock || productDetail.value?.stock || 0
+})
 
 onLoad((options) => {
   if (options?.id) {
@@ -202,9 +224,9 @@ function downloadFile() {
 
         <view class="mb-4 flex items-center justify-between">
           <view class="flex items-baseline">
-            <text class="text-2xl text-red-500 font-bold">¥{{ formatPrice(productDetail.price) }}</text>
+            <text class="text-2xl text-red-500 font-bold">¥{{ formatPrice(displayPrice) }}</text>
           </view>
-          <text class="text-sm text-gray-500">销售 {{ productDetail.sales }}+</text>
+          <text class="text-sm text-gray-500">库存 {{ displayStock }}</text>
         </view>
 
         <view v-if="productDetail.desc_file_url" class="mb-4 rounded-lg bg-gray-50 p-3">
@@ -214,6 +236,27 @@ function downloadFile() {
             <wd-button size="small" type="primary" @click="downloadFile">
               下载
             </wd-button>
+          </view>
+        </view>
+
+        <!-- SKU 选择 -->
+        <view v-if="productDetail.attrInfo && productDetail.attrInfo.length > 0" class="mb-4">
+          <view v-for="(attr, index) in productDetail.attrInfo" :key="index" class="mb-2">
+            <text class="mb-2 block text-lg text-gray-800 font-medium">{{ attr.attrName }}</text>
+            <view class="flex flex-wrap gap-2">
+              <view
+                v-for="(value, valIndex) in attr.attrValue"
+                :key="valIndex"
+                class="rounded-full px-3 py-1 text-sm" :class="[
+                  selectedAttr[attr.attrName] === value
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-600',
+                ]"
+                @click="selectedAttr[attr.attrName] = value"
+              >
+                {{ value }}
+              </view>
+            </view>
           </view>
         </view>
 
@@ -227,13 +270,13 @@ function downloadFile() {
               icon="decrease"
               size="small"
               type="default"
-              :disabled="quantity <= 1"
+              :disabled="quantity <= 1 || displayStock === 0"
               @click="adjustQuantity(-1)"
             />
             <view class="text-md px-2">
               {{ quantity }}
             </view>
-            <wd-button icon="add" size="small" type="default" @click="adjustQuantity(1)" />
+            <wd-button icon="add" size="small" type="default" :disabled="quantity >= displayStock" @click="adjustQuantity(1)" />
           </view>
         </view>
       </view>
