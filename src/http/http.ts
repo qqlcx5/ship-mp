@@ -24,8 +24,13 @@ export function http<T>(options: CustomRequestOptions) {
         // 状态码 2xx，参考 axios 的设计
         // 拦截处理登录过期状态码
         // @ts-expect-error 忽略类型错误
-        if (res?.data?.status === 110002 || res?.status === 110002)
+        if (res?.data?.status === 110002) {
+          uni.showToast({
+            title: '登录已过期，请重新登录',
+            icon: 'none',
+          })
           res.statusCode = 401
+        }
         if (res.statusCode >= 200 && res.statusCode < 300) {
           const { code = 0, msg = 'success', data = null } = res.data as IResponse<T>
           console.log('http 响应', code, msg, data, res, msg !== 'success')
@@ -45,7 +50,7 @@ export function http<T>(options: CustomRequestOptions) {
           if (!isDoubleTokenMode) {
             // 未启用双token策略，清理用户信息，跳转到登录页
             // tokenStore.logout()
-            uni.navigateTo({ url: LOGIN_PAGE })
+            uni.switchTab({ url: LOGIN_PAGE })
             return reject(res)
           }
           /* -------- 无感刷新 token ----------- */
