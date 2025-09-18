@@ -21,15 +21,15 @@ const { loading: pickupLoading, data: pickupData, run: loadPickups } = useReques
 // 分类选项（包含全部选项）
 const categoryTabs = computed(() => {
   const categories = [{ id: 0, name: '全部' }]
-  if (categoryData.value?.data) {
-    categories.push(...categoryData.value.data) // 只显示启用的分类
+  if (categoryData.value) {
+    categories.push(...categoryData.value) // 只显示启用的分类
   }
   return categories
 })
 
 // 取件列表
 const pickupList = computed(() => {
-  return pickupData.value?.data.list || []
+  return pickupData.value?.list || []
 })
 
 // 切换分类

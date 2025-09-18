@@ -50,7 +50,8 @@
 - 使用相对路径引用内部资源
 
 ## 代码风格指南
-http 请求默认返回res.data数据，不需要在.data中获取数据，切记
+http 请求默认返回res.data数据，不需要在.data中获取数据
+
 忽略 读取 编辑 `src/service/**`目录中的文件
 *   **Vue SFC 块顺序:** `<script>`, `<template>`, 然后 `<style>`。
 *   **ESLint 忽略:** `src/uni_modules/`, `dist`, `auto-import.d.ts`, `uni-pages.d.ts`, `src/pages.json`, `src/manifest.json`
