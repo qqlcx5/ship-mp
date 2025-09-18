@@ -78,13 +78,6 @@ function addToCart(product: IProduct) {
   })
 }
 
-// 格式化价格显示
-function formatPrice(price?: number) {
-  if (!price)
-    return '0'
-  return (price)
-}
-
 // 页面加载时获取数据
 onLoad(() => {
   loadCategories()
@@ -96,16 +89,12 @@ onLoad(() => {
   <view class="min-h-screen bg-gray-50">
     <!-- 搜索栏 -->
     <view class="border-b border-gray-100 bg-white p-4">
-      <view class="relative">
-        <input
-          v-model="searchKeyword"
-          type="text"
-          placeholder="搜索商品..."
-          class="box-border h-[80rpx] w-full border border-gray-300 rounded-full bg-gray-50 py-2 pl-10"
-          @confirm="searchProducts"
-        >
-        <view class="i-carbon-search absolute left-3 top-3 text-[16px] text-[#9ca3af]" />
-      </view>
+      <wd-input
+        v-model="searchKeyword"
+        prefix-icon="search"
+        no-border
+        @change="searchProducts"
+      />
     </view>
 
     <!-- 分类选项 -->

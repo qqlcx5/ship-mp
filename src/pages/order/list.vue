@@ -33,7 +33,7 @@ const { loading, data: orderData, run: loadOrderList } = useRequest<IOrderListDa
 
 // 订单列表
 const orderList = computed(() => {
-  return orderData.value?.list || []
+  return orderData.value || []
 })
 
 // 获取状态颜色
@@ -51,7 +51,7 @@ function getStatusColor(status: number) {
 function formatPrice(price?: number) {
   if (!price)
     return '0.00'
-  return (price).toFixed(2)
+  return price
 }
 
 onLoad((options) => {
@@ -99,19 +99,23 @@ function handleOrderAction(action: string, orderId: string) {
 <template>
   <view class="min-h-screen bg-gray-50">
     <!-- 状态筛选 -->
-    <view class="flex border-b border-gray-100 bg-white px-4 py-3 space-x-4">
-      <view
-        v-for="tab in statusTabs"
-        :key="tab.value"
-        class="rounded-full px-3 py-1 text-sm" :class="[
-          currentStatus === tab.value
-            ? 'bg-blue-500 text-white'
-            : 'bg-gray-100 text-gray-600',
-        ]"
-        @click="switchStatus(tab.value)"
-      >
-        {{ tab.label }}
-      </view>
+    <view class="border-b border-gray-100 bg-white px-4 py-3">
+      <scroll-view scroll-x>
+        <view class="flex items-center space-x-2">
+          <view
+            v-for="tab in statusTabs"
+            :key="tab.value"
+            class="whitespace-nowrap rounded-full px-3 py-1 text-sm" :class="[
+              currentStatus === tab.value
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-100 text-gray-600',
+            ]"
+            @click="switchStatus(tab.value)"
+          >
+            {{ tab.label }}
+          </view>
+        </view>
+      </scroll-view>
     </view>
 
     <!-- 加载状态 -->
@@ -133,18 +137,18 @@ function handleOrderAction(action: string, orderId: string) {
       >
         <!-- 订单头部 -->
         <view class="mb-3 flex items-start justify-between">
-          <text class="text-sm text-gray-500">订单号：{{ order.orderNo }}</text>
+          <text class="text-sm text-gray-500">订单号：{{ order.order_id }}</text>
           <text class="text-sm" :style="{ color: getStatusColor(order.status) }">{{ order.statusText }}</text>
         </view>
 
         <!-- 商品列表 -->
-        <view v-for="product in order.products" :key="product.id" class="mb-3 flex space-x-3">
-          <image :src="product.image" class="h-15 w-15 rounded-lg" mode="aspectFill" />
+        <view v-for="product in order.cartInfo " :key="product.id" class="mb-3 flex space-x-3">
+          <image :src="product.productInfo.image" class="h-15 w-15 rounded-lg" mode="aspectFill" />
           <view class="flex-1">
-            <text class="block text-sm text-gray-800 font-medium">{{ product.name }}</text>
+            <text class="block text-sm text-gray-800 font-medium">{{ product.productInfo.name }}</text>
             <view class="mt-2 flex items-center justify-between">
-              <text class="text-sm text-red-500 font-semibold">¥{{ formatPrice(product.price) }}</text>
-              <text class="text-xs text-gray-500">x{{ product.quantity }}</text>
+              <text class="text-sm text-red-500 font-semibold">¥{{ formatPrice(product.productInfo.price) }}</text>
+              <text class="text-xs text-gray-500">x{{ product.productInfo.quantity }}</text>
             </view>
           </view>
         </view>
@@ -152,31 +156,31 @@ function handleOrderAction(action: string, orderId: string) {
         <!-- 订单总价 -->
         <view class="mb-3 flex items-center justify-between border-t border-gray-100 pt-2">
           <text class="text-sm text-gray-600">订单总价</text>
-          <text class="text-lg text-red-500 font-bold">¥{{ formatPrice(order.totalAmount) }}</text>
+          <text class="text-lg text-red-500 font-bold">¥{{ formatPrice(order.pay_price) }}</text>
         </view>
 
         <!-- 订单操作 -->
-        <view class="mt-3 flex justify-end space-x-2">
+        <view class="mt-3 flex justify-end gap-2">
           <template v-if="order.status === 0">
-            <button class="border border-gray-300 rounded px-3 py-1 text-sm text-gray-600" @click="handleOrderAction('cancel', order.id)">
+            <wd-button size="small" type="info" @click="handleOrderAction('cancel', order.id)">
               取消订单
-            </button>
-            <button class="rounded bg-blue-500 px-3 py-1 text-sm text-white" @click="handleOrderAction('pay', order.id)">
+            </wd-button>
+            <wd-button size="small" class="rounded bg-blue-500 px-3 py-1 text-sm text-white" @click="handleOrderAction('pay', order.id)">
               立即支付
-            </button>
+            </wd-button>
           </template>
           <template v-else-if="order.status === 3">
-            <button class="border border-gray-300 rounded px-3 py-1 text-sm text-gray-600" @click="handleOrderAction('detail', order.id)">
+            <wd-button size="small" type="info" @click="handleOrderAction('detail', order.id)">
               查看详情
-            </button>
-            <button class="border border-gray-300 rounded px-3 py-1 text-sm text-gray-600" @click="handleOrderAction('reorder', order.id)">
+            </wd-button>
+            <wd-button size="small" @click="handleOrderAction('reorder', order.id)">
               再次购买
-            </button>
+            </wd-button>
           </template>
           <template v-else>
-            <button class="border border-gray-300 rounded px-3 py-1 text-sm text-gray-600" @click="handleOrderAction('detail', order.id)">
+            <wd-button size="small" type="info" @click="handleOrderAction('detail', order.id)">
               查看详情
-            </button>
+            </wd-button>
           </template>
         </view>
       </view>
