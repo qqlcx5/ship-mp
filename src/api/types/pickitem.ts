@@ -28,6 +28,7 @@ export interface IPickitem {
   desc_file_name: string
   part_name?: string
   plate_part_no?: string
+  item_list?: Record<string, any[]>
 }
 
 // 取件详情查询参数

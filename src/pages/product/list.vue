@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { ICategory, IProduct } from '@/api/types/product'
+import type { ICategoryResponse, IProduct, IProductListResponse } from '@/api/types/product'
 import { getCategoryListAPI, getProductListAPI } from '@/api/product'
 import useRequest from '@/hooks/useRequest'
 
@@ -13,7 +13,7 @@ definePage({
 const searchKeyword = ref('')
 
 // 当前选中的分类ID
-const currentCategoryId = ref<number>(0)
+const currentCategoryId = ref<number | string>(0)
 
 // 商品列表查询参数
 const queryParams = ref({
@@ -30,15 +30,10 @@ const queryParams = ref({
 })
 
 // 获取分类列表
-const { loading: categoryLoading, data: categoryData, run: loadCategories } = useRequest<ICategory[]>(() => getCategoryListAPI())
+const { loading: categoryLoading, data: categoryData, run: loadCategories } = useRequest<ICategoryResponse>(() => getCategoryListAPI())
 
 // 获取商品列表
-const { loading: productLoading, data: productData, run: loadProducts } = useRequest<{
-  list: IProduct[]
-  total: number
-  page: number
-  limit: number
-}>(() => getProductListAPI(queryParams.value))
+const { loading: productLoading, data: productData, run: loadProducts } = useRequest<IProductListResponse>(() => getProductListAPI(queryParams.value))
 
 // 分类选项（包含全部选项）
 const categoryTabs = computed(() => {
@@ -55,7 +50,7 @@ const productList = computed(() => {
 })
 
 // 切换分类
-function switchCategory(categoryId: number) {
+function switchCategory(categoryId: number | string) {
   currentCategoryId.value = categoryId
   queryParams.value.cid = categoryId
   queryParams.value.page = 1 // 重置页码
@@ -70,7 +65,7 @@ function searchProducts() {
 }
 
 // 查看商品详情
-function viewProduct(id: number) {
+function viewProduct(id: number | string) {
   uni.navigateTo({ url: `/pages/product/detail?id=${id}` })
 }
 
@@ -109,7 +104,7 @@ onLoad(() => {
           class="box-border h-[80rpx] w-full border border-gray-300 rounded-full bg-gray-50 py-2 pl-10"
           @confirm="searchProducts"
         >
-        <uni-icons type="search" color="#9ca3af" size="16" class="absolute left-3 top-3" />
+        <view class="i-carbon-search absolute left-3 top-3 text-[16px] text-[#9ca3af]" />
       </view>
     </view>
 
@@ -142,7 +137,7 @@ onLoad(() => {
     <!-- 商品网格 -->
     <view v-else class="grid grid-cols-2 gap-4 p-4">
       <view v-if="productList.length === 0" class="col-span-2 py-20 text-center">
-        <uni-icons type="shop" color="#d1d5db" size="48" />
+        <view class="i-carbon-shopping-cart text-[48px] text-[#d1d5db]" />
         <text class="mt-4 block text-gray-500">暂无商品</text>
       </view>
 
@@ -166,7 +161,7 @@ onLoad(() => {
 
           <!-- <view class="flex items-center justify-between">
              <wd-button size="small" type="primary" @click.stop="addToCart(product)">
-              <uni-icons type="plus" color="white" size="20" />
+              <view class="i-carbon-add text-[20px] text-white" />
             </wd-button>
           </view> -->
         </view>

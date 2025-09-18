@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { IPickitem, IPickitemCategory } from '@/api/types/pickitem'
+import type { IPickitemCategoryResponse, IPickitemListResponse } from '@/api/types/pickitem'
 import { getPickitemCategoriesAPI, getPickitemListAPI } from '@/api/pickitem'
 import useRequest from '@/hooks/useRequest'
 
@@ -13,26 +13,23 @@ definePage({
 const currentCategoryId = ref<number>(0)
 
 // 获取取件分类列表
-const { loading: categoryLoading, data: categoryData, run: loadCategories } = useRequest<IPickitemCategory[]>(() => getPickitemCategoriesAPI())
+const { loading: categoryLoading, data: categoryData, run: loadCategories } = useRequest<IPickitemCategoryResponse>(() => getPickitemCategoriesAPI())
 
 // 获取取件列表
-const { loading: pickupLoading, data: pickupData, run: loadPickups } = useRequest<{
-  list: IPickitem[]
-  total: number
-}>(() => getPickitemListAPI({ cate_id: currentCategoryId.value }))
+const { loading: pickupLoading, data: pickupData, run: loadPickups } = useRequest<IPickitemListResponse>(() => getPickitemListAPI({ cate_id: currentCategoryId.value }))
 
 // 分类选项（包含全部选项）
 const categoryTabs = computed(() => {
   const categories = [{ id: 0, name: '全部' }]
-  if (categoryData.value) {
-    categories.push(...categoryData.value) // 只显示启用的分类
+  if (categoryData.value?.data) {
+    categories.push(...categoryData.value.data) // 只显示启用的分类
   }
   return categories
 })
 
 // 取件列表
 const pickupList = computed(() => {
-  return pickupData.value?.list || []
+  return pickupData.value?.data.list || []
 })
 
 // 切换分类
@@ -92,7 +89,7 @@ onLoad(() => {
     <!-- 取件列表 -->
     <view v-else class="p-4 space-y-4">
       <view v-if="pickupList.length === 0" class="py-20 text-center">
-        <uni-icons type="cart" color="#d1d5db" size="48" />
+        <view class="i-carbon-shopping-cart text-[48px] text-[#d1d5db]" />
         <text class="mt-4 block text-gray-500">暂无取件</text>
       </view>
 

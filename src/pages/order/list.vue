@@ -122,7 +122,7 @@ function handleOrderAction(action: string, orderId: string) {
     <!-- 订单列表 -->
     <view v-else class="p-4 space-y-4">
       <view v-if="orderList.length === 0" class="py-20 text-center">
-        <uni-icons type="list" color="#d1d5db" size="48" />
+        <view class="i-carbon-list text-[48px] text-[#d1d5db]" />
         <text class="mt-4 block text-gray-500">暂无订单</text>
       </view>
 

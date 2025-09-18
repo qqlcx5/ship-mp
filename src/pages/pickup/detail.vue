@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { IPickitem } from '@/api/types/pickitem'
+import type { IPickitemDetailResponse } from '@/api/types/pickitem'
 import { getPickitemDetailAPI } from '@/api/pickitem'
 import useRequest from '@/hooks/useRequest'
 
@@ -12,7 +12,7 @@ definePage({
 const pickupId = ref<number>(0)
 
 // 获取取件详情
-const { loading, data: pickupData, run: loadPickupDetail } = useRequest<IPickitem>(() =>
+const { loading, data: pickupData, run: loadPickupDetail } = useRequest<IPickitemDetailResponse>(() =>
   getPickitemDetailAPI({ id: pickupId.value, group_field: 'part_name' }),
 )
 
@@ -92,7 +92,7 @@ function downloadFile() {
       <view class="mx-4 mt-4 border border-blue-200 rounded-lg bg-blue-50 p-4">
         <view class="flex items-center">
           <view class="mr-3 h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
-            <uni-icons type="person" color="#2563eb" size="28" />
+            <view class="i-carbon-user text-[28px] text-[#2563eb]" />
           </view>
           <view>
             <text class="block text-blue-800 font-semibold">{{ pickupDetail.name }}</text>
@@ -111,11 +111,9 @@ function downloadFile() {
                 <view class="mr-2 h-2 w-2 rounded-full bg-blue-500" />
                 <text class="text-base text-gray-800 font-bold">分类 {{ category }}</text>
               </view>
-              <uni-icons
-                :type="isCategoryExpanded(category) ? 'up' : 'down'"
-                color="#6366f1"
-                size="16"
-                class="transition-transform duration-200"
+              <view
+                :class="isCategoryExpanded(category) ? 'i-carbon-chevron-up' : 'i-carbon-chevron-down'"
+                class="text-[16px] text-[#6366f1] transition-transform duration-200"
               />
             </view>
 
@@ -124,12 +122,12 @@ function downloadFile() {
               <view v-for="(item, index) in items" :key="index" class="ml-2 border-l-2 border-blue-200 py-2 pl-4">
                 <view v-for="(values, key) in item" :key="key" class="mb-3 last:mb-0">
                   <view class="mb-2 flex items-center">
-                    <uni-icons type="flag" color="#6366f1" size="14" class="mr-2" />
+                    <view class="i-carbon-flag mr-2 text-[14px] text-[#6366f1]" />
                     <text class="text-sm text-gray-700 font-semibold">{{ key }}</text>
                   </view>
                   <view class="ml-6 flex flex-wrap gap-2">
                     <view v-for="(value, i) in values" :key="i" class="border border-gray-200 rounded-lg bg-white px-3 py-1.5 text-xs text-gray-600 shadow-sm transition-shadow hover:shadow-md">
-                      <uni-icons type="checkmarkempty" color="#10b981" size="10" class="mr-1" />
+                      <view class="i-carbon-checkmark mr-1 text-[10px] text-[#10b981]" />
                       {{ value }}
                     </view>
                   </view>
@@ -173,14 +171,14 @@ function downloadFile() {
           @click="downloadFile"
         >
           <view class="flex items-center">
-            <uni-icons type="paperplane-filled" color="#dc2626" size="20" class="mr-3" />
+            <view class="i-carbon-send-filled mr-3 text-[20px] text-[#dc2626]" />
             <view>
               <text class="block text-sm text-gray-800 font-medium">{{ pickupDetail.desc_file_name }}</text>
               <text class="text-xs text-gray-500">点击下载</text>
             </view>
           </view>
           <wd-button size="small" type="primary">
-            <uni-icons type="download" color="white" size="12" class="mr-1" />
+            <view class="i-carbon-download mr-1 text-[12px] text-white" />
             下载
           </wd-button>
         </view>
@@ -196,7 +194,7 @@ function downloadFile() {
 
     <!-- 取件不存在提示 -->
     <view v-else class="flex flex-col items-center justify-center py-20">
-      <uni-icons type="cart" color="#d1d5db" size="48" />
+      <view class="i-carbon-shopping-cart text-[48px] text-[#d1d5db]" />
       <text class="mt-4 text-gray-500">取件不存在</text>
     </view>
   </view>

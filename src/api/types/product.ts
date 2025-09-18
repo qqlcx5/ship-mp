@@ -48,7 +48,7 @@ export interface IProductListParams {
   news?: number
   page?: number
   limit?: number
-  cid?: number
+  cid?: number | string
   coupon_category_id?: string
   productId?: string
 }

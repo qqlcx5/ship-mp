@@ -12,7 +12,7 @@
       <text class="picker-text" :class="{ placeholder: !hasSelected }">
         {{ displayText }}
       </text>
-      <uni-icons type="right" color="#9ca3af" size="14" />
+      <view class="i-carbon-chevron-right text-[14px] text-[#9ca3af]" />
     </view>
   </picker>
 </template>

@@ -28,11 +28,11 @@ const currentBanner = ref(0)
 
 // 快捷功能菜单
 const quickMenus = ref([
-  { icon: 'shop', title: '商品', path: '/pages/product/list' },
-  { icon: 'calendar', title: '取件', path: '/pages/pickup/list' },
-  { icon: 'location', title: '地址', path: '/pages/address/list' },
-  { icon: 'list', title: '订单', path: '/pages/order/list' },
-  { icon: 'contact', title: '我的', path: '/pages/me/me' },
+  { icon: 'i-carbon-shopping-cart', title: '商品', path: '/pages/product/list' },
+  { icon: 'i-carbon-calendar', title: '取件', path: '/pages/pickup/list' },
+  { icon: 'i-carbon-location', title: '地址', path: '/pages/address/list' },
+  { icon: 'i-carbon-list', title: '订单', path: '/pages/order/list' },
+  { icon: 'i-carbon-user-avatar', title: '我的', path: '/pages/me/me' },
 ])
 
 // 公告信息
@@ -103,8 +103,8 @@ function handleQuickMenu(item: any) {
     <!-- 公告栏 -->
     <view class="mx-4 mt-4 border-l-4 border-blue-400 rounded-lg bg-blue-50 p-3">
       <view class="flex items-center">
-        <uni-icons type="sound-filled" color="#2563eb" size="16" class="mr-2" />
-        <text class="text-sm text-blue-800">{{ noticeInfo?.desc }}</text>
+        <view class="i-carbon-volume-up-filled mr-2 text-[16px] text-[#2563eb]" />
+        <text class="text-sm text-blue-800">{{ noticeInfo.desc }}</text>
       </view>
     </view>
 
@@ -117,7 +117,7 @@ function handleQuickMenu(item: any) {
         @click="handleQuickMenu(menu)"
       >
         <view class="mx-auto mb-2 h-12 w-12 flex items-center justify-center rounded-full bg-gray-100">
-          <uni-icons :type="menu.icon" color="#6b7280" size="20" />
+          <view :class="menu.icon" class="text-[20px] text-[#6b7280]" />
         </view>
         <text class="text-xs text-gray-700">{{ menu.title }}</text>
       </view>

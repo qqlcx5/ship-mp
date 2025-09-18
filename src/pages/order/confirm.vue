@@ -101,16 +101,16 @@ async function handleSubmitOrder() {
     <!-- 订单确认内容 -->
     <view v-else-if="orderData">
       <!-- 收货地址 -->
-      <view v-if="orderData.address" class="mb-2 bg-white p-4">
+      <view v-if="orderData.addressInfo" class="mb-2 bg-white p-4">
         <view class="mb-2 flex items-center">
-          <uni-icons type="location-filled" color="#f59e0b" size="16" class="mr-2" />
+          <view class="i-carbon-location-filled mr-2 text-[16px] text-[#f59e0b]" />
           <text class="text-gray-800 font-medium">收货地址</text>
         </view>
-        <view class="ml-6">
-          <text class="block text-gray-800 font-medium">{{ orderData.address.name }}</text>
-          <text class="block text-sm text-gray-600">{{ orderData.address.phone }}</text>
-          <text class="block text-sm text-gray-600">{{ orderData.address.address }}</text>
+        <view>
+          <text class="text-gray-800 font-medium">{{ orderData.addressInfo.real_name }}</text>
+          <text class="ml-2 text-sm text-gray-600">{{ orderData.addressInfo.phone }}</text>
         </view>
+        <text class="block break-all text-sm text-gray-600">{{ orderData.addressInfo.province }}{{ orderData.addressInfo.city }}{{ orderData.addressInfo.district }}{{ orderData.addressInfo.detail }}</text>
       </view>
 
       <!-- 商品列表 -->
@@ -119,7 +119,7 @@ async function handleSubmitOrder() {
           <text class="text-gray-800 font-medium">商品清单</text>
         </view>
         <view
-          v-for="product in orderData.products"
+          v-for="product in orderData.cartInfo"
           :key="product.id"
           class="flex items-center border-b border-gray-50 p-4 last:border-b-0"
         >
@@ -145,15 +145,15 @@ async function handleSubmitOrder() {
         </view>
         <view class="flex items-center justify-between py-1">
           <text class="text-gray-600">商品总价</text>
-          <text class="text-gray-800">¥{{ formatPrice(orderData.totalAmount) }}</text>
+          <text class="text-gray-800">¥{{ formatPrice(Number(orderData.priceGroup.totalPrice)) }}</text>
         </view>
         <view class="flex items-center justify-between py-1">
           <text class="text-gray-600">运费</text>
-          <text class="text-gray-800">¥{{ formatPrice(orderData.shippingFee) }}</text>
+          <text class="text-gray-800">¥{{ formatPrice(Number(orderData.priceGroup.storePostage)) }}</text>
         </view>
         <view class="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
           <text class="text-gray-800 font-medium">实付款</text>
-          <text class="text-xl text-red-500 font-bold">¥{{ formatPrice(orderData.finalAmount) }}</text>
+          <text class="text-xl text-red-500 font-bold">¥{{ formatPrice(Number(orderData.priceGroup.payPrice)) }}</text>
         </view>
       </view>
 
@@ -163,7 +163,7 @@ async function handleSubmitOrder() {
 
     <!-- 订单不存在提示 -->
     <view v-else class="flex flex-col items-center justify-center py-20">
-      <uni-icons type="shop" color="#d1d5db" size="48" />
+      <view class="i-carbon-shopping-cart text-[48px] text-[#d1d5db]" />
       <text class="mt-4 text-gray-500">订单信息不存在</text>
     </view>
 
@@ -172,7 +172,7 @@ async function handleSubmitOrder() {
       <view class="flex items-center justify-between">
         <view>
           <text class="text-sm text-gray-600">实付款：</text>
-          <text class="text-xl text-red-500 font-bold">¥{{ formatPrice(orderData.finalAmount) }}</text>
+          <text class="text-xl text-red-500 font-bold">¥{{ formatPrice(Number(orderData.priceGroup.payPrice)) }}</text>
         </view>
         <wd-button
           type="primary"

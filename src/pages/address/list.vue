@@ -22,7 +22,7 @@ tokenStore.setTokenInfo({
 })
 
 // 获取地址列表
-const { loading, data: addressData, run: loadAddressList } = useRequest<IAddressListResponse, []>(() => getAddressListAPI())
+const { loading, data: addressData, run: loadAddressList } = useRequest<IAddressListResponse>(() => getAddressListAPI())
 
 // 地址列表
 const addressList = computed(() => {
@@ -86,8 +86,8 @@ async function setDefaultAddress(id: number) {
       </view>
 
       <!-- 空状态 -->
-      <view v-else-if="addressList.length === 0" class="py-20 text-center">
-        <uni-icons type="location" color="#d1d5db" size="48" />
+      <view v-else-if="addressList?.length === 0" class="py-20 text-center">
+        <view class="i-carbon-location text-[48px] text-[#d1d5db]" />
         <text class="mt-4 block text-gray-500">暂无地址</text>
         <wd-button type="primary" class="mt-4" @click="addAddress">
           添加地址

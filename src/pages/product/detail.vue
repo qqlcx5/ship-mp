@@ -165,10 +165,10 @@ function downloadFile() {
     <view v-else-if="productDetail">
       <!-- 头部导航 -->
       <!-- <view class="flex items-center justify-between border-b border-gray-100 p-4">
-        <uni-icons type="left" color="#6b7280" size="18" @click="() => uni.navigateBack()" />
+        <view class="i-carbon-chevron-left text-[18px] text-[#6b7280]" @click="() => uni.navigateBack()" />
         <view class="flex space-x-4">
-          <uni-icons type="heart" color="#6b7280" size="18" @click="favoriteProduct" />
-          <uni-icons type="redo" color="#6b7280" size="18" @click="shareProduct" />
+          <view class="i-carbon-favorite text-[18px] text-[#6b7280]" @click="favoriteProduct" />
+          <view class="i-carbon-redo text-[18px] text-[#6b7280]" @click="shareProduct" />
         </view>
       </view> -->
 
@@ -255,7 +255,7 @@ function downloadFile() {
 
     <!-- 商品不存在提示 -->
     <view v-else class="flex flex-col items-center justify-center py-20">
-      <uni-icons type="shop" color="#d1d5db" size="48" />
+      <view class="i-carbon-shopping-cart text-[48px] text-[#d1d5db]" />
       <text class="mt-4 text-gray-500">商品不存在</text>
     </view>
   </view>

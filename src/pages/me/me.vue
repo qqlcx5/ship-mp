@@ -14,8 +14,8 @@ const { userInfo } = storeToRefs(userStore)
 
 // 功能菜单
 const menuItems = ref([
-  { icon: 'list', title: '我的订单', path: '/pages/order/list' },
-  { icon: 'location', title: '收货地址', path: '/pages/address/list' },
+  { icon: 'i-carbon-list', title: '我的订单', path: '/pages/order/list' },
+  { icon: 'i-carbon-location', title: '收货地址', path: '/pages/address/list' },
 ])
 
 // 获取用户手机号
@@ -93,10 +93,10 @@ function handleMenuItem(item: any) {
         @click="handleMenuItem(item)"
       >
         <view class="flex items-center">
-          <uni-icons :type="item.icon as any" color="#6b7280" size="18" class="mr-3" />
+          <view :class="item.icon" class="mr-3 text-[18px] text-[#6b7280]" />
           <text class="text-gray-800">{{ item.title }}</text>
         </view>
-        <uni-icons type="right" color="#9ca3af" size="14" />
+        <view class="i-carbon-chevron-right text-[14px] text-[#9ca3af]" />
       </view>
     </view>
 

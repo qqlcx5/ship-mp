@@ -3,10 +3,13 @@ import type { ApiResponse } from './common'
 // 订单确认参数
 export interface IOrderConfirmParams {
   cartId: string
+  new?: number
+  shipping_type?: number
+  addressId?: number
 }
 export interface IOrderCreateParams {
   orderKey: string
-  products: IOrderProduct[]
+  addressId: number
   [key: string]: unknown
 }
 
@@ -22,17 +25,28 @@ export interface IOrderProduct {
 
 // 订单确认响应数据
 export interface IOrderConfirmData {
-  cartId: string
-  products: IOrderProduct[]
-  totalAmount: number
-  shippingFee: number
-  finalAmount: number
-  address?: {
+  orderKey: string
+  addressInfo: {
     id: number
-    name: string
+    real_name: string
     phone: string
-    address: string
+    province: string
+    city: string
+    district: string
+    detail: string
+    is_default: number
   }
+  cartInfo: IOrderProduct[]
+  priceGroup: {
+    totalPrice: string
+    storePostage: string
+    storeCouponPrice: string
+    payFee: string
+    payPrice: string
+    deductionPrice: string
+    couponPrice: string
+  }
+  [key: string]: unknown
 }
 
 // 订单确认响应
@@ -40,11 +54,10 @@ export type IOrderConfirmResponse = ApiResponse<IOrderConfirmData>
 
 // 创建订单响应数据
 export interface IOrderCreateData {
-  orderId: string
-  orderNo: string
-  totalAmount: number
-  status: number
-  created_at: string
+  result: {
+    orderId: string
+    [key: string]: unknown
+  }
 }
 
 // 创建订单响应
@@ -52,8 +65,9 @@ export type IOrderCreateResponse = ApiResponse<IOrderCreateData>
 
 // 支付参数
 export interface IOrderPayParams {
-  orderId: string
-  paymentMethod?: string
+  paytype: 'weixin' | 'balance'
+  type: number
+  uni: string
 }
 
 // 支付响应数据
