@@ -9,6 +9,7 @@ import {
   // logout as _logout,
   refreshToken as _refreshToken,
   wxLogin as _wxLogin,
+  // wxOpenId as _wxOpenId,
   getWxCode,
 } from '@/api/login'
 import { isDoubleTokenRes, isSingleTokenRes } from '@/api/types/login'
@@ -137,6 +138,8 @@ export const useTokenStore = defineStore(
         // 获取微信小程序登录的code
         const resd = await getWxCode()
         console.log('微信登录-code: ', resd)
+        // const resId = await _wxOpenId({ code: resd.code })
+        // console.log(`🚀 - wxOpenId - resId:`, resId)
         const res = await _wxLogin({ ...loginForm, code: resd.code })
         console.log('微信登录-login', res)
         await _postLogin({ ...res, expiresIn: res.expires_time })
