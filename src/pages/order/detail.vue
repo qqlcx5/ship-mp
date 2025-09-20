@@ -11,6 +11,13 @@ onLoad(async (options) => {
     orderDetail.value = await getOrderDetail(id)
   }
 })
+
+// 格式化价格显示
+function formatPrice(price?: string | number) {
+  if (price === undefined || price === null || price === '')
+    return '0.00'
+  return price
+}
 </script>
 
 <template>
@@ -39,6 +46,18 @@ onLoad(async (options) => {
           地址：{{ orderDetail?.user_address }}
         </view>
       </view>
+      <!-- 物流信息 -->
+      <view v-if="orderDetail?.delivery_name || orderDetail?.delivery_code" class="mb-4 rounded-lg bg-gray-50 p-3">
+        <view class="mb-2 font-bold">
+          物流信息
+        </view>
+        <view v-if="orderDetail?.delivery_name" class="text-gray-600">
+          快递公司：{{ orderDetail?.delivery_name }}
+        </view>
+        <view v-if="orderDetail?.delivery_id" class="text-gray-600">
+          快递单号：{{ orderDetail?.delivery_id }}
+        </view>
+      </view>
       <view
         v-for="product in orderDetail?.cartInfo"
         :key="product.id"
@@ -54,7 +73,7 @@ onLoad(async (options) => {
           </view>
         </view>
         <view class="text-lg font-bold">
-          ¥{{ product.truePrice }}
+          ¥{{ formatPrice(product.truePrice) }}
         </view>
       </view>
       <view class="mb-2 flex items-center justify-end">
@@ -62,7 +81,7 @@ onLoad(async (options) => {
           商品总价：
         </view>
         <view class="text-lg font-bold">
-          ¥{{ orderDetail?.total_price }}
+          ¥{{ formatPrice(orderDetail?.total_price) }}
         </view>
       </view>
       <view class="flex items-center justify-end">
@@ -70,7 +89,7 @@ onLoad(async (options) => {
           支付金额：
         </view>
         <view class="text-lg text-red-500 font-bold">
-          ¥{{ orderDetail?.pay_price }}
+          ¥{{ formatPrice(orderDetail?.pay_price) }}
         </view>
       </view>
     </view>

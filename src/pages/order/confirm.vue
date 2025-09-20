@@ -36,7 +36,7 @@ onLoad((options) => {
 function formatPrice(price?: number) {
   if (!price)
     return '0.00'
-  return (price).toFixed(2)
+  return price
 }
 
 // 提交订单并支付
@@ -133,15 +133,15 @@ async function handleSubmitOrder() {
           class="flex items-center border-b border-gray-50 p-4 last:border-b-0"
         >
           <image
-            :src="product.image"
+            :src="product.productInfo.image"
             class="mr-3 h-16 w-16 rounded-lg"
             mode="aspectFill"
           />
           <view class="flex-1">
-            <text class="block text-gray-800 font-medium">{{ product.name }}</text>
+            <text class="block text-gray-800 font-medium">{{ product.productInfo.name }}</text>
             <view class="mt-1 flex items-center justify-between">
-              <text class="text-sm text-gray-600">数量：{{ product.quantity }}</text>
-              <text class="text-red-500 font-medium">¥{{ formatPrice(product.price) }}</text>
+              <text class="text-sm text-gray-600">数量：{{ product.productInfo.quantity }}</text>
+              <text class="text-red-500 font-medium">¥{{ formatPrice(product.productInfo.price) }}</text>
             </view>
           </view>
         </view>
@@ -154,7 +154,7 @@ async function handleSubmitOrder() {
         </view>
         <view class="flex items-center justify-between py-1">
           <text class="text-gray-600">商品总价</text>
-          <text class="text-gray-800">¥{{ formatPrice(Number(orderData.priceGroup.totalPrice)) }}</text>
+          <text class="text-gray-800">¥{{ formatPrice(Number(orderData.priceGroup.sumPrice)) }}</text>
         </view>
         <view class="flex items-center justify-between py-1">
           <text class="text-gray-600">运费</text>
@@ -162,7 +162,7 @@ async function handleSubmitOrder() {
         </view>
         <view class="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
           <text class="text-gray-800 font-medium">实付款</text>
-          <text class="text-xl text-red-500 font-bold">¥{{ formatPrice(Number(orderData.priceGroup.payPrice)) }}</text>
+          <text class="text-xl text-red-500 font-bold">¥{{ formatPrice(Number(orderData.priceGroup.totalPrice)) }}</text>
         </view>
       </view>
 
@@ -181,7 +181,7 @@ async function handleSubmitOrder() {
       <view class="flex items-center justify-between">
         <view>
           <text class="text-sm text-gray-600">实付款：</text>
-          <text class="text-xl text-red-500 font-bold">¥{{ formatPrice(Number(orderData.priceGroup.payPrice)) }}</text>
+          <text class="text-xl text-red-500 font-bold">¥{{ formatPrice(Number(orderData.priceGroup.totalPrice)) }}</text>
         </view>
         <wd-button
           type="primary"
