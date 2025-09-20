@@ -69,7 +69,6 @@ function handleMenuItem(item: any) {
         />
         <view>
           <text class="block text-lg text-gray-800 font-semibold">{{ userInfo.nickname || userInfo.username || '用户' }}</text>
-          <text class="text-sm text-gray-500">会员等级：金牌会员</text>
         </view>
       </view>
       <view v-else class="flex items-center space-x-4">

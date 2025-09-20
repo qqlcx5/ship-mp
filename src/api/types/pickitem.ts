@@ -23,6 +23,7 @@ export interface IPickitem {
   collator: string
   view_num: number
   cate_id: number
+  cate_name?: string // Added cate_name
   image: string
   desc_file_url: string
   desc_file_name: string

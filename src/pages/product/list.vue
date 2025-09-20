@@ -93,7 +93,7 @@ onLoad(() => {
         v-model="searchKeyword"
         prefix-icon="search"
         no-border
-        @change="searchProducts"
+        @input="searchProducts"
       />
     </view>
 
