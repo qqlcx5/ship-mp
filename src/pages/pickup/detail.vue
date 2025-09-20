@@ -161,25 +161,6 @@ function downloadFile() {
         </view>
       </view>
 
-      <!-- 基本信息 -->
-      <view class="mx-4 mt-4 border border-gray-200 rounded-lg bg-white p-4">
-        <text class="mb-4 block text-gray-800 font-semibold">基本信息</text>
-        <view class="space-y-3">
-          <view class="flex justify-between">
-            <text class="text-gray-600">分类名称：</text>
-            <text class="text-gray-800 font-medium">{{ pickupDetail?.cate_name }}</text>
-          </view>
-          <view class="flex justify-between">
-            <text class="text-gray-600">浏览量：</text>
-            <text class="text-gray-800">{{ pickupDetail?.view_num }}</text>
-          </view>
-          <view class="flex justify-between">
-            <text class="text-gray-600">时间：</text>
-            <text class="text-gray-800">{{ pickupDetail?.add_time }}</text>
-          </view>
-        </view>
-      </view>
-
       <!-- 相关附件 -->
       <view v-if="pickupDetail?.desc_file_url" class="mx-4 mt-4 border border-gray-200 rounded-lg bg-white p-4">
         <text class="mb-3 block text-gray-800 font-semibold">相关附件</text>
