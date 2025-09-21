@@ -1,3 +1,128 @@
+<script setup lang="ts">
+import { ref } from "vue";
+
+interface BluetoothDevice {
+  id: string;
+  name: string;
+  signal: number;
+}
+
+interface LoginForm {
+  username: string;
+  password: string;
+}
+
+const currentStep = ref<"login" | "bluetooth">("login");
+const isLoading = ref(false);
+const isSearching = ref(false);
+const isBluetoothConnected = ref(false);
+const connectedDevice = ref<BluetoothDevice | null>(null);
+
+const loginForm = reactive<LoginForm>({
+  username: "",
+  password: "",
+});
+
+const bluetoothDevices = ref<BluetoothDevice[]>([
+  { id: "001", name: "主控设备-001", signal: 85 },
+  { id: "002", name: "主控设备-002", signal: 72 },
+  { id: "003", name: "备用设备-003", signal: 58 },
+]);
+
+const handleLogin = async () => {
+  if (!loginForm.username || !loginForm.password) {
+    uni.showToast({
+      title: "请输入用户名和密码",
+      icon: "none",
+    });
+    return;
+  }
+
+  isLoading.value = true;
+
+  try {
+    // 模拟登录验证
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    // 简单验证
+    if (loginForm.username === "admin" && loginForm.password === "123456") {
+      uni.showToast({
+        title: "登录成功",
+        icon: "success",
+      });
+
+      // 跳转到蓝牙连接页面
+      setTimeout(() => {
+        currentStep.value = "bluetooth";
+      }, 1000);
+    } else {
+      uni.showToast({
+        title: "用户名或密码错误",
+        icon: "error",
+      });
+    }
+  } catch (error) {
+    uni.showToast({
+      title: "登录失败，请重试",
+      icon: "error",
+    });
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const quickLogin = () => {
+  loginForm.username = "admin";
+  loginForm.password = "123456";
+  handleLogin();
+};
+
+const searchDevices = () => {
+  isSearching.value = true;
+
+  // 模拟搜索过程
+  setTimeout(() => {
+    isSearching.value = false;
+    uni.showToast({
+      title: "发现3个设备",
+      icon: "success",
+    });
+  }, 2000);
+};
+
+const connectToDevice = (device: BluetoothDevice) => {
+  uni.showLoading({
+    title: "连接中...",
+  });
+
+  // 模拟连接过程
+  setTimeout(() => {
+    uni.hideLoading();
+    isBluetoothConnected.value = true;
+    connectedDevice.value = device;
+
+    uni.showToast({
+      title: "设备连接成功",
+      icon: "success",
+    });
+  }, 2000);
+};
+
+const enterManualControl = () => {
+  // 跳转到手动导航页面
+  uni.reLaunch({
+    url: "/pages/manual/manual",
+  });
+};
+
+const goBackToLogin = () => {
+  currentStep.value = "login";
+  isBluetoothConnected.value = false;
+  connectedDevice.value = null;
+  isSearching.value = false;
+};
+</script>
+
 <template>
   <view class="login-container">
     <!-- 海洋背景 -->
@@ -30,17 +155,27 @@
               <view class="input-icon">
                 <text class="icon">👤</text>
               </view>
-              <wd-input type="text" class="login-input" v-model="loginForm.username" placeholder="请输入用户名"   />
+              <wd-input
+                type="text"
+                class="login-input"
+                v-model="loginForm.username"
+                placeholder="请输入用户名"
+              />
             </view>
           </view>
-          
+
           <view class="input-wrapper">
             <text class="input-label">密码</text>
             <view class="input-group">
               <view class="input-icon">
                 <text class="icon">🔒</text>
               </view>
-              <wd-input type="text" class="login-input" v-model="loginForm.password" placeholder="请输入密码"   />
+              <wd-input
+                type="text"
+                class="login-input"
+                v-model="loginForm.password"
+                placeholder="请输入密码"
+              />
             </view>
           </view>
         </view>
@@ -49,14 +184,14 @@
         <button class="login-button" @click="handleLogin" :disabled="isLoading">
           <text v-if="!isLoading" class="button-icon">🚀</text>
           <text v-else class="loading-icon">⏳</text>
-          {{ isLoading ? '登录中...' : '立即登录' }}
+          {{ isLoading ? "登录中..." : "立即登录" }}
         </button>
 
         <!-- 快速登录 -->
         <button class="quick-login-button" @click="quickLogin">
           快速登录（演示）
         </button>
-        
+
         <text class="demo-text">默认账号: admin / 密码: 123456</text>
       </view>
 
@@ -74,15 +209,24 @@
         <!-- 蓝牙连接状态 -->
         <view class="bluetooth-section">
           <view class="bluetooth-status">
-            <view class="status-indicator" :class="{ 'connected': isBluetoothConnected }"></view>
+            <view
+              class="status-indicator"
+              :class="{ connected: isBluetoothConnected }"
+            ></view>
             <text class="status-text">
-              {{ isBluetoothConnected ? '设备已连接' : (isSearching ? '正在搜索蓝牙设备...' : '准备连接设备') }}
+              {{
+                isBluetoothConnected
+                  ? "设备已连接"
+                  : isSearching
+                    ? "正在搜索蓝牙设备..."
+                    : "准备连接设备"
+              }}
             </text>
           </view>
-          
+
           <view v-if="!isBluetoothConnected" class="device-list">
-            <view 
-              v-for="device in bluetoothDevices" 
+            <view
+              v-for="device in bluetoothDevices"
               :key="device.id"
               class="device-card"
               @click="connectToDevice(device)"
@@ -91,10 +235,12 @@
                 <text class="device-name">{{ device.name }}</text>
                 <text class="bluetooth-icon">📶</text>
               </view>
-              <text class="signal-strength">信号强度: {{ device.signal }}%</text>
+              <text class="signal-strength"
+                >信号强度: {{ device.signal }}%</text
+              >
             </view>
           </view>
-          
+
           <view v-else class="connected-device">
             <view class="device-card connected">
               <view class="device-info">
@@ -107,162 +253,35 @@
         </view>
 
         <!-- 连接/进入按钮 -->
-        <button 
-          v-if="!isBluetoothConnected" 
-          class="connect-button" 
+        <button
+          v-if="!isBluetoothConnected"
+          class="connect-button"
           @click="searchDevices"
           :disabled="isSearching"
         >
-          <text class="button-icon">{{ isSearching ? '🔄' : '🔍' }}</text>
-          {{ isSearching ? '搜索中...' : '搜索设备' }}
+          <text class="button-icon">{{ isSearching ? "🔄" : "🔍" }}</text>
+          {{ isSearching ? "搜索中..." : "搜索设备" }}
         </button>
-        
-        <button 
-          v-else 
-          class="connect-button" 
-          @click="enterManualControl"
-        >
+
+        <button v-else class="connect-button" @click="enterManualControl">
           <text class="button-icon">🎮</text>
           进入手动控制
         </button>
 
         <text class="help-text">
-          {{ isBluetoothConnected ? '设备连接成功，可以开始操控' : '请确保蓝牙已开启并靠近设备' }}
+          {{
+            isBluetoothConnected
+              ? "设备连接成功，可以开始操控"
+              : "请确保蓝牙已开启并靠近设备"
+          }}
         </text>
-        
+
         <!-- 返回按钮 -->
-        <button class="back-button" @click="goBackToLogin">
-          ← 返回登录
-        </button>
+        <button class="back-button" @click="goBackToLogin">← 返回登录</button>
       </view>
     </view>
   </view>
 </template>
-
-<script setup lang="ts">
-import { ref, reactive } from 'vue'
-
-interface BluetoothDevice {
-  id: string
-  name: string
-  signal: number
-}
-
-interface LoginForm {
-  username: string
-  password: string
-}
-
-const currentStep = ref<'login' | 'bluetooth'>('login')
-const isLoading = ref(false)
-const isSearching = ref(false)
-const isBluetoothConnected = ref(false)
-const connectedDevice = ref<BluetoothDevice | null>(null)
-
-const loginForm = reactive<LoginForm>({
-  username: '',
-  password: ''
-})
-
-const bluetoothDevices = ref<BluetoothDevice[]>([
-  { id: '001', name: '主控设备-001', signal: 85 },
-  { id: '002', name: '主控设备-002', signal: 72 },
-  { id: '003', name: '备用设备-003', signal: 58 }
-])
-
-const handleLogin = async () => {
-  if (!loginForm.username || !loginForm.password) {
-    uni.showToast({
-      title: '请输入用户名和密码',
-      icon: 'none'
-    })
-    return
-  }
-  
-  isLoading.value = true
-  
-  try {
-    // 模拟登录验证
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // 简单验证
-    if (loginForm.username === 'admin' && loginForm.password === '123456') {
-      uni.showToast({
-        title: '登录成功',
-        icon: 'success'
-      })
-      
-      // 跳转到蓝牙连接页面
-      setTimeout(() => {
-        currentStep.value = 'bluetooth'
-      }, 1000)
-    } else {
-      uni.showToast({
-        title: '用户名或密码错误',
-        icon: 'error'
-      })
-    }
-  } catch (error) {
-    uni.showToast({
-      title: '登录失败，请重试',
-      icon: 'error'
-    })
-  } finally {
-    isLoading.value = false
-  }
-}
-
-const quickLogin = () => {
-  loginForm.username = 'admin'
-  loginForm.password = '123456'
-  handleLogin()
-}
-
-const searchDevices = () => {
-  isSearching.value = true
-  
-  // 模拟搜索过程
-  setTimeout(() => {
-    isSearching.value = false
-    uni.showToast({
-      title: '发现3个设备',
-      icon: 'success'
-    })
-  }, 2000)
-}
-
-const connectToDevice = (device: BluetoothDevice) => {
-  uni.showLoading({
-    title: '连接中...'
-  })
-  
-  // 模拟连接过程
-  setTimeout(() => {
-    uni.hideLoading()
-    isBluetoothConnected.value = true
-    connectedDevice.value = device
-    
-    uni.showToast({
-      title: '设备连接成功',
-      icon: 'success'
-    })
-  }, 2000)
-}
-
-const enterManualControl = () => {
-  // 跳转到手动导航页面
-  uni.reLaunch({
-    url: '/pages/manual/manual'
-  })
-}
-
-const goBackToLogin = () => {
-  currentStep.value = 'login'
-  isBluetoothConnected.value = false
-  connectedDevice.value = null
-  isSearching.value = false
-}
-</script>
 
 <style lang="scss" scoped>
 .login-container {
@@ -310,7 +329,7 @@ const goBackToLogin = () => {
   .logo-icon {
     width: 128rpx;
     height: 128rpx;
-    background: linear-gradient(to right, #4FD1C7, #60A5FA);
+    background: linear-gradient(to right, #4fd1c7, #60a5fa);
     border-radius: 50%;
     margin: 0 auto 32rpx;
     display: flex;
@@ -370,9 +389,11 @@ const goBackToLogin = () => {
       box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
 
       &:focus-within {
-        border-color: #4FD1C7;
+        border-color: #4fd1c7;
         background: rgba(79, 209, 199, 0.12);
-        box-shadow: 0 0 0 4rpx rgba(79, 209, 199, 0.1), 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
+        box-shadow:
+          0 0 0 4rpx rgba(79, 209, 199, 0.1),
+          0 8rpx 32rpx rgba(0, 0, 0, 0.15);
         transform: translateY(-2rpx);
       }
 
@@ -397,7 +418,7 @@ const goBackToLogin = () => {
       }
 
       &:focus-within .input-icon .icon {
-        color: #4FD1C7;
+        color: #4fd1c7;
       }
 
       .login-input {
@@ -424,7 +445,7 @@ const goBackToLogin = () => {
 
 .login-button {
   width: 100%;
-  background: linear-gradient(to right, #4FD1C7, #60A5FA);
+  background: linear-gradient(to right, #4fd1c7, #60a5fa);
   color: white;
   font-weight: 600;
   padding: 18rpx 32rpx;
@@ -444,7 +465,7 @@ const goBackToLogin = () => {
   }
 
   &:not(:disabled):hover {
-    background: linear-gradient(to right, #2DD4BF, #3B82F6);
+    background: linear-gradient(to right, #2dd4bf, #3b82f6);
     transform: translateY(-4rpx);
   }
 
@@ -496,13 +517,13 @@ const goBackToLogin = () => {
     .status-indicator {
       width: 24rpx;
       height: 24rpx;
-      background: #4FD1C7;
+      background: #4fd1c7;
       border-radius: 50%;
       margin-right: 16rpx;
       animation: pulse 2s infinite;
 
       &.connected {
-        background: #10B981;
+        background: #10b981;
         animation: none;
       }
     }
@@ -551,11 +572,11 @@ const goBackToLogin = () => {
       }
 
       .bluetooth-icon {
-        color: #4FD1C7;
+        color: #4fd1c7;
         font-size: 32rpx;
 
         &.connected {
-          color: #10B981;
+          color: #10b981;
         }
       }
     }
@@ -579,7 +600,7 @@ const goBackToLogin = () => {
 
 .connect-button {
   width: 100%;
-  background: linear-gradient(to right, #4FD1C7, #60A5FA);
+  background: linear-gradient(to right, #4fd1c7, #60a5fa);
   color: white;
   font-weight: 600;
   padding: 24rpx 32rpx;
@@ -598,7 +619,7 @@ const goBackToLogin = () => {
   }
 
   &:not(:disabled):hover {
-    background: linear-gradient(to right, #2DD4BF, #3B82F6);
+    background: linear-gradient(to right, #2dd4bf, #3b82f6);
     transform: translateY(-4rpx);
   }
 
@@ -633,13 +654,24 @@ const goBackToLogin = () => {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* 横屏适配 */
