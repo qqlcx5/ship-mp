@@ -157,16 +157,40 @@ function downloadFile() {
     url: productDetail.value.desc_file_url,
     success: (res) => {
       if (res.statusCode === 200) {
+        const filePath = res.tempFilePath
+        console.log('filePath', filePath);
+        
+        uni.openDocument({
+          filePath: filePath,
+          showMenu: true,
+          success: (openRes) => {
+            console.log('打开文件成功', openRes)
+            uni.showToast({
+              title: '打开文件成功',
+              icon: 'success',
+            })
+          },
+          fail: (openErr) => {
+            console.error('打开文件失败', openErr)
+            uni.showToast({
+              title: '打开文件失败',
+              icon: 'none',
+            })
+          },
+        })
+      } else {
+        console.error('下载文件失败，状态码：', res.statusCode)
         uni.showToast({
-          title: '下载成功',
-          icon: 'success',
+          title: '下载文件失败',
+          icon: 'none',
         })
       }
     },
-    fail: () => {
+    fail: (err) => {
+      console.error('下载文件失败', err)
       uni.showToast({
-        title: '下载失败',
-        icon: 'error',
+        title: '下载文件失败',
+        icon: 'none',
       })
     },
   })

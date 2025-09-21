@@ -30,9 +30,9 @@ const currentBanner = ref(0)
 const quickMenus = ref([
   { icon: 'i-carbon-shopping-cart', title: '商品', path: '/pages/product/list' },
   { icon: 'i-carbon-calendar', title: '取件', path: '/pages/pickup/list' },
-  { icon: 'i-carbon-location', title: '地址', path: '/pages/address/list' },
-  { icon: 'i-carbon-list', title: '订单', path: '/pages/order/list' },
-  { icon: 'i-carbon-user-avatar', title: '我的', path: '/pages/me/me' },
+  // { icon: 'i-carbon-location', title: '地址', path: '/pages/address/list' },
+  // { icon: 'i-carbon-list', title: '订单', path: '/pages/order/list' },
+  // { icon: 'i-carbon-user-avatar', title: '我的', path: '/pages/me/me' },
 ])
 
 // 公告信息
