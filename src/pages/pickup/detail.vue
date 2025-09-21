@@ -41,14 +41,14 @@ onLoad((options) => {
   }
 })
 
-// 下载附件
+// 查看附件
 function downloadFile() {
   if (!pickupDetail.value?.desc_file_url) {
     uni.showToast({ title: '附件地址不存在', icon: 'none' })
     return
   }
 
-  console.log('下载文件URL:', pickupDetail.value.desc_file_url)
+  console.log('查看文件URL:', pickupDetail.value.desc_file_url)
   uni.downloadFile({
     url: pickupDetail.value.desc_file_url,
     success: (res) => {
@@ -73,17 +73,17 @@ function downloadFile() {
           },
         })
       } else {
-        console.error('下载文件失败，状态码：', res.statusCode)
+        console.error('查看文件失败，状态码：', res.statusCode)
         uni.showToast({
-          title: '下载文件失败',
+          title: '查看文件失败',
           icon: 'none',
         })
       }
     },
     fail: (err) => {
-      console.error('下载文件失败', err)
+      console.error('查看文件失败', err)
       uni.showToast({
-        title: '下载文件失败',
+        title: '查看文件失败',
         icon: 'none',
       })
     },
@@ -193,12 +193,12 @@ function downloadFile() {
             <view class="i-carbon-send-filled mr-3 text-[20px] text-[#dc2626]" />
             <view>
               <text class="block text-sm text-gray-800 font-medium">{{ pickupDetail?.desc_file_name }}</text>
-              <text class="text-xs text-gray-500">点击下载</text>
+              <text class="text-xs text-gray-500">点击查看</text>
             </view>
           </view>
           <wd-button size="small" type="primary">
             <view class="i-carbon-download mr-1 text-[12px] text-white" />
-            下载
+            查看
           </wd-button>
         </view>
       </view>

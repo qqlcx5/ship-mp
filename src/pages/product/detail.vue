@@ -148,7 +148,7 @@ function favoriteProduct() {
   })
 }
 
-// 下载附件
+// 查看附件
 function downloadFile() {
   if (!productDetail.value?.desc_file_url)
     return
@@ -179,17 +179,17 @@ function downloadFile() {
           },
         })
       } else {
-        console.error('下载文件失败，状态码：', res.statusCode)
+        console.error('查看文件失败，状态码：', res.statusCode)
         uni.showToast({
-          title: '下载文件失败',
+          title: '查看文件失败',
           icon: 'none',
         })
       }
     },
     fail: (err) => {
-      console.error('下载文件失败', err)
+      console.error('查看文件失败', err)
       uni.showToast({
-        title: '下载文件失败',
+        title: '查看文件失败',
         icon: 'none',
       })
     },
@@ -258,7 +258,7 @@ function downloadFile() {
           <view class="flex items-center justify-between">
             <text class="text-sm text-blue-600">{{ productDetail.desc_file_name }}</text>
             <wd-button size="small" type="primary" @click="downloadFile">
-              下载
+              查看
             </wd-button>
           </view>
         </view>
