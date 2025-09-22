@@ -1,29 +1,20 @@
 <script lang="ts" setup>
-import type { IAddressListResponse } from '@/api/types/address'
+import type { IAddress } from '@/api/types/address'
 import {
   deleteAddressAPI,
   getAddressListAPI,
   setDefaultAddressAPI,
 } from '@/api/address'
-import useRequest from '@/hooks/useRequest'
+import { usePagination } from '@/hooks/usePagination'
 
 definePage({
   style: {
     navigationBarTitleText: '收货地址',
   },
 })
-
-// 获取地址列表
-const { loading, data: addressData, run: loadAddressList } = useRequest<IAddressListResponse>(() => getAddressListAPI())
-
-// 地址列表
-const addressList = computed(() => {
-  return addressData.value || []
-})
-
-// 页面加载时获取数据
-onShow(() => {
-  loadAddressList()
+const addressList = ref<IAddress[]>([])
+const { paging, query: queryList } = usePagination<IAddress>({
+  api: getAddressListAPI,
 })
 
 // 新增地址
@@ -45,7 +36,7 @@ async function deleteAddress(id: number) {
       if (res.confirm) {
         await deleteAddressAPI(id)
         uni.showToast({ title: '删除成功', icon: 'success' })
-        await loadAddressList()
+        paging.value?.reload() // 删除成功后重新加载列表
       }
     },
   })
@@ -55,37 +46,32 @@ async function deleteAddress(id: number) {
 async function setDefaultAddress(id: number) {
   await setDefaultAddressAPI(id)
   uni.showToast({ title: '设置成功', icon: 'success' })
-  await loadAddressList()
+  paging.value?.reload() // 设置默认成功后重新加载列表
 }
 </script>
 
 <template>
-  <view class="min-h-screen bg-gray-50">
+  <view class="bg-gray-50">
     <!-- 头部操作栏 -->
-    <view class="flex items-center justify-between border-b border-gray-100 bg-white p-4">
-      <text class="text-lg text-gray-800 font-semibold">收货地址</text>
-      <wd-button size="small" type="primary" @click="addAddress">
-        新增
-      </wd-button>
-    </view>
 
     <!-- 地址列表 -->
-    <view class="p-4 space-y-4">
-      <!-- 加载状态 -->
-      <view v-if="loading" class="py-20 text-center">
-        <wd-loading />
-        <text class="mt-4 block text-gray-500">加载中...</text>
-      </view>
-
-      <!-- 空状态 -->
-      <view v-else-if="addressList?.length === 0" class="py-20 text-center">
-        <view class="i-carbon-location text-[48px] text-[#d1d5db]" />
-        <text class="mt-4 block text-gray-500">暂无地址</text>
-        <wd-button type="primary" class="mt-4" @click="addAddress">
-          添加地址
-        </wd-button>
-      </view>
-
+    <z-paging
+      ref="paging"
+      v-model="addressList"
+      class="p-4 space-y-4"
+      empty-view-text="暂无地址"
+      @query="queryList"
+    >
+      <template #top>
+        <view class="bg-gray-100 p-2">
+          <wd-button size="small" type="primary" @click="addAddress">
+            新增
+          </wd-button>
+        </view>
+      </template>
+      <template #bottom>
+        <view class="h-12 p-safe" />
+      </template>
       <view
         v-for="address in addressList"
         :key="address.id"
@@ -131,6 +117,6 @@ async function setDefaultAddress(id: number) {
           </view>
         </view>
       </view>
-    </view>
+    </z-paging>
   </view>
 </template>
