@@ -6,7 +6,11 @@ import { getOrderDetail, takeOrder } from '@/api/order'
 
 const orderDetail = ref<IOrderDetailData>()
 const isLoading = ref(false)
-
+definePage({
+  style: {
+    navigationBarTitleText: '我的订单',
+  },
+})
 onLoad(async (options) => {
   const { id } = options as { id: string }
   if (id) {
