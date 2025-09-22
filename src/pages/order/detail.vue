@@ -11,13 +11,6 @@ onLoad(async (options) => {
     orderDetail.value = await getOrderDetail(id)
   }
 })
-
-// 格式化价格显示
-function formatPrice(price?: string | number) {
-  if (price === undefined || price === null || price === '')
-    return '0.00'
-  return price
-}
 </script>
 
 <template>
@@ -73,7 +66,7 @@ function formatPrice(price?: string | number) {
           </view>
         </view>
         <view class="text-lg font-bold">
-          ¥{{ formatPrice(product.truePrice) }}
+          ¥{{ product.truePrice }}
         </view>
       </view>
       <view class="mb-2 flex items-center justify-end">
@@ -81,7 +74,7 @@ function formatPrice(price?: string | number) {
           商品总价：
         </view>
         <view class="text-lg font-bold">
-          ¥{{ formatPrice(orderDetail?.total_price) }}
+          ¥{{ orderDetail?.total_price }}
         </view>
       </view>
       <view class="flex items-center justify-end">
@@ -89,7 +82,7 @@ function formatPrice(price?: string | number) {
           支付金额：
         </view>
         <view class="text-lg text-red-500 font-bold">
-          ¥{{ formatPrice(orderDetail?.pay_price) }}
+          ¥{{ orderDetail?.pay_price }}
         </view>
       </view>
     </view>

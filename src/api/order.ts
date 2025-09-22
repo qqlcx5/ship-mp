@@ -4,7 +4,6 @@ import type {
   IOrderCreateData,
   IOrderCreateParams,
   IOrderDetailData,
-  IOrderListData,
   IOrderListParams,
   IOrderPayData,
   IOrderPayParams,
@@ -36,8 +35,7 @@ export function payOrder(params: IOrderPayParams) {
  * 获取订单列表
  */
 export function getOrderList(params: IOrderListParams) {
-  const { type, page, limit } = params
-  return http.get<IOrderListData>(`/order/list`, { type, page, limit })
+  return http.get<any>(`/order/list`, params)
 }
 
 /**

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import type { IPickitemCategoryResponse, IPickitemListResponse } from '@/api/types/pickitem'
+import type { IPickitem } from '@/api/types/pickitem'
 import { getPickitemCategoriesAPI, getPickitemListAPI } from '@/api/pickitem'
+import { usePagination } from '@/hooks/usePagination'
 import useRequest from '@/hooks/useRequest'
 
 definePage({
@@ -13,37 +14,28 @@ definePage({
 const currentCategoryId = ref<number>(0)
 
 // 获取取件分类列表
-const { loading: categoryLoading, data: categoryData, run: loadCategories } = useRequest<IPickitemCategoryResponse>(() => getPickitemCategoriesAPI())
-
-// 获取取件列表
-const { loading: pickupLoading, data: pickupData, run: loadPickups } = useRequest<IPickitemListResponse>(() => getPickitemListAPI({ cate_id: currentCategoryId.value }))
+const { data: categoryData, run: loadCategories } = useRequest<any>(() => getPickitemCategoriesAPI())
+const pickupList = ref<IPickitem[]>([])
+const { paging, query: queryPickups } = usePagination<IPickitem>({
+  api: getPickitemListAPI,
+  initialParams: {
+    cate_id: currentCategoryId.value,
+  },
+})
 
 // 分类选项（包含全部选项）
 const categoryTabs = computed(() => {
   const categories = [{ id: 0, name: '全部' }]
   if (categoryData.value) {
-    categories.push(...categoryData.value) // 只显示启用的分类
+    categories.push(...categoryData.value)
   }
   return categories
-})
-
-// 取件列表
-const pickupList = computed(() => {
-  return pickupData.value?.list || []
 })
 
 // 切换分类
 function switchCategory(categoryId: number) {
   currentCategoryId.value = categoryId
-  loadPickups()
-}
-
-// 格式化时间
-function formatTime(timeStr: string | number) {
-  if (typeof timeStr === 'number') {
-    return new Date(timeStr * 1000).toLocaleString()
-  }
-  return timeStr
+  paging.value?.reload()
 }
 
 // 查看取件详情
@@ -52,47 +44,46 @@ function viewDetail(id: number) {
 }
 
 // 页面加载时获取数据
-onLoad(() => {
+onShow(() => {
   loadCategories()
-  loadPickups()
+  paging.value?.reload()
 })
 </script>
 
 <template>
   <view class="min-h-screen bg-gray-50">
-    <!-- 分类筛选 -->
-    <view class="border-b border-gray-100 bg-white px-4 py-3">
-      <scroll-view scroll-x>
-        <view class="flex items-center space-x-2">
-          <view
-            v-for="tab in categoryTabs"
-            :key="tab.id"
-            class="whitespace-nowrap rounded-full px-3 py-1 text-sm" :class="[
-              currentCategoryId === tab.id
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-600',
-            ]"
-            @click="switchCategory(tab.id)"
-          >
-            {{ tab.name }}
-          </view>
-        </view>
-      </scroll-view>
-    </view>
-
-    <!-- 加载状态 -->
-    <view v-if="pickupLoading" class="flex items-center justify-center py-20">
-      <wd-loading />
-      <text class="ml-2 text-gray-500">加载中...</text>
-    </view>
-
     <!-- 取件列表 -->
-    <view v-else class="p-4 space-y-4">
-      <view v-if="pickupList.length === 0" class="py-20 text-center">
-        <view class="i-carbon-shopping-cart text-[48px] text-[#d1d5db]" />
-        <text class="mt-4 block text-gray-500">暂无取件</text>
-      </view>
-
+    <z-paging
+      ref="paging"
+      v-model:list="pickupList"
+      class="p-4 space-y-4"
+      empty-view-text="暂无取件"
+      @query="queryPickups"
+    >
+      <template #top>
+        <!-- 分类筛选 -->
+        <view class="border-b border-gray-100 bg-white px-4 py-3">
+          <scroll-view scroll-x>
+            <view class="flex items-center space-x-2">
+              <view
+                v-for="tab in categoryTabs"
+                :key="tab.id"
+                class="whitespace-nowrap rounded-full px-3 py-1 text-sm" :class="[
+                  currentCategoryId === tab.id
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-600',
+                ]"
+                @click="switchCategory(tab.id)"
+              >
+                {{ tab.name }}
+              </view>
+            </view>
+          </scroll-view>
+        </view>
+      </template>
+      <template #bottom>
+        <view class="h-12 p-safe" />
+      </template>
       <view
         v-for="pickup in pickupList"
         :key="pickup.id"
@@ -117,9 +108,9 @@ onLoad(() => {
           </view>
 
           <!-- 右侧商品图片 -->
-          <image :src="pickup.image" class="ml-4 h-20 w-20 rounded-lg" mode="aspectFill" />
+          <image :src="pickup.image" class="ml-4 size-20 rounded-lg" mode="aspectFill" />
         </view>
       </view>
-    </view>
+    </z-paging>
   </view>
 </template>

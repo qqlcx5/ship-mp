@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import type { IOrderListData } from '@/api/types/order'
+import type { IOrderListItem } from '@/api/types/order'
+import { ref } from 'vue'
 import { getOrderList } from '@/api/order'
-import useRequest from '@/hooks/useRequest'
+import { usePagination } from '@/hooks/usePagination'
 
 definePage({
   style: {
@@ -19,21 +20,14 @@ const statusTabs = ref([
 ])
 
 const currentStatus = ref(9)
-const currentPage = ref(1)
-const pageSize = ref(20)
-
-// 获取订单列表
-const { loading, data: orderData, run: loadOrderList } = useRequest<IOrderListData>(() =>
-  getOrderList({
+const searchKeyword = ref('')
+const orderList = ref<IOrderListItem[]>([])
+const { paging, query: queryList } = usePagination<IOrderListItem>({
+  api: getOrderList,
+  initialParams: {
+    keyword: searchKeyword.value,
     type: currentStatus.value,
-    page: currentPage.value,
-    limit: pageSize.value,
-  }),
-)
-
-// 订单列表
-const orderList = computed(() => {
-  return orderData.value || []
+  },
 })
 
 // 获取状态颜色
@@ -54,19 +48,15 @@ function formatPrice(price?: number | string) {
   return price
 }
 
-onLoad((options) => {
-  // 从URL参数获取初始状态
-  if (options?.type !== undefined) {
-    currentStatus.value = Number(options.type)
-  }
-  loadOrderList()
+onShow(() => {
+  paging.value?.reload() // 页面加载时重新加载列表
 })
 
 // 切换状态筛选
 function switchStatus(status: number) {
+  console.log(`🚀 - switchStatus - status--------------:`, status)
   currentStatus.value = status
-  currentPage.value = 1 // 重置页码
-  loadOrderList()
+  paging.value?.refresh() // 切换状态后重新加载列表
 }
 
 // 订单操作
@@ -82,6 +72,7 @@ function handleOrderAction(action: string, orderId: string) {
         success: (res) => {
           if (res.confirm) {
             uni.showToast({ title: '订单已取消', icon: 'success' })
+            paging.value?.reload() // 取消成功后重新加载列表
           }
         },
       })
@@ -97,39 +88,50 @@ function handleOrderAction(action: string, orderId: string) {
 </script>
 
 <template>
-  <view class="min-h-screen bg-gray-50">
-    <!-- 状态筛选 -->
-    <view class="border-b border-gray-100 bg-white px-4 py-3">
-      <scroll-view scroll-x>
-        <view class="flex items-center space-x-2">
-          <view
-            v-for="tab in statusTabs"
-            :key="tab.value"
-            class="whitespace-nowrap rounded-full px-3 py-1 text-sm" :class="[
-              currentStatus === tab.value
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-600',
-            ]"
-            @click="switchStatus(tab.value)"
-          >
-            {{ tab.label }}
-          </view>
-        </view>
-      </scroll-view>
-    </view>
-
-    <!-- 加载状态 -->
-    <view v-if="loading" class="flex items-center justify-center py-20">
-      <text class="text-gray-500">加载中...</text>
-    </view>
-
+  <view class="bg-gray-50">
     <!-- 订单列表 -->
-    <view v-else class="p-4 space-y-4">
-      <view v-if="orderList.length === 0" class="py-20 text-center">
-        <view class="i-carbon-list text-[48px] text-[#d1d5db]" />
-        <text class="mt-4 block text-gray-500">暂无订单</text>
-      </view>
+    <z-paging
+      ref="paging"
+      v-model="orderList"
+      class="p-4 space-y-4"
+      empty-view-text="暂无订单"
+      @query="queryList"
+    >
+      <template #top>
+        <!-- 搜索栏 -->
+        <view class="bg-gray-100 p-2">
+          <wd-input
+            v-model="searchKeyword"
+            prefix-icon="search"
+            no-border
+            custom-class="bg-white rounded-full p-2"
+            @input="queryList"
+          />
+        </view>
 
+        <!-- 分类选项 -->
+        <view class="bg-gray-100 p-2 pb-3">
+          <scroll-view scroll-x>
+            <view class="flex items-center space-x-2">
+              <view
+                v-for="tab in statusTabs"
+                :key="tab.value"
+                class="whitespace-nowrap rounded-full px-3 py-1 text-sm" :class="[
+                  currentStatus === tab.value
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-600',
+                ]"
+                @click="switchStatus(tab.value)"
+              >
+                {{ tab.label }}
+              </view>
+            </view>
+          </scroll-view>
+        </view>
+      </template>
+      <template #bottom>
+        <view class="h-12 p-safe" />
+      </template>
       <view
         v-for="order in orderList"
         :key="order.id"
@@ -187,6 +189,6 @@ function handleOrderAction(action: string, orderId: string) {
           </template>
         </view>
       </view>
-    </view>
+    </z-paging>
   </view>
 </template>

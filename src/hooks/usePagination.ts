@@ -18,8 +18,9 @@ export function usePagination<T>(options: PaginationOptions<T>) {
         page: pageNo,
         limit: pageSize,
       }
-      const list = await api(params)
-      paging.value?.complete(list)
+      const res = await api(params)
+      let data = Array.isArray(res) ? res : res.list
+      paging.value?.complete(data)
     }
     catch (err) {
       console.error(err)
