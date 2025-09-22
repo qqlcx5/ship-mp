@@ -1,10 +1,8 @@
 import type {
   // ICategory,
   // IProduct,
-  ICategoryResponse,
   IProductDetailResponse,
   IProductListParams,
-  IProductListResponse,
 } from './types/product'
 import { http } from '@/http/http'
 
@@ -27,7 +25,7 @@ export function getProductListAPI(params: IProductListParams = {}) {
     productId: '',
   }
 
-  return http.get<IProductListResponse>(`/products`, {
+  return http.get<any>(`/products`, {
     ...defaultParams,
     ...params,
   })
@@ -37,7 +35,7 @@ export function getProductListAPI(params: IProductListParams = {}) {
  * 获取商品分类（仅一级分类）
  */
 export function getCategoryListAPI() {
-  return http.get<ICategoryResponse>(`/category`)
+  return http.get<any>(`/category`)
 }
 
 /**

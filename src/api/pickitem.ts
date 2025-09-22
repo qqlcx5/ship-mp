@@ -1,11 +1,7 @@
 import type {
-  IPickitem,
-  IPickitemCategory,
-  IPickitemCategoryResponse,
   IPickitemDetailParams,
   IPickitemDetailResponse,
   IPickitemListParams,
-  IPickitemListResponse,
 } from './types/pickitem'
 import { http } from '@/http/http'
 
@@ -20,14 +16,14 @@ export function getPickitemDetailAPI(params: IPickitemDetailParams) {
  * 获取所有取件分类
  */
 export function getPickitemCategoriesAPI() {
-  return http.get<IPickitemCategoryResponse>(`/v2/pickitemcate/getall`)
+  return http.get<any>(`/v2/pickitemcate/getall`)
 }
 
 /**
  * 获取取件列表
  */
 export function getPickitemListAPI(params: IPickitemListParams) {
-  return http.get<IPickitemListResponse>(`/v2/pickitem/getlist`, params)
+  return http.get<any>(`/v2/pickitem/getlist`, params)
 }
 
 /**

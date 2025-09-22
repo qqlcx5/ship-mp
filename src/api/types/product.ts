@@ -73,25 +73,6 @@ export interface IProductListParams {
   productId?: string
 }
 
-// 商品列表响应
-export interface IProductListResponse {
-  status: number
-  msg: string
-  data: {
-    list: IProduct[]
-    total: number
-    page: number
-    limit: number
-  }
-}
-
-// 商品分类响应
-export interface ICategoryResponse {
-  status: number
-  msg: string
-  data: ICategory[]
-}
-
 // 商品详情响应
 export interface IProductDetailResponse {
   status: number

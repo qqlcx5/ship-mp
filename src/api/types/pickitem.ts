@@ -51,20 +51,3 @@ export interface IPickitemDetailResponse {
   msg: string
   data: IPickitem
 }
-
-// 取件分类响应
-export interface IPickitemCategoryResponse {
-  status: number
-  msg: string
-  data: IPickitemCategory[]
-}
-
-// 取件列表响应
-export interface IPickitemListResponse {
-  status: number
-  msg: string
-  data: {
-    list: IPickitem[]
-    total: number
-  }
-}

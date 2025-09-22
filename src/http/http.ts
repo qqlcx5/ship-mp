@@ -33,8 +33,7 @@ export function http<T>(options: CustomRequestOptions) {
         }
         if (res.statusCode >= 200 && res.statusCode < 300) {
           const { code = 0, msg = 'success', data = null } = res.data as IResponse<T>
-          console.log('http 响应', code, msg, data, res, msg !== 'success')
-
+          console.log('http 响应', code, msg, res, data)
           msg !== 'success' && uni.showToast({
             title: msg,
             icon: 'none',

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import type { ICategoryResponse, IProduct, IProductListResponse } from '@/api/types/product'
+import type { IProduct } from '@/api/types/product'
 import { getCategoryListAPI, getProductListAPI } from '@/api/product'
+import { usePagination } from '@/hooks/usePagination'
 import useRequest from '@/hooks/useRequest'
 
 definePage({
@@ -15,25 +16,22 @@ const searchKeyword = ref('')
 // 当前选中的分类ID
 const currentCategoryId = ref<number | string>(0)
 
-// 商品列表查询参数
-const queryParams = ref({
-  sid: 0,
-  keyword: '',
-  priceOrder: '',
-  salesOrder: '',
-  news: 0,
-  page: 1,
-  limit: 20,
-  cid: 0,
-  coupon_category_id: '',
-  productId: '',
-})
-
 // 获取分类列表
-const { loading: categoryLoading, data: categoryData, run: loadCategories } = useRequest<ICategoryResponse>(() => getCategoryListAPI())
-
-// 获取商品列表
-const { loading: productLoading, data: productData, run: loadProducts } = useRequest<IProductListResponse>(() => getProductListAPI(queryParams.value))
+const { data: categoryData, run: loadCategories } = useRequest<any>(() => getCategoryListAPI())
+const productList = ref<IProduct[]>([])
+const { paging, query: queryProducts } = usePagination<IProduct>({
+  api: getProductListAPI,
+  initialParams: {
+    sid: 0,
+    keyword: searchKeyword.value,
+    priceOrder: '',
+    salesOrder: '',
+    news: 0,
+    cid: 0,
+    coupon_category_id: '',
+    productId: '',
+  },
+})
 
 // 分类选项（包含全部选项）
 const categoryTabs = computed(() => {
@@ -44,117 +42,98 @@ const categoryTabs = computed(() => {
   return categories
 })
 
-// 商品列表
-const productList = computed(() => {
-  return productData.value || []
-})
-
 // 切换分类
 function switchCategory(categoryId: number | string) {
   currentCategoryId.value = categoryId
-  queryParams.value.cid = categoryId
-  queryParams.value.page = 1 // 重置页码
-  loadProducts()
+  paging.value?.reload()
 }
 
 // 搜索商品
 function searchProducts() {
-  queryParams.value.keyword = searchKeyword.value
-  queryParams.value.page = 1 // 重置页码
-  loadProducts()
+  paging.value?.reload()
 }
 
 // 查看商品详情
 function viewProduct(id: number | string) {
   uni.navigateTo({ url: `/pages/product/detail?id=${id}` })
 }
-
-// 添加到购物车
-function addToCart(product: IProduct) {
-  uni.showToast({
-    title: `已添加${product.store_name}到购物车`,
-    icon: 'success',
-    duration: 1500,
-  })
-}
-
-// 页面加载时获取数据
-onLoad(() => {
+onShow(() => {
   loadCategories()
-  loadProducts()
+  paging.value?.reload()
 })
 </script>
 
 <template>
-  <view class="min-h-screen bg-gray-50">
-    <!-- 搜索栏 -->
-    <view class="border-b border-gray-100 bg-white p-4">
-      <wd-input
-        v-model="searchKeyword"
-        prefix-icon="search"
-        no-border
-        @input="searchProducts"
-      />
-    </view>
-
-    <!-- 分类选项 -->
-    <view class="border-b border-gray-100 bg-white px-4 py-3">
-      <scroll-view scroll-x>
-        <view class="flex items-center space-x-2">
-          <view
-            v-for="tab in categoryTabs"
-            :key="tab.id"
-            class="whitespace-nowrap rounded-full px-3 py-1 text-sm" :class="[
-              currentCategoryId === tab.id
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-600',
-            ]"
-            @click="switchCategory(tab.id)"
-          >
-            {{ tab.cate_name }}
-          </view>
-        </view>
-      </scroll-view>
-    </view>
-
-    <!-- 加载状态 -->
-    <view v-if="productLoading" class="flex items-center justify-center py-20">
-      <wd-loading />
-      <text class="ml-2 text-gray-500">加载中...</text>
-    </view>
-
+  <view class="bg-gray-50">
     <!-- 商品网格 -->
-    <view v-else class="grid grid-cols-2 gap-4 p-4">
-      <view v-if="productList.length === 0" class="col-span-2 py-20 text-center">
-        <view class="i-carbon-shopping-cart text-[48px] text-[#d1d5db]" />
-        <text class="mt-4 block text-gray-500">暂无商品</text>
-      </view>
+    <z-paging
+      ref="paging"
+      v-model="productList"
+      empty-view-text="暂无商品"
+      @query="queryProducts"
+    >
+      <template #top>
+        <!-- 搜索栏 -->
+        <view class="bg-gray-100 p-2">
+          <wd-input
+            v-model="searchKeyword"
+            prefix-icon="search"
+            no-border
+            custom-class="bg-white rounded-full p-2"
+            @input="searchProducts"
+          />
+        </view>
 
-      <view
-        v-for="product in productList"
-        :key="product.id"
-        class="overflow-hidden border border-gray-200 rounded-lg bg-white"
-        @click="viewProduct(product.id)"
-      >
-        <image :src="product.image" class="h-32 w-full object-cover" mode="aspectFill" />
-        <view class="p-3">
-          <text class="mb-1 block truncate text-sm text-gray-800 font-medium">{{ product.store_name || '' }}</text>
-          <text class="mb-2 block text-xs text-gray-500">{{ product.collator }}</text>
-
-          <view class="mb-2 flex items-center justify-between">
-            <view>
-              <text class="text-red-500 font-semibold">¥{{ product.price || 0 }}</text>
+        <!-- 分类选项 -->
+        <view class="bg-gray-100 p-2 pb-3">
+          <scroll-view scroll-x>
+            <view class="flex items-center space-x-2">
+              <view
+                v-for="tab in categoryTabs"
+                :key="tab.id"
+                class="whitespace-nowrap rounded-full px-3 py-1 text-sm" :class="[
+                  currentCategoryId === tab.id
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-600',
+                ]"
+                @click="switchCategory(tab.id)"
+              >
+                {{ tab.cate_name }}
+              </view>
             </view>
-            <text class="text-xs text-gray-500">销售{{ product.sales }}+</text>
-          </view>
+          </scroll-view>
+        </view>
+      </template>
+      <template #bottom>
+        <view class="h-12 p-safe" />
+      </template>
+      <view class="grid grid-cols-2 gap-4 px-4 pt-4">
+        <view
+          v-for="product in productList"
+          :key="product.id"
+          class="relative z-1 overflow-hidden border border-gray-200 rounded-lg bg-white"
+          @click="viewProduct(product.id)"
+        >
+          <image :src="product.image" class="h-32 w-full object-cover" mode="aspectFill" />
+          <view class="p-3">
+            <text class="mb-1 block truncate text-sm text-gray-800 font-medium">{{ product.store_name || '' }}</text>
+            <text class="mb-2 block text-xs text-gray-500">{{ product.collator }}</text>
 
-          <!-- <view class="flex items-center justify-between">
-             <wd-button size="small" type="primary" @click.stop="addToCart(product)">
-              <view class="i-carbon-add text-[20px] text-white" />
-            </wd-button>
-          </view> -->
+            <view class="mb-2 flex items-center justify-between">
+              <view>
+                <text class="text-red-500 font-semibold">¥{{ product.price || 0 }}</text>
+              </view>
+              <text class="text-xs text-gray-500">销售{{ product.sales }}+</text>
+            </view>
+
+            <!-- <view class="flex items-center justify-between">
+              <wd-button size="small" type="primary" @click.stop="addToCart(product)">
+               <view class="i-carbon-add text-[20px] text-white" />
+             </wd-button>
+           </view> -->
+          </view>
         </view>
       </view>
-    </view>
+    </z-paging>
   </view>
 </template>

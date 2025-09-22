@@ -144,3 +144,10 @@ declare global {
 }
 
 export {} // 防止模块污染
+
+// declare module 'z-paging/components/z-paging/z-paging.vue' {
+//   import type { DefineComponent } from 'vue'
+
+//   const component: DefineComponent<{}, {}, any>
+//   export default component
+// }
