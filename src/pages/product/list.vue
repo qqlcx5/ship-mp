@@ -19,18 +19,19 @@ const currentCategoryId = ref<number | string>(0)
 // 获取分类列表
 const { data: categoryData, run: loadCategories } = useRequest<any>(() => getCategoryListAPI())
 const productList = ref<IProduct[]>([])
+const paginationParams = computed(() => ({
+  keyword: searchKeyword.value,
+  sid: 0,
+  priceOrder: '',
+  salesOrder: '',
+  news: 0,
+  cid: currentCategoryId.value,
+  coupon_category_id: '',
+  productId: '',
+}))
 const { paging, query: queryProducts } = usePagination<IProduct>({
   api: getProductListAPI,
-  initialParams: {
-    sid: 0,
-    keyword: searchKeyword.value,
-    priceOrder: '',
-    salesOrder: '',
-    news: 0,
-    cid: 0,
-    coupon_category_id: '',
-    productId: '',
-  },
+  initialParams: paginationParams,
 })
 
 // 分类选项（包含全部选项）
@@ -45,12 +46,6 @@ const categoryTabs = computed(() => {
 // 切换分类
 function switchCategory(categoryId: number | string) {
   currentCategoryId.value = categoryId
-  paging.value?.reload()
-}
-
-// 搜索商品
-function searchProducts() {
-  paging.value?.reload()
 }
 
 // 查看商品详情
@@ -80,7 +75,6 @@ onShow(() => {
             prefix-icon="search"
             no-border
             custom-class="bg-white rounded-full p-2"
-            @input="searchProducts"
           />
         </view>
 

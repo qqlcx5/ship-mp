@@ -16,11 +16,12 @@ const currentCategoryId = ref<number>(0)
 // 获取取件分类列表
 const { data: categoryData, run: loadCategories } = useRequest<any>(() => getPickitemCategoriesAPI())
 const pickupList = ref<IPickitem[]>([])
-const { paging, query: queryPickups } = usePagination<IPickitem>({
+const paginationParams = computed(() => ({
+  cate_id: currentCategoryId.value,
+}))
+const { paging, query: queryPickups } = usePagination<any>({
   api: getPickitemListAPI,
-  initialParams: {
-    cate_id: currentCategoryId.value,
-  },
+  initialParams: paginationParams,
 })
 
 // 分类选项（包含全部选项）
@@ -35,7 +36,6 @@ const categoryTabs = computed(() => {
 // 切换分类
 function switchCategory(categoryId: number) {
   currentCategoryId.value = categoryId
-  paging.value?.reload()
 }
 
 // 查看取件详情

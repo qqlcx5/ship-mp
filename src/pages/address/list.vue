@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import type { IAddressListResponse } from '@/api/types/address'
 import {
   deleteAddressAPI,
   getAddressListAPI,
@@ -14,7 +13,7 @@ definePage({
 })
 
 // 获取地址列表
-const { loading, data: addressData, run: loadAddressList } = useRequest<IAddressListResponse>(() => getAddressListAPI())
+const { loading, data: addressData, run: loadAddressList } = useRequest<any>(() => getAddressListAPI())
 
 // 地址列表
 const addressList = computed(() => {

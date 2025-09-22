@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { IOrderListItem } from '@/api/types/order'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { getOrderList } from '@/api/order'
 import { usePagination } from '@/hooks/usePagination'
 
@@ -22,12 +22,15 @@ const statusTabs = ref([
 const currentStatus = ref(9)
 const searchKeyword = ref('')
 const orderList = ref<IOrderListItem[]>([])
+
+const paginationParams = computed(() => ({
+  keyword: searchKeyword.value,
+  type: currentStatus.value,
+}))
+
 const { paging, query: queryList } = usePagination<IOrderListItem>({
   api: getOrderList,
-  initialParams: {
-    keyword: searchKeyword.value,
-    type: currentStatus.value,
-  },
+  initialParams: paginationParams,
 })
 
 // 获取状态颜色
@@ -56,7 +59,6 @@ onShow(() => {
 function switchStatus(status: number) {
   console.log(`🚀 - switchStatus - status--------------:`, status)
   currentStatus.value = status
-  paging.value?.refresh() // 切换状态后重新加载列表
 }
 
 // 订单操作
@@ -105,7 +107,6 @@ function handleOrderAction(action: string, orderId: string) {
             prefix-icon="search"
             no-border
             custom-class="bg-white rounded-full p-2"
-            @input="queryList"
           />
         </view>
 

@@ -19,7 +19,8 @@ export function usePagination<T>(options: PaginationOptions<T>) {
         limit: pageSize,
       }
       const res = await api(params)
-      let data = Array.isArray(res) ? res : res.list
+      // @ts-expect-error 数组 或者 对象数组
+      const data = Array.isArray(res) ? res : res?.list || []
       paging.value?.complete(data)
     }
     catch (err) {
