@@ -44,3 +44,10 @@ export function getOrderList(params: IOrderListParams) {
 export function getOrderDetail(id: string) {
   return http.get<IOrderDetailData>(`/order/detail/${id}`)
 }
+
+/**
+ * 确定收货
+ */
+export function takeOrder(orderId: string) {
+  return http.post<any>(`/order/take`, { order_id: orderId })
+}

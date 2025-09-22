@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import type { IOrderListItem } from '@/api/types/order'
 import { computed, ref } from 'vue'
-import { getOrderList } from '@/api/order'
+import { getOrderList, takeOrder } from '@/api/order'
+import { OrderStatus } from '@/api/types/order'
 import { usePagination } from '@/hooks/usePagination'
 
 definePage({
@@ -22,6 +23,7 @@ const statusTabs = ref([
 const currentStatus = ref(9)
 const searchKeyword = ref('')
 const orderList = ref<IOrderListItem[]>([])
+const isLoading = ref(false)
 
 const paginationParams = computed(() => ({
   keyword: searchKeyword.value,
@@ -85,7 +87,43 @@ function handleOrderAction(action: string, orderId: string) {
     case 'reorder':
       uni.showToast({ title: '再次购买', icon: 'none' })
       break
+    case 'take':
+      handleTakeOrder(orderId)
+      break
   }
+}
+
+// 确定收货
+async function handleTakeOrder(orderId: string) {
+  if (isLoading.value)
+    return
+
+  uni.showModal({
+    title: '确认收货',
+    content: '确定已收到商品吗？',
+    success: async (res) => {
+      if (res.confirm) {
+        isLoading.value = true
+        try {
+          await takeOrder(orderId)
+          uni.showToast({
+            title: '收货成功',
+            icon: 'success',
+          })
+          paging.value?.reload() // 收货成功后重新加载列表
+        }
+        catch (error) {
+          uni.showToast({
+            title: '收货失败',
+            icon: 'error',
+          })
+        }
+        finally {
+          isLoading.value = false
+        }
+      }
+    },
+  })
 }
 </script>
 
@@ -173,6 +211,14 @@ function handleOrderAction(action: string, orderId: string) {
             </wd-button>
             <wd-button size="small" class="rounded bg-blue-500 px-3 py-1 text-sm text-white" @click="handleOrderAction('pay', String(order.order_id))">
               立即支付
+            </wd-button>
+          </template>
+          <template v-else-if="order.status === OrderStatus.PENDING_RECEIPT">
+            <wd-button size="small" type="info" @click="handleOrderAction('detail', order.order_id)">
+              查看详情
+            </wd-button>
+            <wd-button size="small" class="rounded bg-green-500 px-3 py-1 text-sm text-white" @click="handleOrderAction('take', order.order_id)">
+              确定收货
             </wd-button>
           </template>
           <template v-else-if="order.offlinePayStatus === 3">

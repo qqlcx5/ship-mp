@@ -2,15 +2,52 @@
 import type { IOrderDetailData } from '@/api/types/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
-import { getOrderDetail } from '@/api/order'
+import { getOrderDetail, takeOrder } from '@/api/order'
+import { OrderStatus } from '@/api/types/order'
 
 const orderDetail = ref<IOrderDetailData>()
+const isLoading = ref(false)
+
 onLoad(async (options) => {
   const { id } = options as { id: string }
   if (id) {
     orderDetail.value = await getOrderDetail(id)
   }
 })
+
+// 确定收货
+async function handleTakeOrder() {
+  if (!orderDetail.value || isLoading.value)
+    return
+
+  uni.showModal({
+    title: '确认收货',
+    content: '确定已收到商品吗？',
+    success: async (res) => {
+      if (res.confirm) {
+        isLoading.value = true
+        try {
+          await takeOrder(orderDetail.value.order_id)
+          uni.showToast({
+            title: '收货成功',
+            icon: 'success',
+          })
+          // 重新获取订单详情
+          orderDetail.value = await getOrderDetail(orderDetail.value.id.toString())
+        }
+        catch (error) {
+          uni.showToast({
+            title: '收货失败',
+            icon: 'error',
+          })
+        }
+        finally {
+          isLoading.value = false
+        }
+      }
+    },
+  })
+}
 </script>
 
 <template>
@@ -84,6 +121,17 @@ onLoad(async (options) => {
         <view class="text-lg text-red-500 font-bold">
           ¥{{ orderDetail?.pay_price }}
         </view>
+      </view>
+
+      <!-- 确定收货按钮 -->
+      <view v-if="orderDetail?.status === OrderStatus.PENDING_RECEIPT" class="mt-4">
+        <button
+          class="w-full rounded-lg bg-blue-500 py-3 text-white font-medium"
+          :disabled="isLoading"
+          @click="handleTakeOrder"
+        >
+          {{ isLoading ? '处理中...' : '确定收货' }}
+        </button>
       </view>
     </view>
   </view>
