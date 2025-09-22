@@ -193,7 +193,7 @@ async function handleTakeOrder(orderId: string) {
 
         <!-- 订单操作 -->
         <view class="mt-3 flex justify-end gap-2">
-          <template v-if="order.offlinePayStatus === 0">
+          <template v-if="order._status._type === 0">
             <wd-button size="small" type="info" @click="handleOrderAction('cancel', String(order.order_id))">
               取消订单
             </wd-button>
@@ -201,7 +201,7 @@ async function handleTakeOrder(orderId: string) {
               立即支付
             </wd-button>
           </template>
-          <template v-else-if="order.offlinePayStatus === OrderStatus.PENDING_RECEIPT">
+          <template v-else-if="order._status._type === OrderStatus.PENDING_RECEIPT">
             <wd-button size="small" type="info" @click="handleOrderAction('detail', order.order_id)">
               查看详情
             </wd-button>
@@ -209,13 +209,13 @@ async function handleTakeOrder(orderId: string) {
               确定收货
             </wd-button>
           </template>
-          <template v-else-if="order.offlinePayStatus === 3">
+          <template v-else-if="order._status._type === OrderStatus.COMPLETED">
             <wd-button size="small" type="info" @click="handleOrderAction('detail', order.order_id)">
               查看详情
             </wd-button>
-            <wd-button size="small" @click="handleOrderAction('reorder', order.order_id)">
+            <!-- <wd-button size="small" @click="handleOrderAction('reorder', order.order_id)">
               再次购买
-            </wd-button>
+            </wd-button> -->
           </template>
           <template v-else>
             <wd-button size="small" type="info" @click="handleOrderAction('detail', order.order_id)">

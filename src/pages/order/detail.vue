@@ -3,7 +3,6 @@ import type { IOrderDetailData } from '@/api/types/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import { getOrderDetail, takeOrder } from '@/api/order'
-import { OrderStatus } from '@/api/types/order'
 
 const orderDetail = ref<IOrderDetailData>()
 const isLoading = ref(false)
@@ -112,7 +111,7 @@ async function handleTakeOrder() {
     </view>
 
     <!-- 确定收货按钮 -->
-    <view v-if="orderDetail?.status === OrderStatus.PENDING_RECEIPT" class="mt-4">
+    <!-- <view v-if="orderDetail?._status._type === OrderStatus.PENDING_RECEIPT" class="mt-4">
       <button
         class="w-full rounded-lg bg-blue-500 py-3 text-white font-medium"
         :disabled="isLoading"
@@ -120,6 +119,6 @@ async function handleTakeOrder() {
       >
         {{ isLoading ? '处理中...' : '确定收货' }}
       </button>
-    </view>
+    </view> -->
   </view>
 </template>
