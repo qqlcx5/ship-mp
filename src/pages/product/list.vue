@@ -105,10 +105,10 @@ onShow(() => {
         <view
           v-for="product in productList"
           :key="product.id"
-          class="relative z-1 overflow-hidden border border-gray-200 rounded-lg bg-white"
+          class="product-card overflow-hidden rounded-lg bg-white"
           @click="viewProduct(product.id)"
         >
-          <image :src="product.image" class="h-32 w-full object-cover" mode="aspectFill" />
+          <image :src="product.image" class="h-48 w-full object-cover" mode="aspectFill" />
           <view class="p-3">
             <text class="mb-1 block truncate text-sm text-gray-800 font-medium">{{ product.store_name || '' }}</text>
             <text class="mb-2 block text-xs text-gray-500">{{ product.collator }}</text>

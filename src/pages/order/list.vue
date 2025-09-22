@@ -149,7 +149,7 @@ function handleOrderAction(action: string, orderId: string) {
 
         <!-- 商品列表 -->
         <view v-for="product in order.cartInfo " :key="product.id" class="mb-3 flex space-x-3">
-          <image :src="product.productInfo.image" class="h-15 w-15 rounded-lg" mode="aspectFill" />
+          <image :src="product.productInfo.image" class="size-20 rounded-lg" mode="aspectFill" />
           <view class="flex-1">
             <text class="block text-sm text-gray-800 font-medium">{{ product.productInfo.store_name }}</text>
             <view class="mt-2 flex items-center justify-between">

@@ -55,7 +55,7 @@ function downloadFile() {
       if (res.statusCode === 200) {
         const filePath = res.tempFilePath
         uni.openDocument({
-          filePath: filePath,
+          filePath,
           showMenu: true,
           success: (openRes) => {
             console.log('打开文件成功', openRes)
@@ -72,7 +72,8 @@ function downloadFile() {
             })
           },
         })
-      } else {
+      }
+      else {
         console.error('查看文件失败，状态码：', res.statusCode)
         uni.showToast({
           title: '查看文件失败',
@@ -114,7 +115,7 @@ function downloadFile() {
     <view v-else-if="pickupDetail">
       <!-- 封面（原商品图片） -->
       <view class="mx-4 mt-4 border border-gray-200 rounded-lg bg-white p-4">
-        <image :src="pickupDetail?.image" class="h-48 w-full rounded-lg object-cover" mode="aspectFill" />
+        <image :src="pickupDetail?.image" class="h-48 rounded-lg object-cover" mode="heightFix" />
       </view>
 
       <!-- 基本信息 -->
