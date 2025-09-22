@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import type { IPickitemDetailResponse } from '@/api/types/pickitem'
 import { getPickitemDetailAPI } from '@/api/pickitem'
 import useRequest from '@/hooks/useRequest'
 
@@ -12,7 +11,7 @@ definePage({
 const pickupId = ref<number>(0)
 
 // 获取取件详情
-const { loading, data: pickupData, run: loadPickupDetail } = useRequest<IPickitemDetailResponse>(() =>
+const { loading, data: pickupData, run: loadPickupDetail } = useRequest<any>(() =>
   getPickitemDetailAPI({ id: pickupId.value, group_field: 'part_name' }),
 )
 

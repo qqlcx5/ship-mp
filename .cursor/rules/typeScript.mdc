@@ -18,7 +18,7 @@ description: TypeScript 开发规范和类型定义
 export interface IApiResponse<T = any> {
   code: number
   data: T
-  message: string
+  msg: string
 }
 
 // 定义具体业务类型

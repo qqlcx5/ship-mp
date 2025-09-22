@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { NoticeInfo, SlideItem } from '@/api/types/common'
+import type { SlideItem } from '@/api/types/common'
 import { getNoticeInfo, getSlideList } from '@/api/home'
 import { useThemeStore } from '@/store'
 import { safeAreaInsets } from '@/utils/systemInfo'
