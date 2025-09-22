@@ -12,12 +12,14 @@ definePage({
 
 // 当前选中的分类ID
 const currentCategoryId = ref<number>(0)
+const searchKeyword = ref('')
 
 // 获取取件分类列表
 const { data: categoryData, run: loadCategories } = useRequest<any>(() => getPickitemCategoriesAPI())
 const pickupList = ref<IPickitem[]>([])
 const paginationParams = computed(() => ({
   cate_id: currentCategoryId.value,
+  keyword: searchKeyword.value,
 }))
 const { paging, query: queryPickups } = usePagination<any>({
   api: getPickitemListAPI,
@@ -61,6 +63,15 @@ onShow(() => {
       @query="queryPickups"
     >
       <template #top>
+        <!-- 搜索栏 -->
+        <view class="bg-gray-100 p-2">
+          <wd-input
+            v-model="searchKeyword"
+            prefix-icon="search"
+            no-border
+            custom-class="bg-white rounded-full p-2"
+          />
+        </view>
         <!-- 分类筛选 -->
         <view class="border-b border-gray-100 bg-white px-4 py-3">
           <scroll-view scroll-x>

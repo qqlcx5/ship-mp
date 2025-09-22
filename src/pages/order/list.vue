@@ -101,14 +101,14 @@ function handleOrderAction(action: string, orderId: string) {
     >
       <template #top>
         <!-- 搜索栏 -->
-        <view class="bg-gray-100 p-2">
+        <!-- <view class="bg-gray-100 p-2">
           <wd-input
             v-model="searchKeyword"
             prefix-icon="search"
             no-border
             custom-class="bg-white rounded-full p-2"
           />
-        </view>
+        </view> -->
 
         <!-- 分类选项 -->
         <view class="bg-gray-100 p-2 pb-3">
