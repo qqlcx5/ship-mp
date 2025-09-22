@@ -103,24 +103,12 @@ async function handleTakeOrder(orderId: string) {
     content: '确定已收到商品吗？',
     success: async (res) => {
       if (res.confirm) {
-        isLoading.value = true
-        try {
-          await takeOrder(orderId)
-          uni.showToast({
-            title: '收货成功',
-            icon: 'success',
-          })
-          paging.value?.reload() // 收货成功后重新加载列表
-        }
-        catch (error) {
-          uni.showToast({
-            title: '收货失败',
-            icon: 'error',
-          })
-        }
-        finally {
-          isLoading.value = false
-        }
+        await takeOrder(orderId)
+        uni.showToast({
+          title: '收货成功',
+          icon: 'success',
+        })
+        paging.value?.reload()
       }
     },
   })
@@ -213,7 +201,7 @@ async function handleTakeOrder(orderId: string) {
               立即支付
             </wd-button>
           </template>
-          <template v-else-if="order.status === OrderStatus.PENDING_RECEIPT">
+          <template v-else-if="order.offlinePayStatus === OrderStatus.PENDING_RECEIPT">
             <wd-button size="small" type="info" @click="handleOrderAction('detail', order.order_id)">
               查看详情
             </wd-button>

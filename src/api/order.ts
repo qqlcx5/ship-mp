@@ -49,5 +49,5 @@ export function getOrderDetail(id: string) {
  * 确定收货
  */
 export function takeOrder(orderId: string) {
-  return http.post<any>(`/order/take`, { order_id: orderId })
+  return http.post<any>(`/order/take`, { uni: orderId })
 }

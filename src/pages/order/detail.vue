@@ -26,24 +26,13 @@ async function handleTakeOrder() {
     success: async (res) => {
       if (res.confirm) {
         isLoading.value = true
-        try {
-          await takeOrder(orderDetail.value.order_id)
-          uni.showToast({
-            title: '收货成功',
-            icon: 'success',
-          })
-          // 重新获取订单详情
-          orderDetail.value = await getOrderDetail(orderDetail.value.id.toString())
-        }
-        catch (error) {
-          uni.showToast({
-            title: '收货失败',
-            icon: 'error',
-          })
-        }
-        finally {
-          isLoading.value = false
-        }
+        await takeOrder(orderDetail.value.order_id)
+        uni.showToast({
+          title: '收货成功',
+          icon: 'success',
+        })
+        // 重新获取订单详情
+        orderDetail.value = await getOrderDetail(orderDetail.value.id.toString())
       }
     },
   })

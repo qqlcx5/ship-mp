@@ -32,14 +32,14 @@ export function http<T>(options: CustomRequestOptions) {
           res.statusCode = 401
         }
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          const { code = 0, msg = 'success', data = null } = res.data as IResponse<T>
-          console.log('http 响应', code, msg, res, data)
-          msg !== 'success' && uni.showToast({
-            title: msg,
-            icon: 'none',
-          })
-          if (code !== ResultEnum.Success0 && code !== ResultEnum.Success200) {
-            throw new Error(`请求错误[${code}]：${msg}`)
+          const { code = 0, status = '200', msg = 'success', data = null } = res.data as IResponse<T>
+          console.log('http 响应', code, status, msg, res, data)
+          if (status !== ResultEnum.Success0 && status !== ResultEnum.Success200) {
+            uni.showToast({
+              title: msg,
+              icon: 'none',
+            })
+            throw new Error(`请求错误[${status}]：${msg}`)
           }
           return resolve(data as T)
         }
