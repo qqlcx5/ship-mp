@@ -1,8 +1,10 @@
 <script lang="ts" setup>
-import type { IProductDetailResponse } from '@/api/types/product'
+import type { IProductDetailResponse, ISkuItem } from '@/api/types/product'
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { addToCart as addToCartAPI } from '@/api/cart'
 import { getProductDetailAPI } from '@/api/product'
 import useRequest from '@/hooks/useRequest'
+import { useShare } from '@/hooks/useShare'
 
 definePage({
   style: {
@@ -16,6 +18,16 @@ const quantity = ref(1)
 const selectedSku = ref<ISkuItem | null>(null)
 const selectedAttr = ref<Record<string, string>>({})
 
+// 获取商品详情
+const { loading, data: productData, run: loadProductDetail } = useRequest<IProductDetailResponse>(() =>
+  getProductDetailAPI(productId.value),
+)
+
+// 商品详情
+const productDetail = computed(() => {
+  return productData.value?.data.storeInfo
+})
+
 // 监听 SKU 属性变化，更新选中的 SKU
 watch(selectedAttr, (newVal) => {
   if (!productDetail.value?.sku) {
@@ -25,16 +37,6 @@ watch(selectedAttr, (newVal) => {
   const skuKey = Object.values(newVal).join(',')
   selectedSku.value = productDetail.value.sku.find(item => item.sku === skuKey) || null
 }, { deep: true })
-
-// 获取商品详情
-const { loading, data: productData, run: loadProductDetail } = useRequest<IProductDetailResponse>(() =>
-  getProductDetailAPI(productId.value),
-)
-
-// 商品详情
-const productDetail = computed(() => {
-  return productData.value?.storeInfo
-})
 
 // 商品图片列表（如果只有一张图片，则只显示一张）
 const productImages = computed(() => {
@@ -64,6 +66,15 @@ onLoad((options) => {
     loadProductDetail()
   }
 })
+
+const { shareOptions } = useShare({
+  title: computed(() => productDetail.value?.store_name || '商品详情'),
+  path: computed(() => `/pages/product/detail?id=${productId.value}`),
+  imageUrl: computed(() => productDetail.value?.image),
+})
+
+onShareAppMessage(() => shareOptions)
+onShareTimeline(() => shareOptions)
 
 // 调整数量
 function adjustQuantity(delta: number) {
@@ -132,14 +143,6 @@ async function buyNow() {
   }
 }
 
-// 分享商品
-function shareProduct() {
-  uni.showToast({
-    title: '分享商品',
-    icon: 'none',
-  })
-}
-
 // 收藏商品
 function favoriteProduct() {
   uni.showToast({
@@ -158,10 +161,10 @@ function downloadFile() {
     success: (res) => {
       if (res.statusCode === 200) {
         const filePath = res.tempFilePath
-        console.log('filePath', filePath);
-        
+        console.log('filePath', filePath)
+
         uni.openDocument({
-          filePath: filePath,
+          filePath,
           showMenu: true,
           success: (openRes) => {
             console.log('打开文件成功', openRes)
@@ -178,7 +181,8 @@ function downloadFile() {
             })
           },
         })
-      } else {
+      }
+      else {
         console.error('查看文件失败，状态码：', res.statusCode)
         uni.showToast({
           title: '查看文件失败',

@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import type { SlideItem } from '@/api/types/common'
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { getNoticeInfo, getSlideList } from '@/api/home'
+import { useShare } from '@/hooks/useShare'
 import { useThemeStore } from '@/store'
 import { safeAreaInsets } from '@/utils/systemInfo'
 
@@ -16,6 +18,14 @@ definePage({
     navigationBarTitleText: '首页',
   },
 })
+
+const { shareOptions } = useShare({
+  title: '首页',
+  path: '/pages/index/index',
+})
+
+onShareAppMessage(() => shareOptions)
+onShareTimeline(() => shareOptions)
 
 const themeStore = useThemeStore()
 // 获取轮播图数据
