@@ -1,10 +1,8 @@
 <script lang="ts" setup>
 import type { IProductDetailResponse, ISkuItem } from '@/api/types/product'
-import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { addToCart as addToCartAPI } from '@/api/cart'
 import { getProductDetailAPI } from '@/api/product'
 import useRequest from '@/hooks/useRequest'
-import { useShare } from '@/hooks/useShare'
 
 definePage({
   style: {
@@ -22,10 +20,9 @@ const selectedAttr = ref<Record<string, string>>({})
 const { loading, data: productData, run: loadProductDetail } = useRequest<IProductDetailResponse>(() =>
   getProductDetailAPI(productId.value),
 )
-
 // 商品详情
 const productDetail = computed(() => {
-  return productData.value?.storeInfo || {}
+  return productData.value?.storeInfo
 })
 
 // 监听 SKU 属性变化，更新选中的 SKU
@@ -66,15 +63,6 @@ onLoad((options) => {
     loadProductDetail()
   }
 })
-
-const { shareOptions } = useShare({
-  title: computed(() => productDetail.value?.store_name || '商品详情'),
-  path: computed(() => `/pages/product/detail?id=${productId.value}`),
-  imageUrl: computed(() => productDetail.value?.image),
-})
-
-onShareAppMessage(() => shareOptions)
-onShareTimeline(() => shareOptions)
 
 // 调整数量
 function adjustQuantity(delta: number) {
@@ -141,14 +129,6 @@ async function buyNow() {
   catch (error) {
     console.log('购买失败', error)
   }
-}
-
-// 收藏商品
-function favoriteProduct() {
-  uni.showToast({
-    title: '已收藏',
-    icon: 'success',
-  })
 }
 
 // 查看附件
