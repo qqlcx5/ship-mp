@@ -125,50 +125,6 @@ function handleMouseMove(e: MouseEvent) {
     knobPosition.value = { x: deltaX, y: deltaY }
   }
 }
-
-function handleMouseUp() {
-  isDragging.value = false
-  knobPosition.value = { x: 0, y: 0 }
-}
-
-onMounted(() => {
-  document.addEventListener('mousemove', handleMouseMove)
-  document.addEventListener('mouseup', handleMouseUp)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('mousemove', handleMouseMove)
-  document.removeEventListener('mouseup', handleMouseUp)
-})
-
-const activeTab = ref('manual') // 'manual', 'auto', 'ai', 'manage'
-
-function setActiveTab(tab: string) {
-  activeTab.value = tab
-  let path = ''
-  switch (tab) {
-    case 'manual':
-      path = '/pages/ManualNavigation/ManualNavigation'
-      break
-    case 'auto':
-      path = '/pages/AutomaticCruise/AutomaticCruise'
-      break
-    case 'ai':
-      path = '/pages/AIManager/AIManager'
-      break
-    case 'manage':
-      path = '/pages/ComprehensiveManagement/ComprehensiveManagement'
-      break
-  }
-  if (path) {
-    uni.switchTab({
-      url: path,
-      fail: (res) => {
-        console.error(`Failed to switch tab to ${path}:`, res)
-      },
-    })
-  }
-}
 </script>
 
 <style scoped>

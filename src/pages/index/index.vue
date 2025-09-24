@@ -1,136 +1,147 @@
-<script lang="ts" setup>
-import type { SlideItem } from '@/api/types/common'
-import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
-import { getNoticeInfo, getSlideList } from '@/api/home'
-import { useShare } from '@/hooks/useShare'
-import { useThemeStore } from '@/store'
-import { safeAreaInsets } from '@/utils/systemInfo'
-
-defineOptions({
-  name: 'Home',
-})
-definePage({
-  // 使用 type: "home" 属性设置首页，其他页面不需要设置，默认为page
-  type: 'home',
-  style: {
-    // 'custom' 表示开启自定义导航栏，默认 'default'
-    navigationStyle: 'custom',
-    navigationBarTitleText: '首页',
-  },
-})
-
-const { shareOptions } = useShare({
-  title: '首页',
-  path: '/pages/index/index',
-})
-
-onShareAppMessage(() => shareOptions)
-onShareTimeline(() => shareOptions)
-
-const themeStore = useThemeStore()
-// 获取轮播图数据
-const {
-  data: slideList,
-  loading: slideLoading,
-  error: slideError,
-} = useRequest(() => getSlideList(), { immediate: true })
-const currentBanner = ref(0)
-
-// 快捷功能菜单
-const quickMenus = ref([
-  { icon: 'i-carbon-shopping-cart', title: '商品', path: '/pages/product/list' },
-  { icon: 'i-carbon-calendar', title: '取件', path: '/pages/pickup/list' },
-  // { icon: 'i-carbon-location', title: '地址', path: '/pages/address/list' },
-  // { icon: 'i-carbon-list', title: '订单', path: '/pages/order/list' },
-  // { icon: 'i-carbon-user-avatar', title: '我的', path: '/pages/me/me' },
-])
-
-// 公告信息
-const announcement = ref('新用户注册即享8折优惠')
-
-// 获取公告数据
-const {
-  data: noticeInfo,
-  loading: noticeLoading,
-  error: noticeError,
-} = useRequest(() => getNoticeInfo(), { immediate: true })
-
-// 处理轮播图点击
-function handleSlideClick(item: SlideItem) {
-  if (item.link) {
-    uni.navigateTo({
-      url: item.link,
-    })
-  }
-}
-
-function handleQuickMenu(item: any) {
-  if (item.path === '/pages/me/me' || item.path === '/pages/product/list' || item.path === '/pages/pickup/list') {
-    uni.switchTab({ url: item.path })
-  }
-  else {
-    uni.navigateTo({ url: item.path })
-  }
-}
-</script>
-
 <template>
-  <view class="min-h-screen bg-gray-50">
+  <div class="h-full w-full bg-white">
     <!-- 顶部导航 -->
-    <view class="flex items-center justify-between bg-white px-4 py-3" :style="{ paddingTop: `${safeAreaInsets?.top + 12}px` }">
-      <view class="text-xl text-gray-800 font-bold">
-        MINIMAL
-      </view>
-    </view>
+    <div class="from-purple-600 to-indigo-600 bg-gradient-to-r p-4 text-white">
+      <h1 class="mb-4 text-xl font-semibold">
+        AI智能管理
+      </h1>
+      <div class="flex justify-between text-sm">
+        <div>总航行里程</div>
+        <div class="font-semibold">
+          1,245.8 km
+        </div>
+      </div>
+    </div>
 
-    <!-- 轮播图 -->
-    <view class="relative mx-4 mt-4 h-48 overflow-hidden rounded-lg">
-      <swiper
-        :current="currentBanner"
-        autoplay
-        :interval="3000"
-        :duration="300"
-        circular
-        class="h-full"
-        @change="(e) => currentBanner = e.detail.current"
-      >
-        <swiper-item v-for="(banner, index) in slideList" :key="index">
-          <view class="relative h-full from-gray-100 to-gray-200 bg-gradient-to-r">
-            <image :src="banner.image" class="h-full w-full object-cover" mode="aspectFill" />
-          </view>
-        </swiper-item>
-      </swiper>
-      <!-- 指示器 -->
-      <view class="absolute bottom-4 right-4 flex space-x-1">
-        <view
-          v-for="(_, index) in slideList"
-          :key="index"
-          class="h-2 w-2 rounded-full" :class="[currentBanner === index ? 'bg-white' : 'bg-white opacity-50']"
-        />
-      </view>
-    </view>
+    <!-- 数据统计卡片 -->
+    <div class="p-4 space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="rounded-xl from-blue-50 to-blue-100 bg-gradient-to-br p-4">
+          <div class="text-2xl text-blue-600 font-bold">
+            85%
+          </div>
+          <div class="mt-1 text-sm text-gray-600">
+            系统效率
+          </div>
+          <div class="mt-2 h-1.5 w-full rounded-full bg-blue-200">
+            <div class="h-1.5 rounded-full bg-blue-600" style="width: 85%" />
+          </div>
+        </div>
+        <div class="rounded-xl from-green-50 to-green-100 bg-gradient-to-br p-4">
+          <div class="text-2xl text-green-600 font-bold">
+            92%
+          </div>
+          <div class="mt-1 text-sm text-gray-600">
+            电能利用率
+          </div>
+          <div class="mt-2 h-1.5 w-full rounded-full bg-green-200">
+            <div class="h-1.5 rounded-full bg-green-600" style="width: 92%" />
+          </div>
+        </div>
+      </div>
 
-    <!-- 公告栏 -->
-    <view v-if="noticeInfo?.desc" class="mx-4 mt-4 border-l-4 border-blue-400 rounded-lg bg-blue-50 p-3">
-      <view class="flex items-center">
-        <view class="i-carbon-volume-up-filled mr-2 text-[16px] text-[#2563eb]" />
-        <text class="text-sm text-blue-800">{{ noticeInfo.desc }}</text>
-      </view>
-    </view>
+      <!-- 数据分析图表 -->
+      <div class="rounded-xl bg-gray-50 p-4">
+        <h3 class="mb-4 text-gray-800 font-semibold">
+          电量消耗分析
+        </h3>
+        <div class="relative h-32 rounded-lg bg-white p-3">
+          <!-- 模拟图表 -->
+          <svg class="h-full w-full">
+            <polyline
+              points="10,80 50,60 90,40 130,55 170,35 210,45 250,25 290,30 330,20"
+              stroke="#3B82F6"
+              stroke-width="2"
+              fill="none"
+            />
+            <circle cx="10" cy="80" r="2" fill="#3B82F6" />
+            <circle cx="90" cy="40" r="2" fill="#3B82F6" />
+            <circle cx="170" cy="35" r="2" fill="#3B82F6" />
+            <circle cx="250" cy="25" r="2" fill="#3B82F6" />
+            <circle cx="330" cy="20" r="2" fill="#3B82F6" />
+          </svg>
+          <div class="absolute bottom-2 left-3 text-xs text-gray-500">
+            7天耗电趋势
+          </div>
+        </div>
+      </div>
 
-    <!-- 快捷功能 -->
-    <view class="grid grid-cols-4 mt-4 gap-4 p-4">
-      <view
-        v-for="menu in quickMenus"
-        :key="menu.title"
-        class="text-center"
-        @click="handleQuickMenu(menu)"
-      >
-        <view class="mx-auto mb-2 h-12 w-12 flex items-center justify-center rounded-full bg-gray-100">
-          <view :class="menu.icon" class="text-[20px] text-[#6b7280]" />
-        </view>
-        <text class="text-xs text-gray-700">{{ menu.title }}</text>
-      </view>
-    </view>
-  </view>
+      <!-- 航速优化建议 -->
+      <div class="rounded-xl bg-gray-50 p-4">
+        <h3 class="mb-3 text-gray-800 font-semibold">
+          AI优化建议
+        </h3>
+        <div class="space-y-3">
+          <div class="flex items-start rounded-lg bg-white p-3 space-x-3">
+            <div class="mt-2 h-2 w-2 rounded-full bg-green-500" />
+            <div class="flex-1">
+              <div class="text-sm text-gray-800 font-medium">
+                航速优化
+              </div>
+              <div class="mt-1 text-xs text-gray-600">
+                建议将航速调整至10-12节，可节能15%
+              </div>
+            </div>
+          </div>
+          <div class="flex items-start rounded-lg bg-white p-3 space-x-3">
+            <div class="mt-2 h-2 w-2 rounded-full bg-yellow-500" />
+            <div class="flex-1">
+              <div class="text-sm text-gray-800 font-medium">
+                路径规划
+              </div>
+              <div class="mt-1 text-xs text-gray-600">
+                优化路径可减少12%航行时间
+              </div>
+            </div>
+          </div>
+          <div class="flex items-start rounded-lg bg-white p-3 space-x-3">
+            <div class="mt-2 h-2 w-2 rounded-full bg-red-500" />
+            <div class="flex-1">
+              <div class="text-sm text-gray-800 font-medium">
+                电量预警
+              </div>
+              <div class="mt-1 text-xs text-gray-600">
+                船舶#003电量低于20%，建议返航充电
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 历史查询 -->
+      <div class="rounded-xl bg-gray-50 p-4">
+        <h3 class="mb-3 text-gray-800 font-semibold">
+          历史记录
+        </h3>
+        <div class="flex space-x-3">
+          <button class="flex-1 rounded-lg bg-blue-600 py-2 text-sm text-white font-medium">
+            轨迹回放
+          </button>
+          <button class="flex-1 border border-gray-200 rounded-lg bg-white py-2 text-sm text-gray-700 font-medium">
+            数据导出
+          </button>
+        </div>
+      </div>
+
+      <!-- 智能预警 -->
+      <div class="border border-orange-200 rounded-xl from-orange-50 to-red-50 bg-gradient-to-r p-4">
+        <div class="mb-2 flex items-center space-x-2">
+          <svg class="h-5 w-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+            />
+          </svg>
+          <span class="text-sm text-orange-800 font-semibold">智能预警</span>
+        </div>
+        <div class="text-sm text-orange-700">
+          检测到3艘船舶电量不足，建议及时充电或返航
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
+
+<script setup lang="ts">
+// AI Manager page logic here
+</script>

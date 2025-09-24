@@ -75,7 +75,7 @@ export const customTabbarList: CustomTabBarItem[] = [
   },
   {
     text: 'AI管理',
-    pagePath: 'pages/AIManager/AIManager',
+    pagePath: 'pages/index/index',
     iconType: 'unocss',
     icon: 'i-carbon-ai-business-impact-assessment',
   },
