@@ -25,7 +25,7 @@ const { loading, data: productData, run: loadProductDetail } = useRequest<IProdu
 
 // 商品详情
 const productDetail = computed(() => {
-  return productData.value?.data.storeInfo
+  return productData.value?.storeInfo || {}
 })
 
 // 监听 SKU 属性变化，更新选中的 SKU
