@@ -62,64 +62,29 @@ export interface CustomTabBarItem {
 // 如果需要配置鼓包，需要在 'tabbar/store.ts' 里面设置，最后在 `tabbar/index.vue` 里面更改鼓包的图片
 export const customTabbarList: CustomTabBarItem[] = [
   {
-    text: '首页',
-    pagePath: 'pages/index/index',
-    // 注意 unocss 图标需要如下处理：（二选一）
-    // 1）在fg-tabbar.vue页面上引入一下并注释掉（见tabbar/index.vue代码第2行）
-    // 2）配置到 unocss.config.ts 的 safelist 中
+    text: '手动导航',
+    pagePath: 'pages/ship-management/ManualNavigation',
     iconType: 'unocss',
-    icon: 'i-carbon-home',
-    // badge: 'dot',
+    icon: 'i-carbon-direction-fork',
   },
   {
-    text: '商品',
-    pagePath: 'pages/product/list',
-    // 注意 unocss 图标需要如下处理：（二选一）
-    // 1）在fg-tabbar.vue页面上引入一下并注释掉（见tabbar/index.vue代码第2行）
-    // 2）配置到 unocss.config.ts 的 safelist 中
+    text: '自动巡航',
+    pagePath: 'pages/ship-management/AutomaticCruise',
     iconType: 'unocss',
-    icon: 'i-carbon-shopping-cart',
-    // badge: 10,
+    icon: 'i-carbon-car',
   },
   {
-    text: '取件',
-    pagePath: 'pages/pickup/list',
+    text: 'AI管理',
+    pagePath: 'pages/ship-management/AIManager',
     iconType: 'unocss',
-    icon: 'i-carbon-calendar',
-    // badge: 5,
+    icon: 'i-carbon-ibm-watson-ai',
   },
   {
-    pagePath: 'pages/me/me',
-    text: '我的',
+    text: '综合管理',
+    pagePath: 'pages/ship-management/ComprehensiveManagement',
     iconType: 'unocss',
-    icon: 'i-carbon-user',
-    // badge: 100,
+    icon: 'i-carbon-settings',
   },
-  // 其他类型演示
-  // 1、uiLib
-  // {
-  //   pagePath: 'pages/index/index',
-  //   text: '首页',
-  //   iconType: 'uiLib',
-  //   icon: 'home',
-  // },
-  // 2、iconfont
-  // {
-  //   pagePath: 'pages/index/index',
-  //   text: '首页',
-  //   // 注意 iconfont 图标需要额外加上 'iconfont'，如下
-  //   iconType: 'iconfont',
-  //   icon: 'iconfont icon-my',
-  // },
-  // 3、image
-  // {
-  //   pagePath: 'pages/index/index',
-  //   text: '首页',
-  //   // 使用 ‘image’时，需要配置 icon + iconActive 2张图片
-  //   iconType: 'image',
-  //   icon: '/static/tabbar/home.png',
-  //   iconActive: '/static/tabbar/homeHL.png',
-  // },
 ]
 
 /**

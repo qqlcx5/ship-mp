@@ -52,15 +52,8 @@ export default defineConfig({
   ],
   // 动态图标需要在这里配置，或者写在vue页面中注释掉
   safelist: [
-    'i-carbon-home',
-    'i-carbon-list',
-    'i-carbon-location',
-    'i-carbon-shopping-cart',
-    'i-carbon-calendar',
-    'i-carbon-user-avatar',
-    'i-carbon-chevron-up',
-    'i-carbon-chevron-down',
-    'i-carbon-user',
+    // 'i-carbon-ibm-watson-ai',
+    'i-carbon-direction-fork',
   ],
   rules: [
     [
