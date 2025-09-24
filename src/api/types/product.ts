@@ -75,9 +75,5 @@ export interface IProductListParams {
 
 // 商品详情响应
 export interface IProductDetailResponse {
-  status: number
-  msg: string
-  data: {
-    storeInfo: IProduct
-  }
+  storeInfo: IProduct
 }
