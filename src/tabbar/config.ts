@@ -63,25 +63,25 @@ export interface CustomTabBarItem {
 export const customTabbarList: CustomTabBarItem[] = [
   {
     text: '手动导航',
-    pagePath: 'pages/ship-management/ManualNavigation',
+    pagePath: 'pages/ManualNavigation/ManualNavigation',
     iconType: 'unocss',
     icon: 'i-carbon-direction-fork',
   },
   {
     text: '自动巡航',
-    pagePath: 'pages/ship-management/AutomaticCruise',
+    pagePath: 'pages/AutomaticCruise/AutomaticCruise',
     iconType: 'unocss',
     icon: 'i-carbon-car',
   },
   {
     text: 'AI管理',
-    pagePath: 'pages/ship-management/AIManager',
+    pagePath: 'pages/index/index',
     iconType: 'unocss',
     icon: 'i-carbon-ai-business-impact-assessment',
   },
   {
     text: '综合管理',
-    pagePath: 'pages/ship-management/ComprehensiveManagement',
+    pagePath: 'pages/ComprehensiveManagement/ComprehensiveManagement',
     iconType: 'unocss',
     icon: 'i-carbon-settings',
   },

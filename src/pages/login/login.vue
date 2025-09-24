@@ -1,117 +1,65 @@
-<script lang="ts" setup>
-import { useTokenStore } from '@/store/token'
-import { useUserStore } from '@/store/user'
-import { tabbarList } from '@/tabbar/config'
-import { isPageTabbar } from '@/tabbar/store'
-import { ensureDecodeURIComponent } from '@/utils'
-import { parseUrlToObj } from '@/utils/index'
-
-definePage({
-  style: {
-    navigationBarTitleText: '登录',
-  },
-})
-
-const redirectUrl = ref('')
-onLoad((options) => {
-  console.log('login options: ', options)
-  if (options.redirect) {
-    redirectUrl.value = ensureDecodeURIComponent(options.redirect)
-  }
-  else {
-    redirectUrl.value = tabbarList[0].pagePath
-  }
-  console.log('redirectUrl.value: ', redirectUrl.value)
-})
-
-const userStore = useUserStore()
-const tokenStore = useTokenStore()
-async function doLogin() {
-  if (tokenStore.hasLogin) {
-    uni.navigateBack()
-    return
-  }
-  try {
-    // 有的时候后端会用一个接口返回token和用户信息，有的时候会分开2个接口（各有利弊，看业务场景和系统复杂度），这里使用2个接口返回的来模拟
-    // 1/2 调用接口回来后设置token信息
-    // 这里用单token来模拟
-    tokenStore.setTokenInfo({
-      token: '123456',
-      expiresIn: 60 * 60 * 24 * 7,
-    })
-
-    // 2/2 调用接口回来后设置用户信息
-    // const res = await login({
-    //   username: '菲鸽',
-    //   password: '123456',
-    // })
-    // console.log('接口拿到的登录信息：', res)
-    userStore.setUserInfo({
-      userId: 123456,
-      username: 'abc123456',
-      nickname: '菲鸽',
-      avatar: 'https://oss.laf.run/ukw0y1-site/avatar.jpg',
-    })
-
-    console.log(redirectUrl.value)
-  }
-  catch (error) {
-    console.log('登录失败', error)
-  }
-  let path = redirectUrl.value
-  if (!path.startsWith('/')) {
-    path = `/${path}`
-  }
-  const { path: _path, query } = parseUrlToObj(path)
-  console.log('_path:', _path, 'query:', query, 'path:', path)
-  console.log('isPageTabbar(_path):', isPageTabbar(_path))
-  if (isPageTabbar(_path)) {
-    // 经过我的测试 switchTab 不能带 query 参数, 不管是放到 url  还是放到 query ,
-    // 最后跳转过去的时候都会丢失 query 信息
-    uni.switchTab({
-      url: path,
-    })
-    // uni.switchTab({
-    //   url: _path,
-    //   query,
-    // })
-  }
-  else {
-    console.log('redirectTo:', path)
-    uni.redirectTo({
-      url: path,
-    })
-  }
-}
-</script>
-
 <template>
-  <view class="login flex items-center justify-center from-gray-50 to-white bg-gradient-to-b pt-[20vh]">
-    <!-- 卡片 -->
-    <view class="max-w-md w-3/5 rounded-2xl bg-white p-8 shadow-lg">
-      <!-- 头像占位 -->
-      <view class="mx-auto mb-6 h-18 w-18 flex items-center justify-center rounded-full from-blue-400 to-indigo-500 bg-gradient-to-r">
-        <text class="i-carbon-user text-3xl text-white" />
-      </view>
+  <div class="h-full w-full flex flex-col items-center justify-center from-[#667eea] to-[#764ba2] bg-gradient-to-br p-8">
+    <div class="mb-12 text-center">
+      <div class="mx-auto mb-6 h-20 w-20 flex items-center justify-center rounded-full bg-white">
+        <svg class="h-10 w-10 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"
+          />
+        </svg>
+      </div>
+      <h1 class="mb-2 text-3xl text-white font-bold">
+        船舶监控
+      </h1>
+      <p class="text-white text-opacity-80">
+        智能海域管理系统
+      </p>
+    </div>
 
-      <view class="mb-2 text-center text-lg text-gray-700 font-semibold">
-        欢迎回来
-      </view>
-      <view class="mb-8 text-center text-sm text-gray-400">
-        登录后可同步您的数据
-      </view>
+    <div class="w-full space-y-4">
+      <div class="border border-white/20 rounded-2xl bg-white/10 p-4 backdrop-blur-20px">
+        <input
+          type="text"
+          placeholder="用户名"
+          class="w-full bg-transparent text-lg text-white outline-none placeholder-white placeholder-opacity-70"
+        >
+      </div>
 
-      <!-- 登录按钮 -->
+      <div class="border border-white/20 rounded-2xl bg-white/10 p-4 backdrop-blur-20px">
+        <input
+          type="password"
+          placeholder="密码"
+          class="w-full bg-transparent text-lg text-white outline-none placeholder-white placeholder-opacity-70"
+        >
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <label class="flex items-center text-white text-opacity-80">
+          <input type="checkbox" class="mr-2 rounded">
+          记住密码
+        </label>
+        <a href="#" class="text-white text-opacity-80 underline">忘记密码</a>
+      </div>
+
       <button
-        class="h-12 w-full rounded-full from-blue-500 to-indigo-600 bg-gradient-to-r text-white font-medium shadow-md transition-transform active:scale-95"
-        @click="doLogin"
+        class="mt-8 w-full rounded-2xl bg-white py-4 text-blue-600 font-semibold transition-all hover:bg-opacity-90"
       >
-        一键登录
+        登录
       </button>
-    </view>
-  </view>
+
+      <div class="mt-8 flex space-x-4">
+        <div class="h-2 w-2 rounded-full bg-white bg-opacity-50" />
+        <div class="h-2 w-8 rounded-full bg-white" />
+        <div class="h-2 w-2 rounded-full bg-white bg-opacity-50" />
+      </div>
+    </div>
+  </div>
 </template>
 
-<style lang="scss" scoped>
-//
+<script setup lang="ts">
+// Login page logic here
+</script>
+
+<style scoped>
+/* Scoped styles for Login page */
 </style>
