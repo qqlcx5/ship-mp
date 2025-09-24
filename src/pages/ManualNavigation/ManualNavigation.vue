@@ -1,133 +1,610 @@
 <template>
-  <div class="relative h-full w-full bg-blue-50">
-    <!-- 地图区域 -->
-    <div class="absolute inset-0">
-      <div class="relative h-full w-full from-blue-200 via-blue-100 to-cyan-100 bg-gradient-to-br">
-        <!-- 模拟地图背景 -->
-        <div
-          class="absolute inset-0"
-          style="
-            background-image: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=800&fit=crop');
-            background-size: cover;
-            background-position: center;
-            opacity: 0.3;
-          "
+  <view class="h-full w-full flex flex-col">
+    <!-- 顶部状态栏 -->
+    <view v-if="userAccelerometer" class="bg-blue-600 px-4 py-2 text-center text-white">
+      <text class="text-sm">当前舵角: {{ currentRudder }}°</text>
+    </view>
+
+    <!-- 地图容器 -->
+    <view class="relative flex-1">
+      <!-- 地图组件 -->
+      <map
+        id="mapId"
+        class="h-full w-full"
+        :latitude="mapCenter.latitude"
+        :longitude="mapCenter.longitude"
+        :scale="mapScale"
+        :markers="allMarkers"
+        :polyline="polylines"
+        @regionchange="onRegionChange"
+        @markertap="onMarkerTap"
+        @tap="onMapTap"
+      >
+        <!-- 地图控制按钮 -->
+        <view class="absolute left-4 top-4 space-y-2">
+          <view class="rounded-lg bg-white p-2 shadow-md">
+            <switch
+              :checked="enableAuto"
+              class="mr-2"
+              @change="onAutoChange"
+            />
+            <text class="text-sm">自动</text>
+          </view>
+          <button
+            class="rounded-lg bg-white px-3 py-2 text-sm shadow-md"
+            @tap="addWaypoint"
+          >
+            添加点
+          </button>
+          <button
+            class="rounded-lg bg-white px-3 py-2 text-sm shadow-md"
+            @tap="deleteWaypoint"
+          >
+            删除点
+          </button>
+          <button
+            class="rounded-lg bg-white px-3 py-2 text-sm shadow-md"
+            @tap="toggleSettings"
+          >
+            设置
+          </button>
+        </view>
+
+        <!-- 设置面板 -->
+        <view v-if="showSettings" class="absolute left-4 top-48 rounded-lg bg-white p-3 shadow-md space-y-2">
+          <button
+            class="block w-full py-1 text-left text-sm"
+            @tap="deleteAllWaypoints"
+          >
+            删除所有路径
+          </button>
+          <button
+            class="block w-full py-1 text-left text-sm"
+            @tap="setZeroPoint"
+          >
+            设置舵机零点
+          </button>
+          <button
+            class="block w-full py-1 text-left text-sm"
+            @tap="calibrateINS"
+          >
+            标定磁力计
+          </button>
+          <view class="flex items-center space-x-2">
+            <switch
+              :checked="userAccelerometer"
+              @change="onAccelerometerChange"
+            />
+            <text class="text-sm">加速度计</text>
+          </view>
+        </view>
+
+        <!-- 功率控制滑块 -->
+        <view class="absolute right-4 top-4 h-80 w-12 rounded-lg bg-white p-2 shadow-md">
+          <slider
+            :value="powerSliderValue"
+            :max="120"
+            vertical
+            class="h-full"
+            @change="onPowerChange"
+          />
+          <view class="mt-2 text-center">
+            <text class="text-xs text-gray-600">{{ userSetPower }}</text>
+          </view>
+        </view>
+      </map>
+    </view>
+
+    <!-- 舵角控制（非加速度计模式） -->
+    <view v-if="!userAccelerometer" class="border-t border-gray-200 bg-white px-4 py-3">
+      <view class="flex items-center space-x-4">
+        <text class="text-sm text-gray-600">舵角:</text>
+        <slider
+          :value="rudderSliderValue"
+          :max="120"
+          class="flex-1"
+          @change="onRudderChange"
         />
+        <text class="text-sm font-medium">{{ currentRudder }}°</text>
+      </view>
+    </view>
 
-        <!-- 船舶标记 -->
-        <div class="absolute h-24px w-24px border-2 border-white rounded-full bg-[#3b82f6] shadow-md" style="top: 25%; left: 30%" />
-        <div class="absolute h-24px w-24px border-2 border-white rounded-full bg-[#3b82f6] shadow-md" style="top: 40%; left: 60%" />
-        <div class="absolute h-24px w-24px border-2 border-white rounded-full bg-[#3b82f6] shadow-md" style="top: 60%; left: 25%" />
-        <div class="absolute h-24px w-24px border-2 border-white rounded-full bg-[#3b82f6] shadow-md" style="top: 35%; left: 80%" />
-        <div class="absolute h-24px w-24px border-2 border-white rounded-full bg-[#3b82f6] shadow-md" style="top: 70%; left: 70%" />
-        <div class="absolute h-24px w-24px border-2 border-white rounded-full bg-[#3b82f6] shadow-md" style="top: 55%; left: 45%" />
-
-        <!-- 信息浮窗 -->
-        <div class="absolute left-1/2 top-1/3 min-w-[200px] transform rounded-12px bg-white/95 p-3 shadow-lg backdrop-blur-10px -translate-x-1/2">
-          <div class="mb-1 text-sm text-gray-800 font-semibold">
-            船舶 #001
-          </div>
-          <div class="text-xs text-gray-600 space-y-1">
-            <div>经度: 119.5023°E</div>
-            <div>纬度: 26.0745°N</div>
-            <div>航向: 045°</div>
-            <div class="text-green-600 font-medium">
-              状态: 正常
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 状态监控面板 -->
-    <div class="absolute right-4 top-4 w-32 rounded-12px bg-white/95 p-3 shadow-lg backdrop-blur-10px">
-      <div class="text-xs text-gray-600 space-y-2">
-        <div class="mb-2 text-gray-800 font-semibold">
-          实时状态
-        </div>
-        <div class="flex justify-between">
-          <span>天气</span>
-          <span class="text-blue-600">晴</span>
-        </div>
-        <div class="flex justify-between">
-          <span>海况</span>
-          <span class="text-green-600">良好</span>
-        </div>
-        <div class="flex justify-between">
-          <span>时速</span>
-          <span>12.5节</span>
-        </div>
-        <div class="flex justify-between">
-          <span>电量</span>
-          <span class="text-orange-600">75%</span>
-        </div>
-        <div class="flex justify-between">
-          <span>功率</span>
-          <span>850W</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 操控系统 -->
-    <div class="absolute bottom-6 right-6">
-      <div class="relative h-120px w-120px border-2 border-white/30 rounded-full bg-white/10" @mousedown="handleMouseDown">
-        <div class="absolute left-1/2 top-1/2 h-40px w-40px rounded-full bg-white shadow-md" :style="{ transform: `translate(-50%, -50%) translate(${knobPosition.x}px, ${knobPosition.y}px)` }" />
-      </div>
-      <div class="mt-2 text-center text-xs text-white font-medium">
-        手动操控
-      </div>
-    </div>
-
-    <!-- 模式切换 -->
-    <div class="absolute bottom-6 left-6 flex space-x-2">
-      <button class="rounded-full bg-blue-600 px-4 py-2 text-sm text-white font-medium">
-        手动
-      </button>
-      <button class="rounded-full bg-white px-4 py-2 text-sm text-gray-600 font-medium">
-        自动
-      </button>
-    </div>
-  </div>
+    <!-- 底部状态栏 -->
+    <view class="border-t border-gray-200 bg-white px-4 py-3">
+      <view class="flex items-center justify-between text-xs">
+        <view class="flex space-x-4">
+          <text>功率: {{ shipStatus.power }}W</text>
+          <text>电压: {{ shipStatus.batteryVoltage }}V</text>
+          <text>速度: {{ shipStatus.speedKnot }}节</text>
+          <text>运行时间: {{ shipStatus.runningTime }}分</text>
+        </view>
+        <view class="flex space-x-2">
+          <view
+            class="rounded px-2 py-1 text-xs text-white"
+            :class="shipStatus.localOK ? 'bg-green-500' : 'bg-red-500'"
+          >
+            主控
+          </view>
+          <view
+            class="rounded px-2 py-1 text-xs text-white"
+            :class="shipStatus.usvOnline ? 'bg-green-500' : 'bg-red-500'"
+          >
+            基站
+          </view>
+          <view
+            class="rounded px-2 py-1 text-xs text-white"
+            :class="shipStatus.remoteOK ? 'bg-green-500' : 'bg-red-500'"
+          >
+            遥控
+          </view>
+          <text class="text-gray-600">{{ rxCount }}</text>
+        </view>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useShipStore } from '@/store/ship'
+import { bluetoothManager } from '@/utils/bluetooth'
+import { shipProtocol } from '@/utils/shipProtocol'
 
-const isDragging = ref(false)
-const knobPosition = ref({ x: 0, y: 0 })
+// 获取页面参数
+const query = uni.createSelectorQuery()
+const options = ref<any>({})
 
-function handleMouseDown(e: MouseEvent) {
-  isDragging.value = true
-  // Prevent text selection during drag
-  e.preventDefault()
+// Store
+const shipStore = useShipStore()
+const {
+  currentShipId,
+  currentShip,
+  allMarkers,
+  polylines,
+  userAccelerometer,
+  crossMarker,
+  shipStatus,
+  bluetoothConnected,
+  connectedDeviceId,
+  connectedDeviceName,
+} = storeToRefs(shipStore)
+
+// 响应式数据
+const mapCenter = ref({
+  latitude: 24.5945,
+  longitude: 118.0835,
+})
+const mapScale = ref(10)
+const enableAuto = ref(false)
+const showSettings = ref(false)
+const userSetPower = ref(0)
+const currentRudder = ref(0)
+const powerSliderValue = ref(60)
+const rudderSliderValue = ref(60)
+const rxCount = ref(0)
+
+// 定时器相关
+let communicationTimer: any = null
+let rxTimeOut = 0
+let rudderDragTime = 0
+
+// 初始化通信定时器
+function startCommunication() {
+  communicationTimer = setInterval(() => {
+    rudderDragTime++
+
+    if (rxTimeOut < 0 || rxTimeOut > 20) {
+      console.log('RxTimeOut:', rxTimeOut)
+      sendBluetoothData()
+      rxTimeOut = 1
+    }
+    rxTimeOut++
+  }, 50)
 }
 
-function handleMouseMove(e: MouseEvent) {
-  if (isDragging.value) {
-    const joystick = document.querySelector('.w-120px.h-120px.rounded-full.bg-white\\/10.border-2.border-white\\/30.relative')
-    if (!joystick)
-      return
+// 发送蓝牙数据
+async function sendBluetoothData() {
+  if (!bluetoothConnected.value || connectedDeviceId.value === 'demo') {
+    return
+  }
 
-    const rect = joystick.getBoundingClientRect()
-    const centerX = rect.left + rect.width / 2
-    const centerY = rect.top + rect.height / 2
-    const maxRadius = 40
+  const data = shipProtocol.getTxBuffer(
+    currentShipId.value,
+    userSetPower.value,
+    -currentShip.value.rudder,
+  )
 
-    let deltaX = e.clientX - centerX
-    let deltaY = e.clientY - centerY
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-
-    if (distance > maxRadius) {
-      deltaX = (deltaX / distance) * maxRadius
-      deltaY = (deltaY / distance) * maxRadius
-    }
-
-    knobPosition.value = { x: deltaX, y: deltaY }
+  const success = await bluetoothManager.writeData(data)
+  if (!success) {
+    console.error('发送数据失败')
   }
 }
+
+// 处理蓝牙数据接收
+function handleBluetoothData(data: ArrayBuffer) {
+  const result = shipProtocol.parseReceivedData(data)
+  if (!result)
+    return
+
+  const { shipId, functionCode } = result
+
+  // 更新船舶状态
+  if (shipId === currentShipId.value) {
+    if (result.status) {
+      shipStore.updateShipStatus({
+        localOK: result.status.localOK,
+        remoteOK: result.status.remoteOK,
+        usvOnline: result.status.usvOnline,
+      })
+    }
+  }
+
+  // 处理不同类型的数据
+  switch (functionCode) {
+    case 0: // 位置数据
+      if (result.position) {
+        shipStore.updateShipPosition(
+          shipId,
+          result.position.latitude,
+          result.position.longitude,
+          result.position.rotate,
+        )
+        shipStore.addTrackPoint(
+          shipId,
+          result.position.latitude,
+          result.position.longitude,
+        )
+        updateMapCenter()
+      }
+      break
+    case 1: // PLOS和电压数据
+      if (result.plos && shipId === currentShipId.value) {
+        // 更新PLOS位置
+        shipStore.updateShipStatus({
+          batteryVoltage: result.batteryVoltage || 0,
+        })
+      }
+      break
+    case 2: // 功率数据
+      if (result.plos && shipId === currentShipId.value) {
+        shipStore.updateShipStatus({
+          power: result.power || 0,
+        })
+      }
+      break
+    case 3: // 速度数据
+      if (result.plos && shipId === currentShipId.value) {
+        shipStore.updateShipStatus({
+          speedKnot: result.speedKnot || 0,
+          runningTime: result.runningTime || 0,
+        })
+      }
+      break
+  }
+
+  rxTimeOut = 20
+  rxCount.value++
+
+  // 更新舵角显示
+  if (shipId === currentShipId.value && rudderDragTime > 20) {
+    currentRudder.value = result.rudder || 0
+  }
+}
+
+// 更新地图中心
+function updateMapCenter() {
+  const ship = currentShip.value
+  if (ship.ship.latitude && ship.ship.longitude) {
+    mapCenter.value = {
+      latitude: ship.ship.latitude,
+      longitude: ship.ship.longitude,
+    }
+  }
+}
+
+// 地图事件处理
+function onRegionChange(event: any) {
+  if (event.type === 'end' && event.causedBy === 'drag') {
+    const mapCtx = uni.createMapContext('mapId')
+    mapCtx.getCenterLocation({
+      success: (res) => {
+        const { latitude, longitude } = res
+
+        // 更新选中航点位置
+        const ship = currentShip.value
+        ship.waypoints.forEach((waypoint) => {
+          if (waypoint.selected) {
+            shipStore.updateWaypoint(currentShipId.value, waypoint.id, latitude, longitude)
+            shipProtocol.modifyWaypoint(currentShipId.value, waypoint.id, longitude, latitude)
+            shipStore.saveToStorage()
+          }
+        })
+
+        // 更新十字标记位置
+        shipStore.setCrossMarker(latitude, longitude)
+
+        mapCtx.getScale({
+          success: (scaleRes) => {
+            mapScale.value = scaleRes.scale
+            shipStore.setCrossMarker(latitude, longitude, scaleRes.scale)
+          },
+        })
+
+        shipStore.saveToStorage()
+      },
+    })
+  }
+}
+
+function onMarkerTap(event: any) {
+  console.log('onMarkerTap', event.markerId)
+
+  const ship = currentShip.value
+
+  // 重置所有航点选中状态
+  ship.waypoints.forEach((waypoint) => {
+    waypoint.width = 20
+    waypoint.height = 20
+    waypoint.selected = false
+
+    if (event.markerId === waypoint.id) {
+      waypoint.width = 25
+      waypoint.height = 25
+      waypoint.selected = true
+
+      // 移动地图到选中航点
+      const mapCtx = uni.createMapContext('mapId')
+      mapCtx.moveToLocation({
+        latitude: waypoint.latitude,
+        longitude: waypoint.longitude,
+      })
+
+      shipStore.setCrossMarker(waypoint.longitude, waypoint.latitude)
+    }
+  })
+
+  // 处理船舶选择
+  shipStore.ships.forEach((shipData, index) => {
+    shipData.ship.width = 30
+    shipData.ship.height = 30
+
+    if (shipData.ship.id === event.markerId) {
+      shipStore.setCurrentShipId(index)
+      shipData.ship.width = 45
+      shipData.ship.height = 45
+    }
+  })
+
+  updateControlValues()
+}
+
+function onMapTap() {
+  console.log('onMapTap')
+
+  const ship = currentShip.value
+  let hasSelection = false
+
+  // 取消航点选择
+  ship.waypoints.forEach((waypoint) => {
+    if (waypoint.selected)
+      hasSelection = true
+    waypoint.width = 20
+    waypoint.height = 20
+    waypoint.selected = false
+  })
+
+  // 高亮当前船舶
+  shipStore.ships.forEach((shipData) => {
+    shipData.ship.width = 30
+    shipData.ship.height = 30
+  })
+
+  ship.ship.width = 45
+  ship.ship.height = 45
+
+  updateControlValues()
+}
+
+// 控制事件处理
+function onPowerChange(event: any) {
+  const value = 60 - event.detail.value
+  let result = 0
+
+  if (value < -10 || value > 10) {
+    result = value
+  }
+
+  if (result < 0) {
+    result = result + 10
+  }
+  else if (result > 0) {
+    result = result - 10
+  }
+
+  const power = Math.round(result * 2)
+  userSetPower.value = power
+  powerSliderValue.value = event.detail.value
+
+  // 更新船舶功率
+  const ship = currentShip.value
+  ship.power = power
+}
+
+function onRudderChange(event: any) {
+  rudderDragTime = 0
+
+  if (userAccelerometer.value || !shipProtocol.getEnableManual(currentShipId.value)) {
+    return
+  }
+
+  const value = 60 - event.detail.value
+  let result = 0
+
+  if (value < -10 || value > 10) {
+    result = value
+  }
+
+  if (result < 0) {
+    result = result + 10
+  }
+  else if (result > 0) {
+    result = result - 10
+  }
+
+  const rudder = Math.round(-result * 2)
+  currentRudder.value = rudder
+  rudderSliderValue.value = event.detail.value
+
+  // 更新船舶舵角
+  const ship = currentShip.value
+  ship.rudder = rudder
+}
+
+function onAutoChange(event: any) {
+  enableAuto.value = event.detail.value
+  shipProtocol.setEnableManual(currentShipId.value, !event.detail.value)
+}
+
+function onAccelerometerChange(event: any) {
+  shipStore.setUserAccelerometer(event.detail.value)
+}
+
+// 航点管理
+function addWaypoint() {
+  console.log('addWaypoint')
+
+  const mapCtx = uni.createMapContext('mapId')
+  mapCtx.getCenterLocation({
+    success: (res) => {
+      const ship = currentShip.value
+      let id = 0
+      if (ship.waypoints.length > 0) {
+        id = ship.waypoints[ship.waypoints.length - 1].id + 1
+      }
+
+      const waypoint = {
+        id,
+        anchor: { x: 0.5, y: 1 },
+        iconPath: '/static/images/reddotmark.png',
+        width: 20,
+        height: 20,
+        latitude: res.latitude,
+        longitude: res.longitude,
+        selected: false,
+        updated: false,
+      }
+
+      shipStore.addWaypoint(currentShipId.value, waypoint)
+      shipProtocol.addWaypoint(currentShipId.value, id, res.longitude, res.latitude)
+      shipStore.saveToStorage()
+    },
+  })
+}
+
+function deleteWaypoint() {
+  console.log('deleteWaypoint')
+
+  const ship = currentShip.value
+  for (let i = ship.waypoints.length - 1; i >= 0; i--) {
+    const waypoint = ship.waypoints[i]
+    if (waypoint.selected) {
+      shipProtocol.deleteWaypoint(currentShipId.value, waypoint.id)
+      shipStore.removeWaypoint(currentShipId.value, waypoint.id)
+      shipStore.saveToStorage()
+    }
+  }
+}
+
+function deleteAllWaypoints() {
+  console.log('deleteAllWaypoints')
+
+  shipProtocol.deleteAllWaypoints(currentShipId.value)
+  shipStore.clearAllWaypoints(currentShipId.value)
+  shipStore.saveToStorage()
+}
+
+function setZeroPoint() {
+  shipProtocol.setForceSetZPoint(currentShipId.value)
+}
+
+function calibrateINS() {
+  shipProtocol.setCalibINS(currentShipId.value)
+}
+
+function toggleSettings() {
+  showSettings.value = !showSettings.value
+}
+
+// 更新控制值
+function updateControlValues() {
+  const ship = currentShip.value
+  currentRudder.value = ship.rudder
+  userSetPower.value = ship.power
+  enableAuto.value = !shipProtocol.getEnableManual(currentShipId.value)
+}
+
+// 页面生命周期
+onMounted(() => {
+  // 获取页面参数
+  const pages = getCurrentPages()
+  const currentPage = pages[pages.length - 1]
+  options.value = currentPage.options || {}
+
+  console.log('页面参数:', options.value)
+
+  // 从存储加载数据
+  shipStore.loadFromStorage()
+
+  // 设置地图中心
+  mapCenter.value = {
+    latitude: crossMarker.value.latitude,
+    longitude: crossMarker.value.longitude,
+  }
+  mapScale.value = crossMarker.value.mapscale
+
+  // 设置蓝牙数据接收回调
+  if (bluetoothConnected.value) {
+    bluetoothManager.setCallbacks({
+      onCharacteristicValueChange: handleBluetoothData,
+    })
+  }
+
+  // 启动通信
+  startCommunication()
+
+  // 初始化航点数据
+  shipStore.ships.forEach((ship, index) => {
+    shipProtocol.startUpdateWaypoint(index)
+    ship.waypoints.forEach((waypoint) => {
+      shipProtocol.updateWaypoint(index, waypoint.id, waypoint.longitude, waypoint.latitude)
+    })
+    shipProtocol.endUpdateWaypoint(index)
+  })
+
+  updateControlValues()
+})
+
+onUnmounted(() => {
+  // 清理定时器
+  if (communicationTimer) {
+    clearInterval(communicationTimer)
+  }
+
+  // 断开蓝牙连接
+  if (bluetoothConnected.value && connectedDeviceId.value !== 'demo') {
+    bluetoothManager.disconnectDevice()
+  }
+})
 </script>
 
-<style scoped>
-/* Scoped styles for Manual Navigation page */
-/* All custom styles have been converted to UnoCSS utility classes */
-</style>
+<route lang="json">
+{
+  "style": {
+    "navigationBarTitleText": "船舶控制",
+    "navigationBarBackgroundColor": "#2563eb",
+    "navigationBarTextStyle": "white",
+    "pageOrientation": "landscape"
+  }
+}
+</route>
