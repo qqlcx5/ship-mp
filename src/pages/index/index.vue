@@ -1,147 +1,211 @@
 <template>
-  <div class="h-full w-full bg-white">
-    <!-- 顶部导航 -->
-    <div class="from-purple-600 to-indigo-600 bg-gradient-to-r p-4 text-white">
-      <h1 class="mb-4 text-xl font-semibold">
-        AI智能管理
-      </h1>
-      <div class="flex justify-between text-sm">
-        <div>总航行里程</div>
-        <div class="font-semibold">
-          1,245.8 km
-        </div>
-      </div>
-    </div>
+  <view class="h-full w-full bg-gray-50">
+    <!-- 顶部标题 -->
+    <view class="bg-blue-600 px-4 py-6 text-white">
+      <text class="text-xl font-bold">USV 无人船控制系统</text>
+      <text class="mt-2 block text-sm opacity-90">请选择要连接的设备</text>
+    </view>
 
-    <!-- 数据统计卡片 -->
-    <div class="p-4 space-y-4">
-      <div class="grid grid-cols-2 gap-4">
-        <div class="rounded-xl from-blue-50 to-blue-100 bg-gradient-to-br p-4">
-          <div class="text-2xl text-blue-600 font-bold">
-            85%
-          </div>
-          <div class="mt-1 text-sm text-gray-600">
-            系统效率
-          </div>
-          <div class="mt-2 h-1.5 w-full rounded-full bg-blue-200">
-            <div class="h-1.5 rounded-full bg-blue-600" style="width: 85%" />
-          </div>
-        </div>
-        <div class="rounded-xl from-green-50 to-green-100 bg-gradient-to-br p-4">
-          <div class="text-2xl text-green-600 font-bold">
-            92%
-          </div>
-          <div class="mt-1 text-sm text-gray-600">
-            电能利用率
-          </div>
-          <div class="mt-2 h-1.5 w-full rounded-full bg-green-200">
-            <div class="h-1.5 rounded-full bg-green-600" style="width: 92%" />
-          </div>
-        </div>
-      </div>
+    <!-- 搜索状态 -->
+    <view class="border-b border-gray-200 bg-white px-4 py-3">
+      <view class="flex items-center justify-between">
+        <text class="text-gray-600">正在搜索蓝牙设备...</text>
+        <view class="flex items-center space-x-2">
+          <view v-if="isSearching" class="h-4 w-4 animate-spin border-2 border-blue-600 border-t-transparent rounded-full" />
+          <text class="text-sm text-blue-600">{{ devices.length }} 个设备</text>
+        </view>
+      </view>
+    </view>
 
-      <!-- 数据分析图表 -->
-      <div class="rounded-xl bg-gray-50 p-4">
-        <h3 class="mb-4 text-gray-800 font-semibold">
-          电量消耗分析
-        </h3>
-        <div class="relative h-32 rounded-lg bg-white p-3">
-          <!-- 模拟图表 -->
-          <svg class="h-full w-full">
-            <polyline
-              points="10,80 50,60 90,40 130,55 170,35 210,45 250,25 290,30 330,20"
-              stroke="#3B82F6"
-              stroke-width="2"
-              fill="none"
-            />
-            <circle cx="10" cy="80" r="2" fill="#3B82F6" />
-            <circle cx="90" cy="40" r="2" fill="#3B82F6" />
-            <circle cx="170" cy="35" r="2" fill="#3B82F6" />
-            <circle cx="250" cy="25" r="2" fill="#3B82F6" />
-            <circle cx="330" cy="20" r="2" fill="#3B82F6" />
-          </svg>
-          <div class="absolute bottom-2 left-3 text-xs text-gray-500">
-            7天耗电趋势
-          </div>
-        </div>
-      </div>
+    <!-- 设备列表 -->
+    <scroll-view class="flex-1 px-4 py-2" scroll-y>
+      <view v-if="devices.length === 0" class="py-20 text-center">
+        <view class="mb-4 text-6xl">
+          📡
+        </view>
+        <text class="text-gray-500">未发现设备</text>
+        <text class="mt-2 block text-sm text-gray-400">请确保设备已开启并在附近</text>
+      </view>
 
-      <!-- 航速优化建议 -->
-      <div class="rounded-xl bg-gray-50 p-4">
-        <h3 class="mb-3 text-gray-800 font-semibold">
-          AI优化建议
-        </h3>
-        <div class="space-y-3">
-          <div class="flex items-start rounded-lg bg-white p-3 space-x-3">
-            <div class="mt-2 h-2 w-2 rounded-full bg-green-500" />
-            <div class="flex-1">
-              <div class="text-sm text-gray-800 font-medium">
-                航速优化
-              </div>
-              <div class="mt-1 text-xs text-gray-600">
-                建议将航速调整至10-12节，可节能15%
-              </div>
-            </div>
-          </div>
-          <div class="flex items-start rounded-lg bg-white p-3 space-x-3">
-            <div class="mt-2 h-2 w-2 rounded-full bg-yellow-500" />
-            <div class="flex-1">
-              <div class="text-sm text-gray-800 font-medium">
-                路径规划
-              </div>
-              <div class="mt-1 text-xs text-gray-600">
-                优化路径可减少12%航行时间
-              </div>
-            </div>
-          </div>
-          <div class="flex items-start rounded-lg bg-white p-3 space-x-3">
-            <div class="mt-2 h-2 w-2 rounded-full bg-red-500" />
-            <div class="flex-1">
-              <div class="text-sm text-gray-800 font-medium">
-                电量预警
-              </div>
-              <div class="mt-1 text-xs text-gray-600">
-                船舶#003电量低于20%，建议返航充电
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <view
+        v-for="(device, index) in devices"
+        :key="device.deviceId"
+        class="mb-3 rounded-lg bg-white p-4 shadow-sm"
+        @tap="connectDevice(device)"
+      >
+        <view class="flex items-center justify-between">
+          <view class="flex-1">
+            <text class="text-base text-gray-900 font-medium">{{ device.name || '未知设备' }}</text>
+            <view class="mt-1 space-y-1">
+              <text class="block text-xs text-gray-500">信号强度: {{ device.RSSI }}dBm ({{ getSignalPercentage(device.RSSI) }}%)</text>
+              <text class="block text-xs text-gray-400">设备ID: {{ device.deviceId }}</text>
+              <text v-if="device.advertisServiceUUIDs?.length" class="block text-xs text-gray-400">
+                服务数量: {{ device.advertisServiceUUIDs.length }}
+              </text>
+            </view>
+          </view>
+          <view class="ml-4 flex items-center">
+            <view class="flex items-center space-x-2">
+              <!-- 信号强度指示器 -->
+              <view class="flex items-end space-x-1">
+                <view
+                  class="h-2 w-1 rounded-full"
+                  :class="getSignalPercentage(device.RSSI) > 20 ? 'bg-green-500' : 'bg-gray-300'"
+                />
+                <view
+                  class="h-3 w-1 rounded-full"
+                  :class="getSignalPercentage(device.RSSI) > 40 ? 'bg-green-500' : 'bg-gray-300'"
+                />
+                <view
+                  class="h-4 w-1 rounded-full"
+                  :class="getSignalPercentage(device.RSSI) > 60 ? 'bg-green-500' : 'bg-gray-300'"
+                />
+                <view
+                  class="h-5 w-1 rounded-full"
+                  :class="getSignalPercentage(device.RSSI) > 80 ? 'bg-green-500' : 'bg-gray-300'"
+                />
+              </view>
+              <text class="text-blue-600">连接</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
 
-      <!-- 历史查询 -->
-      <div class="rounded-xl bg-gray-50 p-4">
-        <h3 class="mb-3 text-gray-800 font-semibold">
-          历史记录
-        </h3>
-        <div class="flex space-x-3">
-          <button class="flex-1 rounded-lg bg-blue-600 py-2 text-sm text-white font-medium">
-            轨迹回放
-          </button>
-          <button class="flex-1 border border-gray-200 rounded-lg bg-white py-2 text-sm text-gray-700 font-medium">
-            数据导出
-          </button>
-        </div>
-      </div>
+    <!-- 底部操作 -->
+    <view class="border-t border-gray-200 bg-white px-4 py-4">
+      <button
+        class="w-full rounded-lg bg-gray-600 py-3 text-white font-medium"
+        @tap="skipConnection"
+      >
+        跳过连接（演示模式）
+      </button>
+    </view>
 
-      <!-- 智能预警 -->
-      <div class="border border-orange-200 rounded-xl from-orange-50 to-red-50 bg-gradient-to-r p-4">
-        <div class="mb-2 flex items-center space-x-2">
-          <svg class="h-5 w-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fill-rule="evenodd"
-              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-            />
-          </svg>
-          <span class="text-sm text-orange-800 font-semibold">智能预警</span>
-        </div>
-        <div class="text-sm text-orange-700">
-          检测到3艘船舶电量不足，建议及时充电或返航
-        </div>
-      </div>
-    </div>
-  </div>
+    <!-- 连接中弹窗 -->
+    <view v-if="connecting" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <view class="mx-4 rounded-lg bg-white p-6 text-center">
+        <view class="mx-auto mb-4 h-8 w-8 animate-spin border-2 border-blue-600 border-t-transparent rounded-full" />
+        <text class="text-base font-medium">正在连接设备...</text>
+        <text class="mt-2 block text-sm text-gray-500">{{ connectingDeviceName }}</text>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script setup lang="ts">
-// AI Manager page logic here
+import type { IBluetoothDevice } from '@/store/ship'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { useShipStore } from '@/store/ship'
+import { bluetoothManager, formatDeviceName, getSignalStrengthPercentage } from '@/utils/bluetooth'
+
+const shipStore = useShipStore()
+
+// 响应式数据
+const devices = ref<IBluetoothDevice[]>([])
+const isSearching = ref(false)
+const connecting = ref(false)
+const connectingDeviceName = ref('')
+
+// 获取信号强度百分比
+const getSignalPercentage = (rssi: number) => getSignalStrengthPercentage(rssi)
+
+// 初始化蓝牙
+async function initBluetooth() {
+  // 设置蓝牙回调
+  bluetoothManager.setCallbacks({
+    onDeviceFound: (device: IBluetoothDevice) => {
+      const existingIndex = devices.value.findIndex(d => d.deviceId === device.deviceId)
+      if (existingIndex !== -1) {
+        devices.value[existingIndex] = device
+      }
+      else {
+        devices.value.push(device)
+      }
+    },
+    onAdapterStateChange: (state) => {
+      isSearching.value = state.discovering
+    },
+    onConnectionStateChange: (connected, deviceId) => {
+      if (connected && deviceId) {
+        connecting.value = false
+        // 跳转到地图页面
+        uni.navigateTo({
+          url: `/pages/ManualNavigation/ManualNavigation?deviceId=${deviceId}&deviceName=${connectingDeviceName.value}`,
+        })
+      }
+      else {
+        connecting.value = false
+        uni.showToast({
+          title: '连接失败',
+          icon: 'none',
+        })
+      }
+    },
+  })
+
+  // 打开蓝牙适配器
+  const success = await bluetoothManager.openBluetoothAdapter()
+  if (!success) {
+    uni.showModal({
+      title: '提示',
+      content: '请开启蓝牙后重试',
+      showCancel: false,
+    })
+  }
+}
+
+// 连接设备
+async function connectDevice(device: IBluetoothDevice) {
+  connecting.value = true
+  connectingDeviceName.value = formatDeviceName(device)
+
+  const success = await bluetoothManager.connectDevice(device.deviceId)
+  if (success) {
+    shipStore.setBluetoothConnection(true, device.deviceId, device.name)
+  }
+  else {
+    connecting.value = false
+    uni.showToast({
+      title: '连接失败',
+      icon: 'none',
+    })
+  }
+}
+
+// 跳过连接
+function skipConnection() {
+  uni.navigateTo({
+    url: '/pages/ManualNavigation/ManualNavigation?deviceId=demo&deviceName=演示模式',
+  })
+}
+
+// 页面生命周期
+onMounted(() => {
+  // 从存储加载数据
+  shipStore.loadFromStorage()
+
+  // 保持屏幕常亮
+  uni.setKeepScreenOn({
+    keepScreenOn: true,
+  })
+
+  // 初始化蓝牙
+  initBluetooth()
+})
+
+onUnmounted(() => {
+  // 关闭蓝牙适配器
+  bluetoothManager.closeBluetoothAdapter()
+})
 </script>
+
+<route lang="json">
+{
+  "style": {
+    "navigationBarTitleText": "设备连接",
+    "navigationBarBackgroundColor": "#2563eb",
+    "navigationBarTextStyle": "white"
+  }
+}
+</route>

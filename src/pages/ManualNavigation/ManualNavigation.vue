@@ -148,11 +148,11 @@
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useShipStore } from '@/store/ship'
+import { accelerometerManager } from '@/utils/accelerometer'
 import { bluetoothManager } from '@/utils/bluetooth'
 import { shipProtocol } from '@/utils/shipProtocol'
 
 // 获取页面参数
-const query = uni.createSelectorQuery()
 const options = ref<any>({})
 
 // Store
@@ -548,7 +548,7 @@ function updateControlValues() {
 onMounted(() => {
   // 获取页面参数
   const pages = getCurrentPages()
-  const currentPage = pages[pages.length - 1]
+  const currentPage = pages[pages.length - 1] as any
   options.value = currentPage.options || {}
 
   console.log('页面参数:', options.value)
