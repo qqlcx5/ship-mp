@@ -229,6 +229,21 @@ export const useShipStore = defineStore('ship', () => {
     },
   ])
 
+  // 工具函数：计算两点间距离
+  const getRealDistance = (lng1: number, lat1: number, lng2: number, lat2: number): number => {
+    const radLat1 = lat1 * Math.PI / 180.0
+    const radLng1 = lng1 * Math.PI / 180.0
+    const radLat2 = lat2 * Math.PI / 180.0
+    const radLng2 = lng2 * Math.PI / 180.0
+    const a = radLat1 - radLat2
+    const b = radLng1 - radLng2
+    const dis = 2 * Math.asin(Math.sqrt(
+      Math.sin(a / 2) ** 2
+      + Math.cos(radLat1) * Math.cos(radLat2) * Math.sin(b / 2.0) ** 2.0,
+    )) * 6378137
+    return dis
+  }
+
   // 方法
   const setCurrentShipId = (id: number) => {
     if (id >= 0 && id < ships.value.length) {
@@ -334,19 +349,16 @@ export const useShipStore = defineStore('ship', () => {
     }
   }
 
-  // 工具函数：计算两点间距离
-  const getRealDistance = (lng1: number, lat1: number, lng2: number, lat2: number): number => {
-    const radLat1 = lat1 * Math.PI / 180.0
-    const radLng1 = lng1 * Math.PI / 180.0
-    const radLat2 = lat2 * Math.PI / 180.0
-    const radLng2 = lng2 * Math.PI / 180.0
-    const a = radLat1 - radLat2
-    const b = radLng1 - radLng2
-    const dis = 2 * Math.asin(Math.sqrt(
-      Math.sin(a / 2) ** 2
-      + Math.cos(radLat1) * Math.cos(radLat2) * Math.sin(b / 2.0) ** 2.0,
-    )) * 6378137
-    return dis
+  const updateShipPower = (shipId: number, power: number) => {
+    if (shipId >= 0 && shipId < ships.value.length) {
+      ships.value[shipId].power = power
+    }
+  }
+
+  const updateShipRudder = (shipId: number, rudder: number) => {
+    if (shipId >= 0 && shipId < ships.value.length) {
+      ships.value[shipId].rudder = rudder
+    }
   }
 
   // 持久化相关方法
@@ -444,6 +456,8 @@ export const useShipStore = defineStore('ship', () => {
     updateShipStatus,
     setUserAccelerometer,
     setCrossMarker,
+    updateShipPower,
+    updateShipRudder,
     getRealDistance,
     saveToStorage,
     loadFromStorage,

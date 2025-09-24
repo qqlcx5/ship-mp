@@ -340,69 +340,39 @@ function onRegionChange(event: any) {
 function onMarkerTap(event: any) {
   console.log('onMarkerTap', event.markerId)
 
+  // 处理航点选择
   const ship = currentShip.value
+  let selectedWaypoint = false
 
-  // 重置所有航点选中状态
-  ship.waypoints.forEach((waypoint) => {
-    waypoint.width = 20
-    waypoint.height = 20
-    waypoint.selected = false
-
+  for (let i = 0; i < ship.waypoints.length; i++) {
+    const waypoint = ship.waypoints[i]
     if (event.markerId === waypoint.id) {
-      waypoint.width = 25
-      waypoint.height = 25
-      waypoint.selected = true
-
+      selectedWaypoint = true
       // 移动地图到选中航点
       const mapCtx = uni.createMapContext('mapId')
       mapCtx.moveToLocation({
         latitude: waypoint.latitude,
         longitude: waypoint.longitude,
       })
-
       shipStore.setCrossMarker(waypoint.longitude, waypoint.latitude)
+      break
     }
-  })
+  }
 
   // 处理船舶选择
-  shipStore.ships.forEach((shipData, index) => {
-    shipData.ship.width = 30
-    shipData.ship.height = 30
-
+  for (let index = 0; index < shipStore.ships.length; index++) {
+    const shipData = shipStore.ships[index]
     if (shipData.ship.id === event.markerId) {
       shipStore.setCurrentShipId(index)
-      shipData.ship.width = 45
-      shipData.ship.height = 45
+      break
     }
-  })
+  }
 
   updateControlValues()
 }
 
 function onMapTap() {
   console.log('onMapTap')
-
-  const ship = currentShip.value
-  let hasSelection = false
-
-  // 取消航点选择
-  ship.waypoints.forEach((waypoint) => {
-    if (waypoint.selected)
-      hasSelection = true
-    waypoint.width = 20
-    waypoint.height = 20
-    waypoint.selected = false
-  })
-
-  // 高亮当前船舶
-  shipStore.ships.forEach((shipData) => {
-    shipData.ship.width = 30
-    shipData.ship.height = 30
-  })
-
-  ship.ship.width = 45
-  ship.ship.height = 45
-
   updateControlValues()
 }
 
@@ -467,7 +437,19 @@ function onAutoChange(event: any) {
 }
 
 function onAccelerometerChange(event: any) {
-  shipStore.setUserAccelerometer(event.detail.value)
+  const enabled = event.detail.value
+  shipStore.setUserAccelerometer(enabled)
+
+  // 根据开关状态启动或停止加速度计
+  if (enabled) {
+    accelerometerManager.startAccelerometer()
+  }
+  else {
+    accelerometerManager.stopAccelerometer()
+  }
+
+  // 保存设置
+  shipStore.saveToStorage()
 }
 
 // 航点管理
@@ -568,6 +550,24 @@ onMounted(() => {
     bluetoothManager.setCallbacks({
       onCharacteristicValueChange: handleBluetoothData,
     })
+  }
+
+  // 设置加速度计回调
+  accelerometerManager.setCallbacks({
+    onAccelerometerChange: (rudder) => {
+      if (userAccelerometer.value && shipProtocol.getEnableManual(currentShipId.value)) {
+        const ship = currentShip.value
+        if (rudder === 0 || Math.abs(ship.rudder - rudder) > 2) {
+          ship.rudder = rudder
+          currentRudder.value = rudder
+        }
+      }
+    },
+  })
+
+  // 如果启用了加速度计，开始监听
+  if (userAccelerometer.value) {
+    accelerometerManager.startAccelerometer()
   }
 
   // 启动通信
