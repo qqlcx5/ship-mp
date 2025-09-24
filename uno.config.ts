@@ -54,6 +54,9 @@ export default defineConfig({
   safelist: [
     // 'i-carbon-ibm-watson-ai',
     'i-carbon-direction-fork',
+    'i-carbon-settings',
+    'i-carbon-car',
+    'i-carbon-ai-business-impact-assessment',
   ],
   rules: [
     [
