@@ -97,7 +97,6 @@
 import type { IBluetoothDevice } from '@/store/ship'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useShipStore } from '@/store/ship'
-import { bluetoothManager, formatDeviceName, getSignalStrengthPercentage } from '@/utils/bluetooth'
 
 const shipStore = useShipStore()
 
@@ -107,71 +106,6 @@ const isSearching = ref(false)
 const connecting = ref(false)
 const connectingDeviceName = ref('')
 
-// 获取信号强度百分比
-const getSignalPercentage = (rssi: number) => getSignalStrengthPercentage(rssi)
-
-// 初始化蓝牙
-async function initBluetooth() {
-  // 设置蓝牙回调
-  bluetoothManager.setCallbacks({
-    onDeviceFound: (device: IBluetoothDevice) => {
-      const existingIndex = devices.value.findIndex(d => d.deviceId === device.deviceId)
-      if (existingIndex !== -1) {
-        devices.value[existingIndex] = device
-      }
-      else {
-        devices.value.push(device)
-      }
-    },
-    onAdapterStateChange: (state) => {
-      isSearching.value = state.discovering
-    },
-    onConnectionStateChange: (connected, deviceId) => {
-      if (connected && deviceId) {
-        connecting.value = false
-        // 跳转到地图页面
-        uni.navigateTo({
-          url: `/pages/ManualNavigation/ManualNavigation?deviceId=${deviceId}&deviceName=${connectingDeviceName.value}`,
-        })
-      }
-      else {
-        connecting.value = false
-        uni.showToast({
-          title: '连接失败',
-          icon: 'none',
-        })
-      }
-    },
-  })
-
-  // 打开蓝牙适配器
-  const success = await bluetoothManager.openBluetoothAdapter()
-  if (!success) {
-    uni.showModal({
-      title: '提示',
-      content: '请开启蓝牙后重试',
-      showCancel: false,
-    })
-  }
-}
-
-// 连接设备
-async function connectDevice(device: IBluetoothDevice) {
-  connecting.value = true
-  connectingDeviceName.value = formatDeviceName(device)
-
-  const success = await bluetoothManager.connectDevice(device.deviceId)
-  if (success) {
-    shipStore.setBluetoothConnection(true, device.deviceId, device.name)
-  }
-  else {
-    connecting.value = false
-    uni.showToast({
-      title: '连接失败',
-      icon: 'none',
-    })
-  }
-}
 
 // 跳过连接
 function skipConnection() {
@@ -190,14 +124,9 @@ onMounted(() => {
     keepScreenOn: true,
   })
 
-  // 初始化蓝牙
-  initBluetooth()
 })
 
-onUnmounted(() => {
-  // 关闭蓝牙适配器
-  bluetoothManager.closeBluetoothAdapter()
-})
+
 </script>
 
 <route lang="json">

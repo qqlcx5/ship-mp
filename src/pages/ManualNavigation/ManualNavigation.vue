@@ -148,9 +148,7 @@
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useShipStore } from '@/store/ship'
-import { accelerometerManager } from '@/utils/accelerometer'
-import { bluetoothManager } from '@/utils/bluetooth'
-import { shipProtocol } from '@/utils/shipProtocol'
+
 
 // 获取页面参数
 const options = ref<any>({})
@@ -218,77 +216,6 @@ async function sendBluetoothData() {
   const success = await bluetoothManager.writeData(data)
   if (!success) {
     console.error('发送数据失败')
-  }
-}
-
-// 处理蓝牙数据接收
-function handleBluetoothData(data: ArrayBuffer) {
-  const result = shipProtocol.parseReceivedData(data)
-  if (!result)
-    return
-
-  const { shipId, functionCode } = result
-
-  // 更新船舶状态
-  if (shipId === currentShipId.value) {
-    if (result.status) {
-      shipStore.updateShipStatus({
-        localOK: result.status.localOK,
-        remoteOK: result.status.remoteOK,
-        usvOnline: result.status.usvOnline,
-      })
-    }
-  }
-
-  // 处理不同类型的数据
-  switch (functionCode) {
-    case 0: // 位置数据
-      if (result.position) {
-        shipStore.updateShipPosition(
-          shipId,
-          result.position.latitude,
-          result.position.longitude,
-          result.position.rotate,
-        )
-        shipStore.addTrackPoint(
-          shipId,
-          result.position.latitude,
-          result.position.longitude,
-        )
-        updateMapCenter()
-      }
-      break
-    case 1: // PLOS和电压数据
-      if (result.plos && shipId === currentShipId.value) {
-        // 更新PLOS位置
-        shipStore.updateShipStatus({
-          batteryVoltage: result.batteryVoltage || 0,
-        })
-      }
-      break
-    case 2: // 功率数据
-      if (result.plos && shipId === currentShipId.value) {
-        shipStore.updateShipStatus({
-          power: result.power || 0,
-        })
-      }
-      break
-    case 3: // 速度数据
-      if (result.plos && shipId === currentShipId.value) {
-        shipStore.updateShipStatus({
-          speedKnot: result.speedKnot || 0,
-          runningTime: result.runningTime || 0,
-        })
-      }
-      break
-  }
-
-  rxTimeOut = 20
-  rxCount.value++
-
-  // 更新舵角显示
-  if (shipId === currentShipId.value && rudderDragTime > 20) {
-    currentRudder.value = result.rudder || 0
   }
 }
 
@@ -404,10 +331,6 @@ function onPowerChange(event: any) {
 function onRudderChange(event: any) {
   rudderDragTime = 0
 
-  if (userAccelerometer.value || !shipProtocol.getEnableManual(currentShipId.value)) {
-    return
-  }
-
   const value = 60 - event.detail.value
   let result = 0
 
@@ -433,20 +356,13 @@ function onRudderChange(event: any) {
 
 function onAutoChange(event: any) {
   enableAuto.value = event.detail.value
-  shipProtocol.setEnableManual(currentShipId.value, !event.detail.value)
-}
+ }
 
 function onAccelerometerChange(event: any) {
   const enabled = event.detail.value
   shipStore.setUserAccelerometer(enabled)
 
-  // 根据开关状态启动或停止加速度计
-  if (enabled) {
-    accelerometerManager.startAccelerometer()
-  }
-  else {
-    accelerometerManager.stopAccelerometer()
-  }
+
 
   // 保存设置
   shipStore.saveToStorage()
@@ -517,85 +433,6 @@ function calibrateINS() {
 function toggleSettings() {
   showSettings.value = !showSettings.value
 }
-
-// 更新控制值
-function updateControlValues() {
-  const ship = currentShip.value
-  currentRudder.value = ship.rudder
-  userSetPower.value = ship.power
-  enableAuto.value = !shipProtocol.getEnableManual(currentShipId.value)
-}
-
-// 页面生命周期
-onMounted(() => {
-  // 获取页面参数
-  const pages = getCurrentPages()
-  const currentPage = pages[pages.length - 1] as any
-  options.value = currentPage.options || {}
-
-  console.log('页面参数:', options.value)
-
-  // 从存储加载数据
-  shipStore.loadFromStorage()
-
-  // 设置地图中心
-  mapCenter.value = {
-    latitude: crossMarker.value.latitude,
-    longitude: crossMarker.value.longitude,
-  }
-  mapScale.value = crossMarker.value.mapscale
-
-  // 设置蓝牙数据接收回调
-  if (bluetoothConnected.value) {
-    bluetoothManager.setCallbacks({
-      onCharacteristicValueChange: handleBluetoothData,
-    })
-  }
-
-  // 设置加速度计回调
-  accelerometerManager.setCallbacks({
-    onAccelerometerChange: (rudder) => {
-      if (userAccelerometer.value && shipProtocol.getEnableManual(currentShipId.value)) {
-        const ship = currentShip.value
-        if (rudder === 0 || Math.abs(ship.rudder - rudder) > 2) {
-          ship.rudder = rudder
-          currentRudder.value = rudder
-        }
-      }
-    },
-  })
-
-  // 如果启用了加速度计，开始监听
-  if (userAccelerometer.value) {
-    accelerometerManager.startAccelerometer()
-  }
-
-  // 启动通信
-  startCommunication()
-
-  // 初始化航点数据
-  shipStore.ships.forEach((ship, index) => {
-    shipProtocol.startUpdateWaypoint(index)
-    ship.waypoints.forEach((waypoint) => {
-      shipProtocol.updateWaypoint(index, waypoint.id, waypoint.longitude, waypoint.latitude)
-    })
-    shipProtocol.endUpdateWaypoint(index)
-  })
-
-  updateControlValues()
-})
-
-onUnmounted(() => {
-  // 清理定时器
-  if (communicationTimer) {
-    clearInterval(communicationTimer)
-  }
-
-  // 断开蓝牙连接
-  if (bluetoothConnected.value && connectedDeviceId.value !== 'demo') {
-    bluetoothManager.disconnectDevice()
-  }
-})
 </script>
 
 <route lang="json">
