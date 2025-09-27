@@ -1,118 +1,261 @@
-<template>
-  <view class="h-full w-full bg-gray-50">
-    <!-- 顶部标题 -->
-    <view class="bg-blue-600 px-4 py-6 text-white">
-      <text class="text-xl font-bold">USV 无人船控制系统</text>
-      <text class="mt-2 block text-sm opacity-90">请选择要连接的设备</text>
-    </view>
-
-    <!-- 搜索状态 -->
-    <view class="border-b border-gray-200 bg-white px-4 py-3">
-      <view class="flex items-center justify-between">
-        <text class="text-gray-600">正在搜索蓝牙设备...</text>
-        <view class="flex items-center space-x-2">
-          <view v-if="isSearching" class="h-4 w-4 animate-spin border-2 border-blue-600 border-t-transparent rounded-full" />
-          <text class="text-sm text-blue-600">{{ devices.length }} 个设备</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- 设备列表 -->
-    <scroll-view class="flex-1 px-4 py-2" scroll-y>
-      <view v-if="devices.length === 0" class="py-20 text-center">
-        <view class="mb-4 text-6xl">
-          📡
-        </view>
-        <text class="text-gray-500">未发现设备</text>
-        <text class="mt-2 block text-sm text-gray-400">请确保设备已开启并在附近</text>
-      </view>
-
-      <view
-        v-for="device in devices"
-        :key="device.deviceId"
-        class="mb-3 rounded-lg bg-white p-4 shadow-sm"
-       >
-        <view class="flex items-center justify-between">
-          <view class="flex-1">
-            <text class="text-base text-gray-900 font-medium">{{ device.name || '未知设备' }}</text>
-            <view class="mt-1 space-y-1">
-               <text class="block text-xs text-gray-400">设备ID: {{ device.deviceId }}</text>
-              <text v-if="device.advertisServiceUUIDs?.length" class="block text-xs text-gray-400">
-                服务数量: {{ device.advertisServiceUUIDs.length }}
-              </text>
-            </view>
-          </view>
-          <view class="ml-4 flex items-center">
-            <view class="flex items-center space-x-2">
-
-              <text class="text-blue-600">连接</text>
-            </view>
-          </view>
-        </view>
-      </view>
-    </scroll-view>
-
-    <!-- 底部操作 -->
-    <view class="border-t border-gray-200 bg-white px-4 py-4">
-      <button
-        class="w-full rounded-lg bg-gray-600 py-3 text-white font-medium"
-        @tap="skipConnection"
-      >
-        跳过连接（演示模式）
-      </button>
-    </view>
-
-    <!-- 连接中弹窗 -->
-    <view v-if="connecting" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <view class="mx-4 rounded-lg bg-white p-6 text-center">
-        <view class="mx-auto mb-4 h-8 w-8 animate-spin border-2 border-blue-600 border-t-transparent rounded-full" />
-        <text class="text-base font-medium">正在连接设备...</text>
-        <text class="mt-2 block text-sm text-gray-500">{{ connectingDeviceName }}</text>
-      </view>
-    </view>
-  </view>
-</template>
-
 <script setup lang="ts">
 import type { IBluetoothDevice } from '@/store/ship'
+
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useShipStore } from '@/store/ship'
 
 const shipStore = useShipStore()
 
-// 响应式数据
+// 页面数据
 const devices = ref<IBluetoothDevice[]>([])
-const isSearching = ref(false)
-const connecting = ref(false)
-const connectingDeviceName = ref('')
+const connected = ref(false)
+const discoveryStarted = ref(false)
+
+// 工具函数
+function inArray(arr: any[], key: string, val: any) {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i][key] === val) {
+      return i
+    }
+  }
+  return -1
+}
+
+// 监听蓝牙设备发现
+function onBluetoothDeviceFound() {
+  uni.onBluetoothDeviceFound((res) => {
+    res.devices.forEach((device) => {
+      if (!device.name && !device.localName) {
+        return
+      }
+
+      const foundDevices = devices.value
+      const idx = inArray(foundDevices, 'deviceId', device.deviceId)
+
+      if (idx === -1) {
+        foundDevices.push(device as IBluetoothDevice)
+      }
+      else {
+        foundDevices[idx] = device as IBluetoothDevice
+      }
+
+      devices.value = [...foundDevices]
+    })
+  })
+}
+
+// 开始蓝牙设备发现
+function startBluetoothDevicesDiscovery() {
+  if (discoveryStarted.value) {
+    return
+  }
+  discoveryStarted.value = true
+
+  uni.startBluetoothDevicesDiscovery({
+    allowDuplicatesKey: true,
+    success: (res) => {
+      console.log('startBluetoothDevicesDiscovery success', res)
+      onBluetoothDeviceFound()
+    },
+  })
+}
+
+// 创建蓝牙连接
+function createBLEConnection(device: IBluetoothDevice) {
+  const deviceId = device.deviceId
+  const name = device.name || device.localName || ''
+
+  uni.createBLEConnection({
+    deviceId,
+    success: (res) => {
+      connected.value = true
+      shipStore.setBluetoothConnection(true, deviceId, name)
+
+      console.log('连接成功:', name)
+
+      // 跳转到地图页面
+      uni.navigateTo({
+        url: `/pages/ManualNavigation/ManualNavigation?connectedDeviceId=${deviceId}&connectedDevicename=${encodeURIComponent(name)}`,
+      })
+    },
+    fail: (res) => {
+      console.log('连接失败:', res)
+      uni.showToast({
+        title: '连接失败',
+        icon: 'error',
+      })
+    },
+  })
+}
 
 // 跳过连接
-function skipConnection() {
+function skip() {
   uni.navigateTo({
-    url: '/pages/ManualNavigation/ManualNavigation?deviceId=demo&deviceName=演示模式',
+    url: '/pages/ManualNavigation/ManualNavigation?connectedDeviceId=0&connectedDevicename=0',
   })
+}
+
+// 计算信号强度百分比
+function getSignalPercent(rssi: number) {
+  return Math.max(0, rssi + 100)
 }
 
 // 页面生命周期
 onMounted(() => {
-  // 从存储加载数据
+  // 加载存储的数据
   shipStore.loadFromStorage()
 
-  // 保持屏幕常亮
-  uni.setKeepScreenOn({
-    keepScreenOn: true,
+  // 开启蓝牙适配器
+  uni.openBluetoothAdapter({
+    success: (res) => {
+      console.log('openBluetoothAdapter success', res)
+      startBluetoothDevicesDiscovery()
+    },
+    fail: (res) => {
+      if (res.errCode === 10001) {
+        uni.onBluetoothAdapterStateChange((res) => {
+          console.log('onBluetoothAdapterStateChange', res)
+          if (res.available) {
+            startBluetoothDevicesDiscovery()
+          }
+        })
+      }
+    },
   })
 })
 
-
+onUnmounted(() => {
+  uni.stopBluetoothDevicesDiscovery()
+  uni.closeBluetoothAdapter()
+})
 </script>
 
-<route lang="json">
-{
-  "style": {
-    "navigationBarTitleText": "设备连接",
-    "navigationBarBackgroundColor": "#2563eb",
-    "navigationBarTextStyle": "white"
+<template>
+  <view class="page">
+    <view class="header">
+      <text class="title">USV 蓝牙连接</text>
+      <text class="subtitle">请选择要连接的设备</text>
+    </view>
+
+    <scroll-view
+      class="device-list"
+      scroll-y
+      :scroll-with-animation="true"
+    >
+      <view
+        v-for="(item, index) in devices"
+        :key="index"
+        class="device-item"
+        hover-class="device-item-hover"
+        @tap="createBLEConnection(item)"
+      >
+        <view class="device-name">
+          {{ item.name || item.localName }}
+        </view>
+        <view class="device-info">
+          信号强度: {{ item.RSSI }}dBm ({{ getSignalPercent(item.RSSI) }}%)
+        </view>
+        <view class="device-info">
+          UUID: {{ item.deviceId }}
+        </view>
+        <view class="device-info">
+          Service数量: {{ item.advertisServiceUUIDs?.length || 0 }}
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="footer">
+      <button
+        class="skip-btn"
+        type="primary"
+        @tap="skip"
+      >
+        跳过连接
+      </button>
+    </view>
+  </view>
+</template>
+
+<style lang="scss" scoped>
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f8f8f8;
+  color: #333;
+}
+
+.header {
+  padding: 40rpx 30rpx 20rpx;
+  background-color: #fff;
+  border-bottom: 1rpx solid #eee;
+}
+
+.title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.subtitle {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+}
+
+.device-list {
+  flex: 1;
+  margin: 20rpx;
+  background-color: #fff;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.device-item {
+  padding: 30rpx;
+  border-bottom: 1rpx solid #eee;
+
+  &:last-child {
+    border-bottom: none;
   }
 }
-</route>
+
+.device-item-hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.device-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.device-info {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 5rpx;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.footer {
+  padding: 30rpx;
+  background-color: #fff;
+  border-top: 1rpx solid #eee;
+}
+
+.skip-btn {
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  background-color: #007aff;
+  color: #fff;
+  border-radius: 10rpx;
+  font-size: 32rpx;
+}
+</style>
+

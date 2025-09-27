@@ -5,10 +5,11 @@ import { tabBar } from './src/tabbar/config'
 export default defineUniPages({
   globalStyle: {
     navigationStyle: 'default',
-    navigationBarTitleText: 'minimal',
+    navigationBarTitleText: 'USV',
     navigationBarBackgroundColor: '#f8f8f8',
     navigationBarTextStyle: 'black',
     backgroundColor: '#FFFFFF',
+    pageOrientation: 'landscape',
   },
   easycom: {
     autoscan: true,
