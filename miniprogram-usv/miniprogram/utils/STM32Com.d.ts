@@ -1,0 +1,15 @@
+export function GetTxBuf(shipid: number, power: number, rudder: number): number[];
+export function AddWayPoint(shipid: number, id: number, lng: number, lat: number): void;
+export function StartUpdateWayPoint(shipid: number): void;
+export function UpdateWayPoint(shipid: number, id: number, lng: number, lat: number): void;
+export function EndUpdateWayPoint(shipid: number): void;
+export function DeleteWayPoint(shipid: number, id: number): void;
+export function ModifyWayPoint(shipid: number, id: number, lng: number, lat: number): void;
+export function RemoveInstruction(shipid: number, cmd: number, crc: number): void;
+export function SetEnableManual(shipid: number, e: boolean): void;
+export function GetEnableManual(shipid: number): boolean;
+export function SetForceSetZPoint(shipid: number): void;
+export function SetCalibINS(shipid: number): void;
+export function DeleteAllWayPoint(shipid: number): void;
+export function ClearInstructions(): void;
+export function GetRealDistance(lng1: number, lat1: number, lng2: number, lat2: number): number;

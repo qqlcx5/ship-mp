@@ -75,7 +75,7 @@ function GetTxBuf(shipid, power, rudder) {
             Power[shipid] = power;
             Rudder[shipid] = rudder;
         }
-       
+
         arr.push(shipid)//船舶ID
         arr.push(0)//功能码
         arr.push(Power[shipid])
@@ -108,7 +108,7 @@ function AddWayPoint(shipid, id,  lng, lat) {
         SendBuffer:[
             shipid,//船舶ID
             4, //指令吗
-            id & 0xff, (id >> 8 )& 0xff, 
+            id & 0xff, (id >> 8 )& 0xff,
             lng1 & 0xff , (lng1 >> 8 )& 0xff, (lng1 >> 16 )& 0xff, (lng1 >> 24)& 0xff,
             lat1 & 0xff , (lat1 >> 8 )& 0xff, (lat1 >> 16 )& 0xff, (lat1 >> 24)& 0xff,
          ],
@@ -122,7 +122,7 @@ function StartUpdateWayPoint(shipid) {
         SendBuffer:[
             shipid,//船舶ID
             5, //指令吗
-            0, 0, 
+            0, 0,
          ],
         CRC:0,
         retry:0,
@@ -139,7 +139,7 @@ function UpdateWayPoint(shipid, id,  lng, lat) {
         SendBuffer:[
             shipid,//船舶ID
             6, //指令吗
-            id & 0xff, (id >> 8 )& 0xff, 
+            id & 0xff, (id >> 8 )& 0xff,
             lng1 & 0xff , (lng1 >> 8 )& 0xff, (lng1 >> 16 )& 0xff, (lng1 >> 24)& 0xff,
             lat1 & 0xff , (lat1 >> 8 )& 0xff, (lat1 >> 16 )& 0xff, (lat1 >> 24)& 0xff,
          ],
@@ -154,7 +154,7 @@ function EndUpdateWayPoint(shipid) {
         SendBuffer:[
             shipid,//船舶ID
             7, //指令吗
-            0, 0, 
+            0, 0,
          ],
         CRC:0,
         retry:0,
@@ -168,7 +168,7 @@ function DeleteWayPoint(shipid, id) {
         SendBuffer:[
             shipid,//船舶ID
             8, //指令吗
-            id & 0xff, (id >> 8 )& 0xff, 
+            id & 0xff, (id >> 8 )& 0xff,
          ],
         CRC:0,
         retry:0,
@@ -181,7 +181,7 @@ function DeleteAllWayPoint(shipid) {
         SendBuffer:[
             shipid,//船舶ID
             9, //指令吗
-            0, 0, 
+            0, 0,
          ],
         CRC:0,
         retry:0,
@@ -197,7 +197,7 @@ function ModifyWayPoint(shipid, id,  lng, lat) {
         SendBuffer:[
             shipid,//船舶ID
             11, //指令吗
-            id & 0xff, (id >> 8 )& 0xff, 
+            id & 0xff, (id >> 8 )& 0xff,
             lng1 & 0xff , (lng1 >> 8 )& 0xff, (lng1 >> 16 )& 0xff, (lng1 >> 24)& 0xff,
             lat1 & 0xff , (lat1 >> 8 )& 0xff, (lat1 >> 16 )& 0xff, (lat1 >> 24)& 0xff,
          ],
@@ -247,7 +247,7 @@ function GetRealDistance(lng1, lat1, lng2, lat2 )
     return dis;
 }
 
-module.exports = {
+export default {
     GetTxBuf: GetTxBuf,
     AddWayPoint: AddWayPoint,
     StartUpdateWayPoint: StartUpdateWayPoint,

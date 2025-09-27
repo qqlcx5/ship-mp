@@ -69,6 +69,6 @@ function compute(bytes_, len) {
     }
     return ((byte_hi << 8) | byte_lo);
 };
-module.exports = {
+export default {
   compute:compute,
 };

@@ -1,210 +1,436 @@
-<template>
-  <div class="h-full w-full bg-white">
-    <!-- 顶部导航 -->
-    <div class="from-gray-600 to-gray-800 bg-gradient-to-r p-4 text-white">
-      <h1 class="mb-4 text-xl font-semibold">
-        综合管理
-      </h1>
-      <div class="grid grid-cols-3 gap-4 text-center text-sm">
-        <div>
-          <div class="font-bold">
-            7
-          </div>
-          <div class="text-gray-300">
-            船舶总数
-          </div>
-        </div>
-        <div>
-          <div class="font-bold">
-            5
-          </div>
-          <div class="text-gray-300">
-            在线船舶
-          </div>
-        </div>
-        <div>
-          <div class="font-bold">
-            3
-          </div>
-          <div class="text-gray-300">
-            操作人员
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 船舶管理列表 -->
-    <div class="p-4">
-      <h3 class="mb-3 text-gray-800 font-semibold">
-        船舶管理
-      </h3>
-      <div class="space-y-3">
-        <div class="rounded-xl bg-gray-50 p-4">
-          <div class="mb-2 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <div class="h-3 w-3 rounded-full bg-green-500" />
-              <span class="font-medium">船舶 #001</span>
-            </div>
-            <span class="text-sm text-green-600">在线</span>
-          </div>
-          <div class="grid grid-cols-2 gap-2 text-xs text-gray-600">
-            <div>电量: 85%</div>
-            <div>航速: 12.5节</div>
-            <div>位置: 119.50°E, 26.07°N</div>
-            <div>状态: 自动巡航</div>
-          </div>
-        </div>
-
-        <div class="rounded-xl bg-gray-50 p-4">
-          <div class="mb-2 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <div class="h-3 w-3 rounded-full bg-green-500" />
-              <span class="font-medium">船舶 #002</span>
-            </div>
-            <span class="text-sm text-green-600">在线</span>
-          </div>
-          <div class="grid grid-cols-2 gap-2 text-xs text-gray-600">
-            <div>电量: 72%</div>
-            <div>航速: 8.3节</div>
-            <div>位置: 119.52°E, 26.09°N</div>
-            <div>状态: 手动控制</div>
-          </div>
-        </div>
-
-        <div class="rounded-xl bg-gray-50 p-4">
-          <div class="mb-2 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <div class="h-3 w-3 rounded-full bg-red-500" />
-              <span class="font-medium">船舶 #003</span>
-            </div>
-            <span class="text-sm text-red-600">离线</span>
-          </div>
-          <div class="grid grid-cols-2 gap-2 text-xs text-gray-600">
-            <div>电量: 15%</div>
-            <div>航速: 0节</div>
-            <div>位置: 119.48°E, 26.05°N</div>
-            <div>状态: 低电量停航</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 人员管理 -->
-      <h3 class="mb-3 mt-6 text-gray-800 font-semibold">
-        人员管理
-      </h3>
-      <div class="space-y-2">
-        <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-          <div class="flex items-center space-x-3">
-            <div
-              class="h-8 w-8 flex items-center justify-center rounded-full bg-blue-500 text-sm text-white font-medium"
-            >
-              张
-            </div>
-            <div>
-              <div class="text-sm font-medium">
-                张三
-              </div>
-              <div class="text-xs text-gray-600">
-                高级操作员
-              </div>
-            </div>
-          </div>
-          <div class="text-xs text-green-600">
-            在线
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-          <div class="flex items-center space-x-3">
-            <div
-              class="h-8 w-8 flex items-center justify-center rounded-full bg-green-500 text-sm text-white font-medium"
-            >
-              李
-            </div>
-            <div>
-              <div class="text-sm font-medium">
-                李四
-              </div>
-              <div class="text-xs text-gray-600">
-                普通操作员
-              </div>
-            </div>
-          </div>
-          <div class="text-xs text-gray-600">
-            离线
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-          <div class="flex items-center space-x-3">
-            <div
-              class="h-8 w-8 flex items-center justify-center rounded-full bg-purple-500 text-sm text-white font-medium"
-            >
-              王
-            </div>
-            <div>
-              <div class="text-sm font-medium">
-                王五
-              </div>
-              <div class="text-xs text-gray-600">
-                系统管理员
-              </div>
-            </div>
-          </div>
-          <div class="text-xs text-green-600">
-            在线
-          </div>
-        </div>
-      </div>
-
-      <!-- 系统概览 -->
-      <h3 class="mb-3 mt-6 text-gray-800 font-semibold">
-        系统概览
-      </h3>
-      <div class="rounded-xl from-blue-50 to-indigo-50 bg-gradient-to-br p-4">
-        <div class="grid grid-cols-2 gap-4 text-center">
-          <div>
-            <div class="text-lg text-blue-600 font-bold">
-              1,245
-            </div>
-            <div class="text-xs text-gray-600">
-              总航行里程(km)
-            </div>
-          </div>
-          <div>
-            <div class="text-lg text-green-600 font-bold">
-              98.5%
-            </div>
-            <div class="text-xs text-gray-600">
-              系统稳定性
-            </div>
-          </div>
-          <div>
-            <div class="text-lg text-orange-600 font-bold">
-              156
-            </div>
-            <div class="text-xs text-gray-600">
-              今日任务数
-            </div>
-          </div>
-          <div>
-            <div class="text-lg text-purple-600 font-bold">
-              24/7
-            </div>
-            <div class="text-xs text-gray-600">
-              监控时长
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-// Comprehensive Management page logic here
+import { computed, onMounted, ref } from 'vue'
+import { useShipStore } from '@/store/ship'
+
+const shipStore = useShipStore()
+
+// 导入工具函数
+const stm32 = require('@/utils/STM32Com.js')
+
+// 当前船舶ID
+const currentShipId = ref(0)
+
+// 系统设置
+const systemSettings = ref({
+  userAccelerometer: false,
+  autoReconnect: true,
+  dataLogging: false,
+  debugMode: false,
+})
+
+// 船舶状态
+const shipStatus = ref({
+  power: 0,
+  batteryVoltage: 0,
+  speedKnot: 0,
+  runningTime: 0,
+  localOK: false,
+  remoteOK: false,
+  usvOnline: false,
+})
+
+// 连接状态
+const connectionStatus = ref({
+  bluetooth: false,
+  deviceName: '',
+  signalStrength: 0,
+  lastUpdate: '',
+})
+
+// 计算属性
+const currentShip = computed(() => shipStore.ships[currentShipId.value])
+
+// 系统设置方法
+function toggleUserAccelerometer() {
+  systemSettings.value.userAccelerometer = !systemSettings.value.userAccelerometer
+  shipStore.setUserAccelerometer(systemSettings.value.userAccelerometer)
+}
+
+function toggleAutoReconnect() {
+  systemSettings.value.autoReconnect = !systemSettings.value.autoReconnect
+}
+
+function toggleDataLogging() {
+  systemSettings.value.dataLogging = !systemSettings.value.dataLogging
+}
+
+function toggleDebugMode() {
+  systemSettings.value.debugMode = !systemSettings.value.debugMode
+}
+
+// 校准功能
+function calibrateCompass() {
+  stm32.SetCalibINS(currentShipId.value)
+  uni.showToast({
+    title: '开始校准磁力计',
+    icon: 'success',
+  })
+}
+
+function setRudderZero() {
+  stm32.SetForceSetZPoint(currentShipId.value)
+  uni.showToast({
+    title: '设置舵机零点',
+    icon: 'success',
+  })
+}
+
+// 数据管理
+function exportData() {
+  uni.showToast({
+    title: '导出数据功能开发中',
+    icon: 'none',
+  })
+}
+
+function clearData() {
+  uni.showModal({
+    title: '确认',
+    content: '确定要清除所有数据吗？此操作不可恢复。',
+    success: (res) => {
+      if (res.confirm) {
+        // 清除所有船舶数据
+        shipStore.ships.forEach((_, index) => {
+          shipStore.clearAllWaypoints(index)
+        })
+        shipStore.saveToStorage()
+
+        uni.showToast({
+          title: '数据已清除',
+          icon: 'success',
+        })
+      }
+    },
+  })
+}
+
+// 连接管理
+function reconnectBluetooth() {
+  uni.navigateTo({
+    url: '/pages/bluetooth/connect',
+  })
+}
+
+function disconnectBluetooth() {
+  uni.showModal({
+    title: '确认',
+    content: '确定要断开蓝牙连接吗？',
+    success: (res) => {
+      if (res.confirm) {
+        // 断开蓝牙连接的逻辑
+        connectionStatus.value.bluetooth = false
+        connectionStatus.value.deviceName = ''
+
+        uni.showToast({
+          title: '已断开连接',
+          icon: 'success',
+        })
+      }
+    },
+  })
+}
+
+// 船舶选择
+function selectShip(shipId: number) {
+  currentShipId.value = shipId
+  shipStore.setCurrentShipId(shipId)
+}
+
+// 系统信息
+function showSystemInfo() {
+  const systemInfo = uni.getSystemInfoSync()
+  uni.showModal({
+    title: '系统信息',
+    content: `平台: ${systemInfo.platform}\n版本: ${systemInfo.version}\n设备: ${systemInfo.model}`,
+    showCancel: false,
+  })
+}
+
+// 关于应用
+function showAbout() {
+  uni.showModal({
+    title: '关于 USV 控制系统',
+    content: '版本: 1.0.0\n基于 uni-app + Vue3 + TypeScript 开发\n用于无人船舶远程控制和监控',
+    showCancel: false,
+  })
+}
+
+// 页面生命周期
+onMounted(() => {
+  shipStore.loadFromStorage()
+  systemSettings.value.userAccelerometer = shipStore.userAccelerometer
+})
+
+// 页面配置
+definePage({
+  style: {
+    navigationBarTitleText: '综合管理'
+  }
+})
 </script>
 
-<style scoped>
-/* Scoped styles for Comprehensive Management page */
+<template>
+  <view class="page">
+    <scroll-view class="scroll-container" scroll-y>
+      <!-- 船舶选择 -->
+      <view class="section">
+        <view class="section-title">船舶选择</view>
+        <view class="ship-selector">
+          <button
+            v-for="(ship, index) in shipStore.ships"
+            :key="index"
+            :class="currentShipId === index ? 'ship-btn active' : 'ship-btn'"
+            @tap="selectShip(index)"
+          >
+            船舶 {{ index + 1 }}
+          </button>
+        </view>
+      </view>
+
+      <!-- 连接状态 -->
+      <view class="section">
+        <view class="section-title">连接状态</view>
+        <view class="status-card">
+          <view class="status-item">
+            <text class="status-label">蓝牙连接:</text>
+            <text :class="connectionStatus.bluetooth ? 'status-connected' : 'status-disconnected'">
+              {{ connectionStatus.bluetooth ? '已连接' : '未连接' }}
+            </text>
+          </view>
+          <view v-if="connectionStatus.bluetooth" class="status-item">
+            <text class="status-label">设备名称:</text>
+            <text class="status-value">{{ connectionStatus.deviceName || '未知设备' }}</text>
+          </view>
+          <view class="button-row">
+            <button class="action-btn primary" @tap="reconnectBluetooth">
+              重新连接
+            </button>
+            <button
+              v-if="connectionStatus.bluetooth"
+              class="action-btn danger"
+              @tap="disconnectBluetooth"
+            >
+              断开连接
+            </button>
+          </view>
+        </view>
+      </view>
+
+      <!-- 船舶状态 -->
+      <view class="section">
+        <view class="section-title">船舶状态</view>
+        <view class="status-grid">
+          <view class="status-item">
+            <text class="status-label">功率:</text>
+            <text class="status-value">{{ shipStatus.power }}W</text>
+          </view>
+          <view class="status-item">
+            <text class="status-label">电压:</text>
+            <text class="status-value">{{ shipStatus.batteryVoltage.toFixed(1) }}V</text>
+          </view>
+          <view class="status-item">
+            <text class="status-label">速度:</text>
+            <text class="status-value">{{ shipStatus.speedKnot.toFixed(1) }} 节</text>
+          </view>
+          <view class="status-item">
+            <text class="status-label">运行时间:</text>
+            <text class="status-value">{{ shipStatus.runningTime }} 分钟</text>
+          </view>
+        </view>
+
+        <view class="system-status">
+          <view class="status-indicator">
+            <text :class="shipStatus.localOK ? 'indicator-ok' : 'indicator-error'">主控</text>
+            <text :class="shipStatus.usvOnline ? 'indicator-ok' : 'indicator-error'">基站</text>
+            <text :class="shipStatus.remoteOK ? 'indicator-ok' : 'indicator-error'">遥控</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 系统设置 -->
+      <view class="section">
+        <view class="section-title">系统设置</view>
+        <view class="settings-list">
+          <view class="setting-item">
+            <text class="setting-label">使用加速度计</text>
+            <switch
+              :checked="systemSettings.userAccelerometer"
+              @change="toggleUserAccelerometer"
+            />
+          </view>
+          <view class="setting-item">
+            <text class="setting-label">自动重连</text>
+            <switch
+              :checked="systemSettings.autoReconnect"
+              @change="toggleAutoReconnect"
+            />
+          </view>
+          <view class="setting-item">
+            <text class="setting-label">数据记录</text>
+            <switch
+              :checked="systemSettings.dataLogging"
+              @change="toggleDataLogging"
+            />
+          </view>
+          <view class="setting-item">
+            <text class="setting-label">调试模式</text>
+            <switch
+              :checked="systemSettings.debugMode"
+              @change="toggleDebugMode"
+            />
+          </view>
+        </view>
+      </view>
+
+      <!-- 校准功能 -->
+      <view class="section">
+        <view class="section-title">校准功能</view>
+        <view class="button-grid">
+          <button class="action-btn secondary" @tap="calibrateCompass">
+            校准磁力计
+          </button>
+          <button class="action-btn secondary" @tap="setRudderZero">
+            设置舵机零点
+          </button>
+        </view>
+      </view>
+
+      <!-- 数据管理 -->
+      <view class="section">
+        <view class="section-title">数据管理</view>
+        <view class="button-grid">
+          <button class="action-btn primary" @tap="exportData">
+            导出数据
+          </button>
+          <button class="action-btn danger" @tap="clearData">
+            清除数据
+          </button>
+        </view>
+      </view>
+
+      <!-- 系统信息 -->
+      <view class="section">
+        <view class="section-title">系统信息</view>
+        <view class="button-grid">
+          <button class="action-btn secondary" @tap="showSystemInfo">
+            设备信息
+          </button>
+          <button class="action-btn secondary" @tap="showAbout">
+            关于应用
+          </button>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</template>
+
+<style lang="scss" scoped>
+.page {
+  @apply h-screen bg-gray-50;
+}
+
+.scroll-container {
+  @apply h-full;
+}
+
+.section {
+  @apply bg-white mx-4 my-3 rounded-lg p-4 shadow-sm;
+}
+
+.section-title {
+  @apply text-lg font-semibold text-gray-800 mb-4;
+}
+
+.ship-selector {
+  @apply flex flex-wrap gap-2;
+}
+
+.ship-btn {
+  @apply flex-1 py-2 px-4 text-sm border border-gray-300 rounded bg-white text-gray-700;
+  min-width: 80px;
+
+  &.active {
+    @apply bg-blue-500 text-white border-blue-500;
+  }
+}
+
+.status-card {
+  @apply space-y-3;
+}
+
+.status-item {
+  @apply flex justify-between items-center;
+}
+
+.status-label {
+  @apply text-sm text-gray-600;
+}
+
+.status-value {
+  @apply text-sm font-medium text-gray-800;
+}
+
+.status-connected {
+  @apply text-green-600 font-medium;
+}
+
+.status-disconnected {
+  @apply text-red-600 font-medium;
+}
+
+.button-row {
+  @apply flex space-x-2 mt-3;
+}
+
+.status-grid {
+  @apply grid grid-cols-2 gap-3 mb-4;
+}
+
+.system-status {
+  @apply border-t border-gray-200 pt-3;
+}
+
+.status-indicator {
+  @apply flex space-x-3;
+}
+
+.indicator-ok {
+  @apply text-xs bg-green-500 text-white px-2 py-1 rounded;
+}
+
+.indicator-error {
+  @apply text-xs bg-red-500 text-white px-2 py-1 rounded;
+}
+
+.settings-list {
+  @apply space-y-4;
+}
+
+.setting-item {
+  @apply flex justify-between items-center;
+}
+
+.setting-label {
+  @apply text-sm text-gray-700;
+}
+
+.button-grid {
+  @apply grid grid-cols-2 gap-3;
+}
+
+.action-btn {
+  @apply py-3 px-4 rounded font-medium text-white text-sm;
+}
+
+.primary {
+  @apply bg-blue-500;
+}
+
+.secondary {
+  @apply bg-gray-500;
+}
+
+.danger {
+  @apply bg-red-500;
+}
 </style>

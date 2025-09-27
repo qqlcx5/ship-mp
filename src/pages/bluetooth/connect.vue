@@ -90,7 +90,7 @@ function createBLEConnection(device: IBluetoothDevice) {
 
 // 跳过连接
 function skip() {
-  uni.navigateTo({
+  uni.switchTab({
     url: '/pages/ManualNavigation/ManualNavigation?connectedDeviceId=0&connectedDevicename=0',
   })
 }
@@ -258,4 +258,3 @@ onUnmounted(() => {
   font-size: 32rpx;
 }
 </style>
-

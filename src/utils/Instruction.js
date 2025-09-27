@@ -5,7 +5,7 @@ class Instruction
         this.CRC = 0;
         this.Command = 0;
     }
-    
+
     AddWayPoint(id, lng, lat)
     {
         SendBuffer= [];
@@ -16,3 +16,4 @@ class Instruction
         SendBuffer.Add(view.getInt8(0));
     }
 }
+export default Instruction

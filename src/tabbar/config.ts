@@ -62,6 +62,12 @@ export interface CustomTabBarItem {
 // 如果需要配置鼓包，需要在 'tabbar/store.ts' 里面设置，最后在 `tabbar/index.vue` 里面更改鼓包的图片
 export const customTabbarList: CustomTabBarItem[] = [
   {
+    text: '蓝牙连接',
+    pagePath: 'pages/bluetooth/connect',
+    iconType: 'unocss',
+    icon: 'i-carbon-bluetooth',
+  },
+  {
     text: '手动导航',
     pagePath: 'pages/ManualNavigation/ManualNavigation',
     iconType: 'unocss',
@@ -72,12 +78,6 @@ export const customTabbarList: CustomTabBarItem[] = [
     pagePath: 'pages/AutomaticCruise/AutomaticCruise',
     iconType: 'unocss',
     icon: 'i-carbon-car',
-  },
-  {
-    text: 'AI管理',
-    pagePath: 'pages/index/index',
-    iconType: 'unocss',
-    icon: 'i-carbon-ai-business-impact-assessment',
   },
   {
     text: '综合管理',
